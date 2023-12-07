@@ -1,6 +1,6 @@
 import { ApolloServer } from '@apollo/server'
 
-const createGraphQLServer = async () => {
+export default async function createGraphQLServer() {
     const gqlserver = new ApolloServer({
         typeDefs: `
                 type Query {
@@ -20,5 +20,3 @@ const createGraphQLServer = async () => {
 
     return gqlserver
 }
-
-export default createGraphQLServer
