@@ -1,0 +1,5 @@
+build
+node_modules
+.env.local
+.env.production
+pnpm-lock.yaml
