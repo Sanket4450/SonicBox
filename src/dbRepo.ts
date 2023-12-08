@@ -1,4 +1,3 @@
-
 import domain from './models/index.model'
 
 interface QueryObject {
@@ -8,7 +7,7 @@ interface QueryObject {
 }
 
 class DbRepo {
-    public static findOne(collectionName: string, queryObject: QueryObject): Promise<object> {
+    public static findOne(collectionName: string, queryObject: QueryObject): Promise<any> {
         return new Promise((resolve, reject) => {
             const collection = (domain as Record<string, any>)[collectionName]
 
@@ -17,13 +16,13 @@ class DbRepo {
                 .then((results: object) => {
                     resolve(results)
                 })
-                .catch((error: object) => {
+                .catch((error: any) => {
                     reject(error)
                 })
         })
     }
 
-    public static create(collectionName: string, queryObject: Omit<QueryObject, 'query' | 'options'>) {
+    public static create(collectionName: string, queryObject: Omit<QueryObject, 'query' | 'options'>): Promise<any> {
         return new Promise((resolve, reject) => {
             const collection = (domain as Record<string, any>)[collectionName]
 
@@ -32,13 +31,13 @@ class DbRepo {
                 .then((results: object) => {
                     resolve(results)
                 })
-                .catch((error: object) => {
+                .catch((error: any) => {
                     reject(error)
                 })
         })
     }
 
-    public static updateOne(collectionName: string, queryObject: QueryObject) {
+    public static updateOne(collectionName: string, queryObject: QueryObject): Promise<any> {
         return new Promise((resolve, reject) => {
             const collection = (domain as Record<string, any>)[collectionName]
 
@@ -47,13 +46,13 @@ class DbRepo {
                 .then((results: object) => {
                     resolve(results)
                 })
-                .catch((error: object) => {
+                .catch((error: any) => {
                     reject(error)
                 })
         })
     }
 
-    public static deleteOne(collectionName: string, queryObject: Pick<QueryObject, 'query'>) {
+    public static deleteOne(collectionName: string, queryObject: Pick<QueryObject, 'query'>): Promise<any> {
         return new Promise((resolve, reject) => {
             const collection = (domain as Record<string, any>)[collectionName]
 
@@ -62,13 +61,13 @@ class DbRepo {
                 .then((results: object) => {
                     resolve(results)
                 })
-                .catch((error: object) => {
+                .catch((error: any) => {
                     reject(error)
                 })
         })
     }
 
-    public static find(collectionName: string, queryObject: QueryObject, sortQuery: object = {}) {
+    public static find(collectionName: string, queryObject: QueryObject, sortQuery: object = {}): Promise<any> {
         return new Promise((resolve, reject) => {
             const collection = (domain as Record<string, any>)[collectionName]
 
@@ -78,13 +77,13 @@ class DbRepo {
                 .then((results: object[]) => {
                     resolve(results)
                 })
-                .catch((error: object) => {
+                .catch((error: any) => {
                     reject(error)
                 })
         })
     }
 
-    public static findPage(collectionName: string, queryObject: QueryObject, sortQuery: object = {}, page: number, limit: number) {
+    public static findPage(collectionName: string, queryObject: QueryObject, sortQuery: object = {}, page: number, limit: number): Promise<any> {
         return new Promise((resolve, reject) => {
             const collection = (domain as Record<string, any>)[collectionName]
 
@@ -96,13 +95,13 @@ class DbRepo {
                 .then((results: object[]) => {
                     resolve(results)
                 })
-                .catch((error: object) => {
+                .catch((error: any) => {
                     reject(error)
                 })
         })
     }
 
-    public static aggregate(collectionName: string, queryArray: any[]) {
+    public static aggregate(collectionName: string, queryArray: any[]): Promise<any> {
         return new Promise((resolve, reject) => {
             const collection = (domain as Record<string, any>)[collectionName]
 
@@ -111,7 +110,7 @@ class DbRepo {
                 .then((results: object[]) => {
                     resolve(results)
                 })
-                .catch((error: object) => {
+                .catch((error: any) => {
                     reject(error)
                 })
         })

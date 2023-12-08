@@ -5,7 +5,7 @@ import Playlist from './playlist'
 import Album from './album'
 import Category from './category'
 
-const domain = {
+export default {
     User,
     Library,
     Song,
@@ -13,5 +13,3 @@ const domain = {
     Album,
     Category
 }
-
-export default domain

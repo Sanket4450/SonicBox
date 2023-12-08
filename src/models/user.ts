@@ -51,6 +51,10 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
+    token: {
+        type: String,
+        default: null
+    },
     followers: [{
         type: Schema.Types.ObjectId,
         ref: 'User'
