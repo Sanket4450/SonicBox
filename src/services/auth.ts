@@ -2,6 +2,7 @@ import { GraphQLError, graphql } from 'graphql'
 import bcrypt from 'bcryptjs'
 import constants from '../constants'
 import userService from './user'
+import tokenService from './token'
 
 const checkUserAlreadyExist = async (username: string, email: string): Promise<boolean> => {
     if (await userService.getUserByUsername(username) || await userService.getUserByEmail(email)) {
@@ -41,46 +42,6 @@ const registerUser = async (userData: userData): Promise<userIdAndRole> => {
     return { _id, role }
 }
 
-const loginUser = async (loginData: loginData): Promise<userIdAndRole> => {
-    if (!loginData.username && !loginData.email) {
-        throw new GraphQLError(constants.MESSAGES.USERNAME_EMAIL_REQUIRED, {
-            extensions: {
-                code: 'BAD_USER_INPUT'
-            }
-        })
-    }
-
-    if (loginData.username && loginData.email) {
-        throw new GraphQLError(constants.MESSAGES.ONE_OF_THEM_REQUIRED, {
-            extensions: {
-                code: 'BAD_USER_INPUT'
-            }
-        })
-    }
-
-    if (!await checkUserAlreadyExist(loginData.username || '', loginData.email || '')) {
-        throw new GraphQLError(constants.MESSAGES.USER_NOT_EXIST, {
-            extensions: {
-                code: 'FORBIDDEN'
-            }
-        })
-    }
-
-    const { _id, role, password } = loginData.username
-        ? await userService.getUserByUsername(loginData.username || '')
-        : await userService.getUserByEmail(loginData.email || '')
-
-    if (!await bcrypt.compare(loginData.password, password)) {
-        throw new GraphQLError(constants.MESSAGES.INCORRECT_PASSWORD, {
-            extensions: {
-                code: 'FORBIDDEN'
-            }
-        })
-    }
-
-    return { _id, role }
-}
-
 interface userData {
     username: string,
     name?: string,
@@ -113,15 +74,130 @@ interface userIdAndRole {
     role: roleType | undefined
 }
 
+const loginUser = async (loginData: loginData): Promise<userIdAndRole> => {
+    if (!loginData.username && !loginData.email) {
+        throw new GraphQLError(constants.MESSAGES.USERNAME_EMAIL_REQUIRED, {
+            extensions: {
+                code: 'BAD_USER_INPUT'
+            }
+        })
+    }
+
+    if (loginData.username && loginData.email) {
+        throw new GraphQLError(constants.MESSAGES.ONE_OF_THEM_REQUIRED, {
+            extensions: {
+                code: 'BAD_USER_INPUT'
+            }
+        })
+    }
+
+    if (!await checkUserAlreadyExist(loginData.username || '', loginData.email || '')) {
+        throw new GraphQLError(constants.MESSAGES.USER_NOT_EXIST, {
+            extensions: {
+                code: 'FORBIDDEN'
+            }
+        })
+    }
+
+    const user = loginData.username
+        ? await userService.getUserByUsername(loginData.username || '')
+        : await userService.getUserByEmail(loginData.email || '')
+
+    if (!await bcrypt.compare(loginData.password, user.password)) {
+        throw new GraphQLError(constants.MESSAGES.INCORRECT_PASSWORD, {
+            extensions: {
+                code: 'FORBIDDEN'
+            }
+        })
+    }
+
+    return {
+        _id: user._id,
+        role: user.role
+    }
+}
+
 interface loginData {
     username?: string,
     email?: string,
     password: string
 }
 
+const requestReset = async (email: string): Promise<string> => {
+    const user = await userService.getUserByEmail(email)
+
+    if (!user) {
+        throw new GraphQLError(constants.MESSAGES.USER_NOT_EXIST_WITH_EMAIL, {
+            extensions: {
+                code: 'NOT_FOUND'
+            }
+        })
+    }
+
+    const role = user.role === 'admin' ? roleType.ADMIN : user.role === 'artist' ? roleType.ARTIST : roleType.USER
+
+    return tokenService.generateToken({
+        payload: {
+            sub: user._id,
+            role
+        },
+        secret: process.env.RESET_TOKEN_SECRET || '',
+        options: { expiresIn: process.env.RESET_TOKEN_EXPIRY || '' }
+    })
+}
+
+const verifyResetOtp = async ({ otp, resetToken }: otpAndToken): Promise<void> => {
+    const { sub } = await tokenService.verifyToken(resetToken, process.env.RESET_TOKEN_SECRET || '')
+
+    if (!await userService.getUserById(sub)) {
+        throw new GraphQLError(constants.MESSAGES.AUTHENTICATION_FAILED, {
+            extensions: {
+                code: 'UNAUTHENTICATED'
+            }
+        })
+    }
+
+    if (otp !== 1234) {
+        throw new GraphQLError(constants.MESSAGES.INCORRECT_OTP, {
+            extensions: {
+                code: 'FORBIDDEN'
+            }
+        })
+    }
+}
+
+interface otpAndToken {
+    otp: number,
+    resetToken: string
+}
+
+const resetPassword = async ({ password, resetToken }: passwordAndToken): Promise<void> => {
+    const { sub } = await tokenService.verifyToken(resetToken, process.env.RESET_TOKEN_SECRET || '')
+
+    if (!await userService.getUserById(sub)) {
+        throw new GraphQLError(constants.MESSAGES.AUTHENTICATION_FAILED, {
+            extensions: {
+                code: 'UNAUTHENTICATED'
+            }
+        })
+    }
+
+    password = await bcrypt.hash(password, 10)
+
+    await userService.updateUserById(sub, { password })
+}
+
+interface passwordAndToken {
+    password: string,
+    resetToken: string
+}
+
 export default {
     registerUser,
     checkUserAlreadyExist,
     validateUserRole,
-    loginUser
+    loginUser,
+    requestReset,
+    verifyResetOtp,
+    resetPassword
 }

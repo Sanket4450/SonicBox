@@ -1,4 +1,6 @@
-import jwt from 'jsonwebtoken'
+import jwt, { JwtPayload } from 'jsonwebtoken'
+import { GraphQLError } from 'graphql'
+import constants from '../constants'
 import userService from './user'
 
 interface tokenType {
@@ -18,24 +20,37 @@ enum roleType {
     ADMIN = 'admin'
 }
 
-const generateToken = ({ payload, secret, options }: tokenType) => {
+interface payload {
+    sub: string,
+    role: roleType
+}
+
+const generateToken = ({ payload, secret, options }: tokenType): string => {
     return jwt.sign(payload, secret, options)
 }
 
-// const verifyToken = (token, secret) => {
-//     return new Promise((resolve, reject) => {
-//         jwt.verify(token, secret, (err, decoded) => {
-//             if (err) {
-//                 if (err.name === 'JsonWebTokenError') {
-//                     reject(new ApiError(constant.MESSAGES.AUTHENTICATION_FAILED, httpStatus.UNAUTHORIZED))
-//                 }
-//                 reject(new ApiError(err.message, httpStatus.UNAUTHORIZED))
-//             } else {
-//                 resolve(decoded)
-//             }
-//         })
-//     })
-// }
+const verifyToken = (token: string, secret: string): any => {
+    return new Promise((resolve, reject) => {
+        jwt.verify(token, secret, (err, decoded) => {
+            if (err) {
+                if (err.name === 'JsonWebTokenError') {
+                    throw new GraphQLError(constants.MESSAGES.AUTHENTICATION_FAILED, {
+                        extensions: {
+                            code: 'UNAUTHENTICATED'
+                        }
+                    })
+                }
+                throw new GraphQLError(err.message, {
+                    extensions: {
+                        code: 'UNAUTHENTICATED'
+                    }
+                })
+            } else {
+                resolve(decoded)
+            }
+        })
+    })
+}
 
 const generateAuthTokens = async (userId: string, role: roleType = roleType.USER): Promise<{ accessToken: string, refreshToken: string }> => {
     const payload = {
@@ -62,5 +77,6 @@ const generateAuthTokens = async (userId: string, role: roleType = roleType.USER
 
 export default {
     generateToken,
-    generateAuthTokens
+    generateAuthTokens,
+    verifyToken
 }

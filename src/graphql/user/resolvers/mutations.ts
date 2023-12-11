@@ -1,7 +1,6 @@
 import { GraphQLResolveInfo, GraphQLError } from 'graphql'
 import { validateSchema, validateSelection } from '../../../utils/validate'
 import authValidation from '../../../validations/auth'
-import { extractFields } from '../../../utils/selection'
 import fields from '../fields/mutations'
 import constants from '../../../constants'
 import authService from '../../../services/auth'
@@ -13,17 +12,6 @@ const mutations = {
             validateSchema(input, authValidation.createUser)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createUser)
-
-            const selectionSet = info.fieldNodes[0].selectionSet
-            const selectedFields = selectionSet ? extractFields(selectionSet) : []
-
-            if(!fields.createUser.every(field => selectedFields.includes(field))) {
-                throw new GraphQLError(constants.MESSAGES.SELECT_REQUIRED_FIELDS, {
-                    extensions: {
-                        code: 'VALIDATION_FAILED'
-                    }
-                })
-            }
 
             const { _id, role } = await authService.registerUser(input)
 
@@ -41,7 +29,25 @@ const mutations = {
                 }
             })
         }
-    }
+    },
+
+    resetPassword: async (_: any, { input }: passwordAndToken, __: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema(input, authValidation.resetPassword)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.resetPassword)
+
+            await authService.resetPassword(input)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
 }
 
 interface userData {
@@ -77,6 +83,13 @@ interface userIdAndTokens {
     _id: string,
     accessToken: string,
     refreshToken: string
+}
+
+interface passwordAndToken {
+    input: {
+        password: string,
+        resetToken: string
+    }
 }
 
 export default mutations

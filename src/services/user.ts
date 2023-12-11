@@ -3,6 +3,18 @@ import DbRepo from '../dbRepo'
 import constants from '../constants'
 import authService from './auth'
 
+const getUserById = async (_id: string): Promise<{_id: string}> => {
+    const query = {
+        _id
+    }
+
+    const data = {
+        _id: 1,
+    }
+
+    return DbRepo.findOne(constants.COLLECTIONS.USER, { query, data })
+}
+
 const getUserByUsername = async (username: string): Promise<Pick<getUserData, '_id' | 'role' | 'password'>> => {
     const query = {
         username
@@ -120,6 +132,7 @@ const updateUserById = async (userId: string, userData: Partial<userData>): Prom
 }
 
 export default {
+    getUserById,
     getUserByUsername,
     getUserByEmail,
     createUser,

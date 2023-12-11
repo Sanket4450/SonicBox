@@ -3,6 +3,7 @@ import Joi from 'joi'
 import {
     dateValidation,
     emailValidation,
+    integerNumberReqValidation,
     passwordValidation,
     stringReqValidation,
     stringValidation
@@ -29,7 +30,24 @@ const loginUser = Joi.object({
     password: passwordValidation,
 })
 
+const requestReset = Joi.object({
+    email: emailValidation
+})
+
+const verifyResetOtp = Joi.object({
+    otp: integerNumberReqValidation,
+    resetToken: stringReqValidation
+})
+
+const resetPassword = Joi.object({
+    password: passwordValidation,
+    resetToken: stringReqValidation
+})
+
 export default {
     createUser,
-    loginUser
+    loginUser,
+    requestReset,
+    verifyResetOtp,
+    resetPassword
 }

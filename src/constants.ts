@@ -7,7 +7,10 @@ export default {
         USERNAME_EMAIL_REQUIRED: 'Username or email is required',
         ONE_OF_THEM_REQUIRED: 'One of username and email is required',
         USER_NOT_EXIST: 'User does not exist with this username or email',
-        INCORRECT_PASSWORD: 'Incorrect password'
+        INCORRECT_PASSWORD: 'Incorrect password',
+        USER_NOT_EXIST_WITH_EMAIL: 'User does not exist with this email',
+        AUTHENTICATION_FAILED: 'Authentication failed',
+        INCORRECT_OTP: 'Incorrect OTP'
     },
     COLLECTIONS: {
         USER: 'User',

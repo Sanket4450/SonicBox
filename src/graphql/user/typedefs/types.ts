@@ -31,7 +31,7 @@ export default `#graphql
         refreshToken: String!
     }
 
-    type getUserIdAndTokens {
+    type UserIdAndTokens {
         _id: ID!,
         accessToken: String!,
         refreshToken: String!
@@ -41,5 +41,23 @@ export default `#graphql
         username: String
         email: String,
         password: String!
+    }
+
+    type ResetToken {
+        resetToken: String!
+    }
+
+    input verifyResetOtpInput {
+        otp: Int!,
+        resetToken: String!
+    }
+
+    type SuccessResponse {
+        success: Boolean!
+    }
+
+    input resetPasswordInput {
+        password: String!,
+        resetToken: String!
     }
 `
