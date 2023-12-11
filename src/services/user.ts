@@ -1,39 +1,50 @@
 import { GraphQLError } from 'graphql'
-import bcrypt from 'bcryptjs'
 import DbRepo from '../dbRepo'
 import constants from '../constants'
 import authService from './auth'
 
-const getUserByUsername = async (username: string): Promise<object | null> => {
+const getUserByUsername = async (username: string): Promise<Pick<getUserData, '_id' | 'role' | 'password'>> => {
     const query = {
         username
     }
 
     const data = {
-        _id: 1
+        _id: 1,
+        role: 1,
+        password: 1
     }
 
     return DbRepo.findOne(constants.COLLECTIONS.USER, { query, data })
 }
 
-const getUserByEmail = async (email: string): Promise<object | null> => {
+const getUserByEmail = async (email: string): Promise<Pick<getUserData, '_id' | 'role' | 'password'>> => {
     const query = {
         email
     }
 
     const data = {
-        _id: 1
+        _id: 1,
+        role: 1,
+        password: 1
     }
 
     return DbRepo.findOne(constants.COLLECTIONS.USER, { query, data })
 }
 
 const createUser = async (userData: userData): Promise<getUserData> => {
-    const data = {
-        ...userData
-    }
+    try {
+        const data = {
+            ...userData
+        }
 
-    return DbRepo.create(constants.COLLECTIONS.USER, { data })
+        return DbRepo.create(constants.COLLECTIONS.USER, { data })
+    } catch (error) {
+        throw new GraphQLError(constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 interface userData {
@@ -53,8 +64,7 @@ interface userData {
 }
 
 interface getUserData {
-    id?: string,
-    _id?: string,
+    _id: string,
     username: string,
     name?: string,
     email: string,
@@ -72,15 +82,15 @@ interface getUserData {
 }
 
 enum genderType {
-    male = 'male',
-    female = 'female',
-    other = 'other'
+    MALE = 'male',
+    FEMALE = 'female',
+    OTHER = 'other'
 }
 
 enum roleType {
-    user = 'user',
-    artist = 'artist',
-    admin = 'admin'
+    USER = 'user',
+    ARTIST = 'artist',
+    ADMIN = 'admin'
 }
 
 const updateUserById = async (userId: string, userData: Partial<userData>): Promise<getUserData> => {
@@ -98,9 +108,9 @@ const updateUserById = async (userId: string, userData: Partial<userData>): Prom
         }
     }
 
-    userData.role = userData.role === roleType.admin || userData.role === roleType.artist
+    userData.role = userData.role === roleType.ADMIN || userData.role === roleType.ARTIST
         ? authService.validateUserRole(userData.role, userData.secret || '')
-        : roleType.user
+        : roleType.USER
 
     const data = {
         ...userData

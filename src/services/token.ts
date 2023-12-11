@@ -13,9 +13,9 @@ interface tokenType {
 }
 
 enum roleType {
-    user = 'user',
-    artist = 'artist',
-    admin = 'admin'
+    USER = 'user',
+    ARTIST = 'artist',
+    ADMIN = 'admin'
 }
 
 const generateToken = ({ payload, secret, options }: tokenType) => {
@@ -37,7 +37,7 @@ const generateToken = ({ payload, secret, options }: tokenType) => {
 //     })
 // }
 
-const generateAuthTokens = async (userId: string, role: roleType = roleType.user): Promise<{ accessToken: string, refreshToken: string }> => {
+const generateAuthTokens = async (userId: string, role: roleType = roleType.USER): Promise<{ accessToken: string, refreshToken: string }> => {
     const payload = {
         sub: userId,
         role: role

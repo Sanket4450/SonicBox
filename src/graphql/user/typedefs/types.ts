@@ -1,37 +1,45 @@
 export default `#graphql
-    type UserType {
-        id: ID!,
+    input createUserInput {
         username: String!,
         name: String,
         email: String!,
-        gender: genderType,
+        password: String!
+        gender: GenderType,
         dateOfBirth: String,
+        role: RoleType,
+        secret: String
         state: String,
         country: String,
         profile_picture: String,
-        description: String,
-        isVerified: Boolean
+        description: String
     }
 
-    enum genderType {
+    enum GenderType {
         male,
         female,
         other
     }
 
-    enum roleType {
+    enum RoleType {
         user,
         artist,
         admin
     }
 
-    type TokenType {
+    type Tokens {
         accessToken: String!,
         refreshToken: String!
     }
 
-    type getUserAndTokens {
-        user: UserType!,
-        tokens: TokenType!
+    type getUserIdAndTokens {
+        _id: ID!,
+        accessToken: String!,
+        refreshToken: String!
+    }
+
+    input loginUserInput {
+        username: String
+        email: String,
+        password: String!
     }
 `
