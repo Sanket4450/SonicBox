@@ -15,6 +15,7 @@ const userSchema = new Schema({
         trim: true,
         lowercase: true,
         unique: true,
+        index: true,
         required: true
     },
     password: {
@@ -51,9 +52,9 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
-    token: {
-        type: String,
-        default: null
+    session_logins: {
+        type: [Date],
+        default: []
     },
     followers: [{
         type: Schema.Types.ObjectId,

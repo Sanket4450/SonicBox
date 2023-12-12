@@ -71,8 +71,7 @@ interface userData {
     state?: string,
     country?: string,
     profile_picture?: string,
-    description?: string,
-    token?: string | null
+    description?: string
 }
 
 interface getUserData {
@@ -89,8 +88,7 @@ interface getUserData {
     country?: string,
     profile_picture?: string,
     description?: string,
-    isVerified?: boolean,
-    token: string | null
+    isVerified?: boolean
 }
 
 enum genderType {
@@ -105,30 +103,122 @@ enum roleType {
     ADMIN = 'admin'
 }
 
-const updateUserById = async (userId: string, userData: Partial<userData>): Promise<getUserData> => {
-    const query = {
-        _id: userId
-    }
-
-    if (userData.username || userData.email) {
-        if (await authService.checkUserAlreadyExist(userData.username || '', userData.email || '')) {
-            throw new GraphQLError(constants.MESSAGES.USER_ALREADY_EXISTS, {
-                extensions: {
-                    code: 'FORBIDDEN'
-                }
-            })
+const createSession = async (sessionData: sessionData): Promise<any> => {
+    try {
+        const data = {
+            ...sessionData
         }
+
+        return DbRepo.create(constants.COLLECTIONS.SESSION, { data })
+    } catch (error) {
+        throw new GraphQLError(constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR'
+            }
+        })
     }
+}
 
-    userData.role = userData.role === roleType.ADMIN || userData.role === roleType.ARTIST
-        ? authService.validateUserRole(userData.role, userData.secret || '')
-        : roleType.USER
+interface sessionData {
+    userId: string,
+    device: string,
+    token: string
+}
 
-    const data = {
-        ...userData
+const addUserSession = async (userId: string, sessionDate: Date): Promise<getUserData> => {
+    try {
+        const query = {
+            _id: userId
+        }
+
+        const data = {
+            $push: {
+                session_logins: {
+                    $each: [sessionDate],
+                    $position: 0
+                }
+            }
+        }
+
+        return DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
+    } catch (error) {
+        throw new GraphQLError(constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR'
+            }
+        })
     }
+}
 
-    return DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
+const getSessionByDevice = async (deviceToken: string): Promise<object | null> => {
+    try {
+        const query = {
+            device: deviceToken
+        }
+        const data = {
+            _id: 1
+        }
+
+        return DbRepo.findOne(constants.COLLECTIONS.SESSION, { query, data })
+    } catch (error) {
+        throw new GraphQLError(constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const updateUserById = async (userId: string, userData: Partial<userData> ): Promise<void> => {
+    try {
+        const query = {
+            _id: userId
+        }
+
+        if (userData.username || userData.email) {
+            if (await authService.checkUserAlreadyExist(userData.username || '', userData.email || '')) {
+                throw new GraphQLError(constants.MESSAGES.USER_ALREADY_EXISTS, {
+                    extensions: {
+                        code: 'FORBIDDEN'
+                    }
+                })
+            }
+        }
+
+        userData.role = userData.role === roleType.ADMIN || userData.role === roleType.ARTIST
+            ? authService.validateUserRole(userData.role, userData.secret || '')
+            : roleType.USER
+
+        const data = {
+            $set: {
+                ...userData
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
+    } catch (error) {
+        throw new GraphQLError(constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const deleteAllSessions = async (userId: string): Promise<void> => {
+    try {
+        const query = {
+            userId
+        }
+
+        DbRepo.deleteMany(constants.COLLECTIONS.SESSION, { query })
+    } catch (error) {
+        throw new GraphQLError(constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 export default {
@@ -136,5 +226,9 @@ export default {
     getUserByUsername,
     getUserByEmail,
     createUser,
-    updateUserById
+    createSession,
+    addUserSession,
+    getSessionByDevice,
+    updateUserById,
+    deleteAllSessions
 }

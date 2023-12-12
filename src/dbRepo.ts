@@ -6,7 +6,7 @@ interface QueryObject {
     options?: object
 }
 
-class DbRepo {
+export default class DbRepo {
     public static findOne(collectionName: string, queryObject: QueryObject): Promise<any> {
         return new Promise((resolve, reject) => {
             const collection = (domain as Record<string, any>)[collectionName]
@@ -67,6 +67,21 @@ class DbRepo {
         })
     }
 
+    public static deleteMany(collectionName: string, queryObject: Pick<QueryObject, 'query'>): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const collection = (domain as Record<string, any>)[collectionName]
+
+            collection
+                .deleteMany(queryObject.query)
+                .then((results: object) => {
+                    resolve(results)
+                })
+                .catch((error: any) => {
+                    reject(error)
+                })
+        })
+    }
+
     public static find(collectionName: string, queryObject: QueryObject, sortQuery: object = {}): Promise<any> {
         return new Promise((resolve, reject) => {
             const collection = (domain as Record<string, any>)[collectionName]
@@ -116,5 +131,3 @@ class DbRepo {
         })
     }
 }
-
-export default DbRepo

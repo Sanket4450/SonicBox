@@ -4,46 +4,37 @@ import authValidation from '../../../validations/auth'
 import fields from '../fields/mutations'
 import constants from '../../../constants'
 import authService from '../../../services/auth'
-import tokenService from '../../../services/token'
 
 const mutations = {
     createUser: async (_: any, { input }: userData, __: any, info: GraphQLResolveInfo): Promise<userIdAndTokens> => {
-        try {
+
             validateSchema(input, authValidation.createUser)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createUser)
 
-            const { _id, role } = await authService.registerUser(input)
-
-            const { accessToken, refreshToken } = await tokenService.generateAuthTokens(_id || '', role)
+            const user = await authService.registerUser(input)
 
             return {
-                _id,
-                accessToken,
-                refreshToken
+                _id: user._id,
+                accessToken: user.accessToken,
+                refreshToken: user.refreshToken
             }
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
-        }
+
     },
 
-    resetPassword: async (_: any, { input }: passwordAndToken, __: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+    resetForgotPassword: async (_: any, { input }: passwordAndToken, __: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
         try {
-            validateSchema(input, authValidation.resetPassword)
+            validateSchema(input, authValidation.resetForgotPassword)
 
-            validateSelection(info.fieldNodes[0].selectionSet, fields.resetPassword)
+            validateSelection(info.fieldNodes[0].selectionSet, fields.resetForgotPassword)
 
-            await authService.resetPassword(input)
+            await authService.resetForgotPassword(input)
 
             return { success: true }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
-                    code: error.extensions.code || 'INTERNAL_SERVER_ERROR'
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
                 }
             })
         }
@@ -63,7 +54,8 @@ interface userData {
         state?: string,
         country?: string,
         profile_picture?: string,
-        description?: string
+        description?: string,
+        deviceToken: string
     }
 }
 

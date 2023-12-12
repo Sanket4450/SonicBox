@@ -1,4 +1,4 @@
-import { GraphQLError, graphql } from 'graphql'
+import { GraphQLError } from 'graphql'
 import bcrypt from 'bcryptjs'
 import constants from '../constants'
 import userService from './user'
@@ -22,7 +22,7 @@ const validateUserRole = (role: roleType, secret: string): roleType => {
     })
 }
 
-const registerUser = async (userData: userData): Promise<userIdAndRole> => {
+const registerUser = async (userData: userData): Promise<userIdAndTokens> => {
     if (await checkUserAlreadyExist(userData.username, userData.email)) {
         throw new GraphQLError(constants.MESSAGES.USER_ALREADY_EXISTS, {
             extensions: {
@@ -39,7 +39,13 @@ const registerUser = async (userData: userData): Promise<userIdAndRole> => {
 
     const { _id, role } = await userService.createUser(userData)
 
-    return { _id, role }
+    const { accessToken, refreshToken } = await tokenService.generateAuthTokens(_id || '', role)
+
+    const { createdAt } = await userService.createSession({ userId: _id, device: userData.deviceToken, token: refreshToken })
+
+    await userService.addUserSession(_id, createdAt)
+
+    return { _id, accessToken, refreshToken }
 }
 
 interface userData {
@@ -54,7 +60,8 @@ interface userData {
     state?: string,
     country?: string,
     profile_picture?: string,
-    description?: string
+    description?: string,
+    deviceToken: string
 }
 
 enum genderType {
@@ -69,12 +76,13 @@ enum roleType {
     ADMIN = 'admin'
 }
 
-interface userIdAndRole {
+interface userIdAndTokens {
     _id: string,
-    role: roleType | undefined
+    accessToken: string,
+    refreshToken: string
 }
 
-const loginUser = async (loginData: loginData): Promise<userIdAndRole> => {
+const loginUser = async (loginData: loginData): Promise<userIdAndTokens> => {
     if (!loginData.username && !loginData.email) {
         throw new GraphQLError(constants.MESSAGES.USERNAME_EMAIL_REQUIRED, {
             extensions: {
@@ -99,6 +107,14 @@ const loginUser = async (loginData: loginData): Promise<userIdAndRole> => {
         })
     }
 
+    if (await userService.getSessionByDevice(loginData.deviceToken)) {
+        throw new GraphQLError(constants.MESSAGES.ALREADY_LOGGED_IN, {
+            extensions: {
+                code: 'FORBIDDEN'
+            }
+        })
+    }
+
     const user = loginData.username
         ? await userService.getUserByUsername(loginData.username || '')
         : await userService.getUserByEmail(loginData.email || '')
@@ -111,16 +127,20 @@ const loginUser = async (loginData: loginData): Promise<userIdAndRole> => {
         })
     }
 
-    return {
-        _id: user._id,
-        role: user.role
-    }
+    const { accessToken, refreshToken } = await tokenService.generateAuthTokens(user._id || '', user.role)
+
+    const { createdAt } = await userService.createSession({ userId: user._id, device: loginData.deviceToken, token: refreshToken })
+
+    await userService.addUserSession(user._id, createdAt)
+
+    return { _id: user._id, accessToken, refreshToken }
 }
 
 interface loginData {
     username?: string,
     email?: string,
-    password: string
+    password: string,
+    deviceToken: string
 }
 
 const requestReset = async (email: string): Promise<string> => {
@@ -171,7 +191,7 @@ interface otpAndToken {
     resetToken: string
 }
 
-const resetPassword = async ({ password, resetToken }: passwordAndToken): Promise<void> => {
+const resetForgotPassword = async ({ password, resetToken }: passwordAndToken): Promise<void> => {
     const { sub } = await tokenService.verifyToken(resetToken, process.env.RESET_TOKEN_SECRET || '')
 
     if (!await userService.getUserById(sub)) {
@@ -185,6 +205,8 @@ const resetPassword = async ({ password, resetToken }: passwordAndToken): Promis
     password = await bcrypt.hash(password, 10)
 
     await userService.updateUserById(sub, { password })
+
+    await userService.deleteAllSessions(sub)
 }
 
 interface passwordAndToken {
@@ -199,5 +221,5 @@ export default {
     loginUser,
     requestReset,
     verifyResetOtp,
-    resetPassword
+    resetForgotPassword
 }

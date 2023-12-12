@@ -11,7 +11,8 @@ export default `#graphql
         state: String,
         country: String,
         profile_picture: String,
-        description: String
+        description: String,
+        deviceToken: String!
     }
 
     enum GenderType {
@@ -41,6 +42,7 @@ export default `#graphql
         username: String
         email: String,
         password: String!
+        deviceToken: String!
     }
 
     type ResetToken {
@@ -56,7 +58,7 @@ export default `#graphql
         success: Boolean!
     }
 
-    input resetPasswordInput {
+    input resetForgotPasswordInput {
         password: String!,
         resetToken: String!
     }

@@ -1,7 +1,7 @@
 const createUser: string[] = ['_id', 'accessToken', 'refreshToken']
-const resetPassword: string[] = ['success']
+const resetForgotPassword: string[] = ['success']
 
 export default {
     createUser,
-    resetPassword
+    resetForgotPassword
 }

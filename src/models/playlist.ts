@@ -5,7 +5,7 @@ const playlistSchema = new Schema({
         type: String,
         required: true
     },
-    user: {
+    userId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true

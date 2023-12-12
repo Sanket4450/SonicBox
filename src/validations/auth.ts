@@ -21,13 +21,15 @@ const createUser = Joi.object({
     state: stringValidation,
     country: stringValidation,
     profile_picture: stringValidation,
-    description: stringValidation
+    description: stringValidation,
+    deviceToken: stringReqValidation
 })
 
 const loginUser = Joi.object({
     username: stringValidation.alphanum().min(8).max(15),
     email: stringValidation.email().lowercase(),
     password: passwordValidation,
+    deviceToken: stringReqValidation
 })
 
 const requestReset = Joi.object({
@@ -39,7 +41,7 @@ const verifyResetOtp = Joi.object({
     resetToken: stringReqValidation
 })
 
-const resetPassword = Joi.object({
+const resetForgotPassword = Joi.object({
     password: passwordValidation,
     resetToken: stringReqValidation
 })
@@ -49,5 +51,5 @@ export default {
     loginUser,
     requestReset,
     verifyResetOtp,
-    resetPassword
+    resetForgotPassword
 }

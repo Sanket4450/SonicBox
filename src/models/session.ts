@@ -1,27 +1,22 @@
 import { Schema, InferSchemaType, model } from 'mongoose'
 
-const songSchema = new Schema({
-    name: {
+const sessionSchema = new Schema({
+    device: {
         type: String,
+        trim: true,
+        unique: true,
         required: true
     },
-    artistId: {
+    userId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    image: {
-        type: String,
-        trim: true
-    },
-    url: {
+    token: {
         type: String,
         trim: true,
+        unique: true,
         required: true
-    },
-    listens: {
-        type: Number,
-        default: 0
     }
 },
     {
@@ -29,6 +24,6 @@ const songSchema = new Schema({
         autoIndex: false
     })
 
-type Song = InferSchemaType<typeof songSchema>
+type Session = InferSchemaType<typeof sessionSchema>
 
-export default model<Song>('Song', songSchema)
+export default model<Session>('Session', sessionSchema)

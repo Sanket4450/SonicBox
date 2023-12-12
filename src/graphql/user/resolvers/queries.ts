@@ -4,7 +4,6 @@ import authValidation from '../../../validations/auth'
 import fields from '../fields/queries'
 import constants from '../../../constants'
 import authService from '../../../services/auth'
-import tokenService from '../../../services/token'
 
 const queries = {
     loginUser: async (_: any, { input }: userData, __: any, info: GraphQLResolveInfo): Promise<userIdAndTokens> => {
@@ -13,19 +12,17 @@ const queries = {
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.loginUser)
 
-            const { _id, role } = await authService.loginUser(input)
-
-            const { accessToken, refreshToken } = await tokenService.generateAuthTokens(_id || '', role)
+            const user = await authService.loginUser(input)
 
             return {
-                _id,
-                accessToken,
-                refreshToken
+                _id: user._id,
+                accessToken: user.accessToken,
+                refreshToken: user.refreshToken
             }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
-                    code: error.extensions.code || 'INTERNAL_SERVER_ERROR'
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
                 }
             })
         }
@@ -43,7 +40,7 @@ const queries = {
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
-                    code: error.extensions.code || 'INTERNAL_SERVER_ERROR'
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
                 }
             })
         }
@@ -61,7 +58,7 @@ const queries = {
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
-                    code: error.extensions.code || 'INTERNAL_SERVER_ERROR'
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
                 }
             })
         }
@@ -72,7 +69,8 @@ interface userData {
     input: {
         username?: string,
         email?: string,
-        password: string
+        password: string,
+        deviceToken: string
     }
 }
 

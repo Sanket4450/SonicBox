@@ -12,7 +12,7 @@ const categorySchema = new Schema({
     description: {
         type: String
     },
-    parent_category: {
+    parent_categoryId: {
         type: Schema.Types.ObjectId,
         ref: 'Category'
     },

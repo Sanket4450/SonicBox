@@ -1,7 +1,6 @@
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { GraphQLError } from 'graphql'
 import constants from '../constants'
-import userService from './user'
 
 interface tokenType {
     payload: {
@@ -55,7 +54,7 @@ const verifyToken = (token: string, secret: string): any => {
 const generateAuthTokens = async (userId: string, role: roleType = roleType.USER): Promise<{ accessToken: string, refreshToken: string }> => {
     const payload = {
         sub: userId,
-        role: role
+        role
     }
     const accessToken = generateToken({
         payload,
@@ -67,7 +66,6 @@ const generateAuthTokens = async (userId: string, role: roleType = roleType.USER
         secret: process.env.REFRESH_TOKEN_SECRET || '',
         options: { expiresIn: process.env.REFRESH_TOKEN_EXPIRY || '' }
     })
-    await userService.updateUserById(userId, { token: refreshToken })
 
     return {
         accessToken,
