@@ -11,7 +11,9 @@ export default {
         ALREADY_LOGGED_IN: 'You are already logged-in on this device',
         USER_NOT_EXIST_WITH_EMAIL: 'User does not exist with this email',
         AUTHENTICATION_FAILED: 'Authentication failed',
-        INCORRECT_OTP: 'Incorrect OTP'
+        INCORRECT_OTP: 'Incorrect OTP',
+        USER_NOT_FOUND: 'User not found for this userId',
+        INVALID_TOKEN: 'Invalid token'
     },
     COLLECTIONS: {
         USER: 'User',

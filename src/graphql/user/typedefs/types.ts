@@ -62,4 +62,9 @@ export default `#graphql
         password: String!,
         resetToken: String!
     }
+
+    type AuthTokens {
+        accessToken: String!,
+        refreshToken: String!
+    }
 `

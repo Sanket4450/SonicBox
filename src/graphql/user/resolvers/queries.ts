@@ -63,6 +63,24 @@ const queries = {
             })
         }
     },
+
+    refreshAuthTokens: async (_: any, { token }: token, __: any, info: GraphQLResolveInfo): Promise<authTokens> => {
+        try {
+            validateSchema({ token }, authValidation.refreshAuthTokens)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.refreshAuthTokens)
+
+            const { accessToken, refreshToken } = await authService.refreshAuthTokens(token)
+
+            return { accessToken, refreshToken }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
 }
 
 interface userData {
@@ -88,11 +106,20 @@ type resetToken = {
     resetToken: string,
 }
 
-export interface otpAndToken {
+interface otpAndToken {
     input: {
         otp: number,
         resetToken: string
     }
+}
+
+type token = {
+    token: string
+}
+
+interface authTokens {
+    accessToken: string,
+    refreshToken: string
 }
 
 export default queries

@@ -214,6 +214,33 @@ interface passwordAndToken {
     resetToken: string
 }
 
+const refreshAuthTokens = async (token: string): Promise<authTokens> => {
+    const { sub } = await tokenService.verifyToken(token, process.env.REFRESH_TOKEN_SECRET || '')
+
+    const user = await userService.getFullUser({ _id: sub }, { role: 1 })
+
+    if (!user) {
+        throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+            extensions: {
+                code: 'NOT_FOUND'
+            }
+        })
+    }
+
+    const { sessionId } = await userService.validateSession(sub, token)
+
+    const { accessToken, refreshToken } = await tokenService.generateAuthTokens(sub, user.role)
+
+    await userService.updateSessionById(sessionId, refreshToken)
+
+    return { accessToken, refreshToken }
+}
+
+interface authTokens {
+    accessToken: string,
+    refreshToken: string
+}
+
 export default {
     registerUser,
     checkUserAlreadyExist,
@@ -221,5 +248,6 @@ export default {
     loginUser,
     requestReset,
     verifyResetOtp,
-    resetForgotPassword
+    resetForgotPassword,
+    refreshAuthTokens
 }

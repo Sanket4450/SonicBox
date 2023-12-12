@@ -19,11 +19,6 @@ enum roleType {
     ADMIN = 'admin'
 }
 
-interface payload {
-    sub: string,
-    role: roleType
-}
-
 const generateToken = ({ payload, secret, options }: tokenType): string => {
     return jwt.sign(payload, secret, options)
 }
@@ -51,7 +46,7 @@ const verifyToken = (token: string, secret: string): any => {
     })
 }
 
-const generateAuthTokens = async (userId: string, role: roleType = roleType.USER): Promise<{ accessToken: string, refreshToken: string }> => {
+const generateAuthTokens = async (userId: string, role: roleType = roleType.USER): Promise<authTokens> => {
     const payload = {
         sub: userId,
         role
@@ -71,6 +66,11 @@ const generateAuthTokens = async (userId: string, role: roleType = roleType.USER
         accessToken,
         refreshToken
     }
+}
+
+interface authTokens {
+    accessToken: string,
+    refreshToken: string
 }
 
 export default {

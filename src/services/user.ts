@@ -3,7 +3,7 @@ import DbRepo from '../dbRepo'
 import constants from '../constants'
 import authService from './auth'
 
-const getUserById = async (_id: string): Promise<{_id: string}> => {
+const getUserById = async (_id: string): Promise<{ _id: string } | null> => {
     const query = {
         _id
     }
@@ -43,6 +43,41 @@ const getUserByEmail = async (email: string): Promise<Pick<getUserData, '_id' | 
     return DbRepo.findOne(constants.COLLECTIONS.USER, { query, data })
 }
 
+const getFullUser = async (userQuery: Partial<idUsernameEmail>, userData: Partial<selectUserData>): Promise<Partial<getUserData>> => {
+    const query = {
+        ...userQuery
+    }
+
+    const data = {
+        ...userData
+    }
+
+    return DbRepo.findOne(constants.COLLECTIONS.USER, { query, data })
+}
+
+interface idUsernameEmail {
+    _id: string,
+    username: string,
+    email: string
+}
+
+interface selectUserData {
+    _id: number,
+    username: number,
+    name: number,
+    email: number,
+    password: number,
+    gender: number,
+    dateOfBirth: number,
+    role: number,
+    secret: number,
+    state: number,
+    country: boolean,
+    profile_picture: number,
+    description: number
+    isVerified: number
+}
+
 const createUser = async (userData: userData): Promise<getUserData> => {
     try {
         const data = {
@@ -50,10 +85,10 @@ const createUser = async (userData: userData): Promise<getUserData> => {
         }
 
         return DbRepo.create(constants.COLLECTIONS.USER, { data })
-    } catch (error) {
-        throw new GraphQLError(constants.MESSAGES.SOMETHING_WENT_WRONG, {
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
-                code: 'INTERNAL_SERVER_ERROR'
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
             }
         })
     }
@@ -110,10 +145,10 @@ const createSession = async (sessionData: sessionData): Promise<any> => {
         }
 
         return DbRepo.create(constants.COLLECTIONS.SESSION, { data })
-    } catch (error) {
-        throw new GraphQLError(constants.MESSAGES.SOMETHING_WENT_WRONG, {
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
-                code: 'INTERNAL_SERVER_ERROR'
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
             }
         })
     }
@@ -125,7 +160,7 @@ interface sessionData {
     token: string
 }
 
-const addUserSession = async (userId: string, sessionDate: Date): Promise<getUserData> => {
+const addUserSession = async (userId: string, sessionDate: Date): Promise<void> => {
     try {
         const query = {
             _id: userId
@@ -140,11 +175,11 @@ const addUserSession = async (userId: string, sessionDate: Date): Promise<getUse
             }
         }
 
-        return DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
-    } catch (error) {
-        throw new GraphQLError(constants.MESSAGES.SOMETHING_WENT_WRONG, {
+        await DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
-                code: 'INTERNAL_SERVER_ERROR'
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
             }
         })
     }
@@ -160,16 +195,16 @@ const getSessionByDevice = async (deviceToken: string): Promise<object | null> =
         }
 
         return DbRepo.findOne(constants.COLLECTIONS.SESSION, { query, data })
-    } catch (error) {
-        throw new GraphQLError(constants.MESSAGES.SOMETHING_WENT_WRONG, {
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
-                code: 'INTERNAL_SERVER_ERROR'
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
             }
         })
     }
 }
 
-const updateUserById = async (userId: string, userData: Partial<userData> ): Promise<void> => {
+const updateUserById = async (userId: string, userData: Partial<userData>): Promise<void> => {
     try {
         const query = {
             _id: userId
@@ -196,10 +231,10 @@ const updateUserById = async (userId: string, userData: Partial<userData> ): Pro
         }
 
         await DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
-    } catch (error) {
-        throw new GraphQLError(constants.MESSAGES.SOMETHING_WENT_WRONG, {
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
-                code: 'INTERNAL_SERVER_ERROR'
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
             }
         })
     }
@@ -211,11 +246,64 @@ const deleteAllSessions = async (userId: string): Promise<void> => {
             userId
         }
 
-        DbRepo.deleteMany(constants.COLLECTIONS.SESSION, { query })
-    } catch (error) {
-        throw new GraphQLError(constants.MESSAGES.SOMETHING_WENT_WRONG, {
+        await DbRepo.deleteMany(constants.COLLECTIONS.SESSION, { query })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
-                code: 'INTERNAL_SERVER_ERROR'
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const validateSession = async (userId: string, token: string): Promise<{ sessionId: string }> => {
+    try {
+        const query = {
+            userId,
+            token
+        }
+
+        const data = {
+            _id: 1
+        }
+
+        const session = await DbRepo.findOne(constants.COLLECTIONS.SESSION, { query, data })
+
+        if (!session) {
+            throw new GraphQLError(constants.MESSAGES.INVALID_TOKEN, {
+                extensions: {
+                    code: 'FORBIDDEN'
+                }
+            })
+        }
+
+        return { sessionId: session._id }
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const updateSessionById = async (_id: string, token: string): Promise<void> => {
+    try {
+        const query = {
+            _id
+        }
+
+        const data = {
+            $set: {
+                token
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.SESSION, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
             }
         })
     }
@@ -225,10 +313,13 @@ export default {
     getUserById,
     getUserByUsername,
     getUserByEmail,
+    getFullUser,
     createUser,
     createSession,
     addUserSession,
     getSessionByDevice,
     updateUserById,
-    deleteAllSessions
+    deleteAllSessions,
+    validateSession,
+    updateSessionById
 }

@@ -7,7 +7,7 @@ import authService from '../../../services/auth'
 
 const mutations = {
     createUser: async (_: any, { input }: userData, __: any, info: GraphQLResolveInfo): Promise<userIdAndTokens> => {
-
+        try {
             validateSchema(input, authValidation.createUser)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createUser)
@@ -19,7 +19,13 @@ const mutations = {
                 accessToken: user.accessToken,
                 refreshToken: user.refreshToken
             }
-
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     },
 
     resetForgotPassword: async (_: any, { input }: passwordAndToken, __: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
@@ -38,7 +44,7 @@ const mutations = {
                 }
             })
         }
-    },
+    }
 }
 
 interface userData {
