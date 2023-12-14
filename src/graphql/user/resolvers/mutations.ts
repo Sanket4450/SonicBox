@@ -4,6 +4,7 @@ import authValidation from '../../../validations/auth'
 import fields from '../fields/mutations'
 import constants from '../../../constants'
 import authService from '../../../services/auth'
+import tokenService from '../../../services/token'
 
 const mutations = {
     createUser: async (_: any, { input }: userData, __: any, info: GraphQLResolveInfo): Promise<userIdAndTokens> => {
@@ -12,13 +13,27 @@ const mutations = {
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createUser)
 
-            const user = await authService.registerUser(input)
+            const { userId, accessToken, refreshToken } = await authService.registerUser(input)
 
-            return {
-                _id: user._id,
-                accessToken: user.accessToken,
-                refreshToken: user.refreshToken
-            }
+            return { userId, accessToken, refreshToken }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    loginUser: async (_: any, { input }: loginData, __: any, info: GraphQLResolveInfo): Promise<userIdAndTokens> => {
+        try {
+            validateSchema(input, authValidation.loginUser)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.loginUser)
+
+            const { userId, accessToken, refreshToken } = await authService.loginUser(input)
+
+            return { userId, accessToken, refreshToken }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -35,6 +50,26 @@ const mutations = {
             validateSelection(info.fieldNodes[0].selectionSet, fields.resetForgotPassword)
 
             await authService.resetForgotPassword(input)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    logoutUser: async (_: any, { sessionId }: session, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema({ sessionId }, authValidation.logoutUser)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.logoutUser)
+
+            await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET || '')
+
+            await authService.logoutUser(sessionId)
 
             return { success: true }
         } catch (error: any) {
@@ -65,6 +100,15 @@ interface userData {
     }
 }
 
+interface loginData {
+    input: {
+        username?: string,
+        email?: string,
+        password: string,
+        deviceToken: string
+    }
+}
+
 enum genderType {
     MALE = 'male',
     FEMALE = 'female',
@@ -78,7 +122,7 @@ enum roleType {
 }
 
 interface userIdAndTokens {
-    _id: string,
+    userId: string,
     accessToken: string,
     refreshToken: string
 }
@@ -88,6 +132,10 @@ interface passwordAndToken {
         password: string,
         resetToken: string
     }
+}
+
+type session = {
+    sessionId: string
 }
 
 export default mutations

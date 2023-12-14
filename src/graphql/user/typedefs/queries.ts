@@ -1,7 +1,6 @@
 export default `#graphql
     type Query {
-        loginUser(input: loginUserInput!): UserIdAndTokens!
-        requestReset(email: String!): ResetToken!
+        requestReset(input: requestResetInput!): ResetToken!
         verifyResetOtp(input: verifyResetOtpInput!): SuccessResponse!
         refreshAuthTokens(token: String!): AuthTokens!
     }

@@ -1,47 +1,47 @@
 export default `#graphql
     input createUserInput {
-        username: String!,
-        name: String,
-        email: String!,
+        username: String!
+        name: String
+        email: String!
         password: String!
-        gender: GenderType,
-        dateOfBirth: String,
-        role: RoleType,
+        gender: GenderType
+        dateOfBirth: String
+        role: RoleType
         secret: String
-        state: String,
-        country: String,
-        profile_picture: String,
-        description: String,
+        state: String
+        country: String
+        profile_picture: String
+        description: String
         deviceToken: String!
     }
 
     enum GenderType {
-        male,
-        female,
+        male
+        female
         other
     }
 
     enum RoleType {
-        user,
-        artist,
+        user
+        artist
         admin
     }
 
-    type Tokens {
-        accessToken: String!,
-        refreshToken: String!
-    }
-
-    type UserIdAndTokens {
-        _id: ID!,
-        accessToken: String!,
+    type loginData {
+        userId: ID
+        accessToken: String!
         refreshToken: String!
     }
 
     input loginUserInput {
         username: String
-        email: String,
+        email: String
         password: String!
+        deviceToken: String!
+    }
+
+    input requestResetInput {
+        email: String!
         deviceToken: String!
     }
 
@@ -50,7 +50,7 @@ export default `#graphql
     }
 
     input verifyResetOtpInput {
-        otp: Int!,
+        otp: Int!
         resetToken: String!
     }
 
@@ -59,12 +59,12 @@ export default `#graphql
     }
 
     input resetForgotPasswordInput {
-        password: String!,
+        password: String!
         resetToken: String!
     }
 
     type AuthTokens {
-        accessToken: String!,
+        accessToken: String!
         refreshToken: String!
     }
 `

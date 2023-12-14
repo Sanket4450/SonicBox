@@ -21,14 +21,14 @@ export default async function createGraphQLServer() {
                 
                 return {
                     ...formattedError,
-                    message: "Your query doesn't match the schema. Try double-checking it!",
-                };
+                    message: "Your query doesn't match the schema. Try double-checking it!"
+                }
             }
 
             // Otherwise return the formatted error. This error can also
             // be manipulated in other ways, as long as it's returned.
-            return formattedError;
-        },
+            return formattedError
+        }
     })
 
     await gqlserver.start()

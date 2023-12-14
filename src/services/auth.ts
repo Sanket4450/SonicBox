@@ -31,21 +31,27 @@ const registerUser = async (userData: userData): Promise<userIdAndTokens> => {
         })
     }
 
-    userData.role = userData.role === roleType.ADMIN || userData.role === roleType.ARTIST
-        ? validateUserRole(userData.role, userData.secret || '')
+    userData.role = userData.role === 'admin' ? validateUserRole(roleType.ADMIN, userData.secret || '')
+        : userData.role === 'artist' ? validateUserRole(roleType.ARTIST, userData.secret || '')
         : roleType.USER
 
     userData.password = await bcrypt.hash(userData.password, 10)
 
-    const { _id, role } = await userService.createUser(userData)
+    const user = await userService.createUser(userData)
 
-    const { accessToken, refreshToken } = await tokenService.generateAuthTokens(_id || '', role)
+    const payload = {
+        sub: user._id,
+        role: userData.role,
+        device: userData.deviceToken
+    }
 
-    const { createdAt } = await userService.createSession({ userId: _id, device: userData.deviceToken, token: refreshToken })
+    const { accessToken, refreshToken } = await tokenService.generateAuthTokens(payload)
 
-    await userService.addUserSession(_id, createdAt)
+    const { createdAt } = await userService.createSession({ userId: user._id, device: userData.deviceToken, token: refreshToken })
 
-    return { _id, accessToken, refreshToken }
+    await userService.addUserSession(user._id, createdAt)
+
+    return { userId: user._id, accessToken, refreshToken }
 }
 
 interface userData {
@@ -77,8 +83,8 @@ enum roleType {
 }
 
 interface userIdAndTokens {
-    _id: string,
-    accessToken: string,
+    userId: string
+    accessToken: string
     refreshToken: string
 }
 
@@ -127,13 +133,21 @@ const loginUser = async (loginData: loginData): Promise<userIdAndTokens> => {
         })
     }
 
-    const { accessToken, refreshToken } = await tokenService.generateAuthTokens(user._id || '', user.role)
+    const role = user.role === 'admin' ? roleType.ADMIN : user.role === 'artist' ? roleType.ARTIST : roleType.USER
+
+    const payload = {
+        sub: user._id,
+        role,
+        device: loginData.deviceToken
+    }
+
+    const { accessToken, refreshToken } = await tokenService.generateAuthTokens(payload)
 
     const { createdAt } = await userService.createSession({ userId: user._id, device: loginData.deviceToken, token: refreshToken })
 
     await userService.addUserSession(user._id, createdAt)
 
-    return { _id: user._id, accessToken, refreshToken }
+    return { userId: user._id, accessToken, refreshToken }
 }
 
 interface loginData {
@@ -143,7 +157,7 @@ interface loginData {
     deviceToken: string
 }
 
-const requestReset = async (email: string): Promise<string> => {
+const requestReset = async ({ email, deviceToken }: requestResetData): Promise<string> => {
     const user = await userService.getUserByEmail(email)
 
     if (!user) {
@@ -159,11 +173,17 @@ const requestReset = async (email: string): Promise<string> => {
     return tokenService.generateToken({
         payload: {
             sub: user._id,
-            role
+            role,
+            device: deviceToken
         },
         secret: process.env.RESET_TOKEN_SECRET || '',
         options: { expiresIn: process.env.RESET_TOKEN_EXPIRY || '' }
     })
+}
+
+interface requestResetData {
+    email: string,
+    deviceToken: string
 }
 
 const verifyResetOtp = async ({ otp, resetToken }: otpAndToken): Promise<void> => {
@@ -215,11 +235,9 @@ interface passwordAndToken {
 }
 
 const refreshAuthTokens = async (token: string): Promise<authTokens> => {
-    const { sub } = await tokenService.verifyToken(token, process.env.REFRESH_TOKEN_SECRET || '')
+    const { sub, role, device } = await tokenService.verifyToken(token, process.env.REFRESH_TOKEN_SECRET || '')
 
-    const user = await userService.getFullUser({ _id: sub }, { role: 1 })
-
-    if (!user) {
+    if (!await userService.getUserById(sub)) {
         throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
             extensions: {
                 code: 'NOT_FOUND'
@@ -227,9 +245,9 @@ const refreshAuthTokens = async (token: string): Promise<authTokens> => {
         })
     }
 
-    const { sessionId } = await userService.validateSession(sub, token)
+    const { sessionId } = await userService.validateSession({ userId: sub, device, token })
 
-    const { accessToken, refreshToken } = await tokenService.generateAuthTokens(sub, user.role)
+    const { accessToken, refreshToken } = await tokenService.generateAuthTokens({ sub, role, device })
 
     await userService.updateSessionById(sessionId, refreshToken)
 
@@ -241,6 +259,18 @@ interface authTokens {
     refreshToken: string
 }
 
+const logoutUser = async (sessionId: string): Promise<void> => {
+    if (!await userService.getSessionById(sessionId)) {
+        throw new GraphQLError(constants.MESSAGES.SESSION_NOT_FOUND, {
+            extensions: {
+                code: 'NOT_FOUND'
+            }
+        })
+    }
+
+    await userService.deleteSessionById(sessionId)
+}
+
 export default {
     registerUser,
     checkUserAlreadyExist,
@@ -249,5 +279,6 @@ export default {
     requestReset,
     verifyResetOtp,
     resetForgotPassword,
-    refreshAuthTokens
+    refreshAuthTokens,
+    logoutUser
 }

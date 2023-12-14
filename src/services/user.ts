@@ -220,8 +220,8 @@ const updateUserById = async (userId: string, userData: Partial<userData>): Prom
             }
         }
 
-        userData.role = userData.role === roleType.ADMIN || userData.role === roleType.ARTIST
-            ? authService.validateUserRole(userData.role, userData.secret || '')
+        userData.role = userData.role === 'admin' ? authService.validateUserRole(roleType.ADMIN, userData.secret || '')
+            : userData.role === 'artist' ? authService.validateUserRole(roleType.ARTIST, userData.secret || '')
             : roleType.USER
 
         const data = {
@@ -256,7 +256,7 @@ const deleteAllSessions = async (userId: string): Promise<void> => {
     }
 }
 
-const validateSession = async (userId: string, token: string): Promise<{ sessionId: string }> => {
+const validateSession = async ({ userId, device, token }: sessionData): Promise<{ sessionId: string }> => {
     try {
         const query = {
             userId,
@@ -267,9 +267,7 @@ const validateSession = async (userId: string, token: string): Promise<{ session
             _id: 1
         }
 
-        const session = await DbRepo.findOne(constants.COLLECTIONS.SESSION, { query, data })
-
-        if (!session) {
+        if (!await DbRepo.findOne(constants.COLLECTIONS.SESSION, { query, data })) {
             throw new GraphQLError(constants.MESSAGES.INVALID_TOKEN, {
                 extensions: {
                     code: 'FORBIDDEN'
@@ -277,7 +275,39 @@ const validateSession = async (userId: string, token: string): Promise<{ session
             })
         }
 
+        Object.assign(query, { device })
+
+        const session = await DbRepo.findOne(constants.COLLECTIONS.SESSION, { query, data })
+
+        if (!session) {
+            throw new GraphQLError(constants.MESSAGES.SESSION_EXPIRED, {
+                extensions: {
+                    code: 'FORBIDDEN'
+                }
+            })
+        }
+
         return { sessionId: session._id }
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const getSessionById = async (_id: string): Promise<{ _id: string }> => {
+    try {
+        const query = {
+            _id
+        }
+
+        const data = {
+            _id: 1
+        }
+
+        return DbRepo.findOne(constants.COLLECTIONS.SESSION, { query, data })
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -309,6 +339,22 @@ const updateSessionById = async (_id: string, token: string): Promise<void> => {
     }
 }
 
+const deleteSessionById = async (_id: string): Promise<void> => {
+    try {
+        const query = {
+            _id
+        }
+
+        await DbRepo.deleteOne(constants.COLLECTIONS.SESSION, { query })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 export default {
     getUserById,
     getUserByUsername,
@@ -321,5 +367,7 @@ export default {
     updateUserById,
     deleteAllSessions,
     validateSession,
-    updateSessionById
+    getSessionById,
+    updateSessionById,
+    deleteSessionById
 }

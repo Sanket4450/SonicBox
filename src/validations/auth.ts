@@ -33,11 +33,15 @@ const loginUser = Joi.object({
 })
 
 const requestReset = Joi.object({
-    email: emailValidation
+    email: emailValidation,
+    deviceToken: stringReqValidation
 })
 
 const verifyResetOtp = Joi.object({
-    otp: integerNumberReqValidation,
+    otp: integerNumberReqValidation.min(10 ** 3).max(10 ** 4 - 1).messages({
+        'number.min': 'OTP should be 4 digit',
+        'number.max': 'OTP should be 4 digit',
+    }),
     resetToken: stringReqValidation
 })
 
@@ -50,11 +54,16 @@ const refreshAuthTokens = Joi.object({
     token: stringReqValidation
 })
 
+const logoutUser = Joi.object({
+    sessionId: stringReqValidation
+})
+
 export default {
     createUser,
     loginUser,
     requestReset,
     verifyResetOtp,
     resetForgotPassword,
-    refreshAuthTokens
+    refreshAuthTokens,
+    logoutUser
 }

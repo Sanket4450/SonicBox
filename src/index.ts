@@ -8,11 +8,12 @@ import express, { Express } from 'express'
 import cors from 'cors'
 import connectDB from './config'
 import createGraphQLServer from './graphql/index'
+import { setContext } from './context'
 
 const init = async () => {
     const app: Express = express()
     const gqlserver = await createGraphQLServer()
-    const port: number = parseInt(process.env.PORT || '4000') || 4000
+    const port: number = parseInt(process.env.PORT || '4000')
 
     connectDB()
 
@@ -23,7 +24,9 @@ const init = async () => {
         res.send('App is running...')
     })
 
-    app.use('/graphql', expressMiddleware(gqlserver))
+    app.use('/graphql', expressMiddleware(gqlserver, {
+        context: setContext
+    }))
 
     app.listen(port, () => {
         console.log(`Server is listening on PORT: ${port}`)

@@ -13,7 +13,11 @@ export default {
         AUTHENTICATION_FAILED: 'Authentication failed',
         INCORRECT_OTP: 'Incorrect OTP',
         USER_NOT_FOUND: 'User not found for this userId',
-        INVALID_TOKEN: 'Invalid token'
+        INVALID_TOKEN: 'Invalid token or signature',
+        TOKEN_EXPIRED: 'Token has expired',
+        SESSION_NOT_FOUND: 'Session not found for this sessionId',
+        SESSION_EXPIRED: 'Session expired! please log-in again',
+        NO_SESSION: 'User has no active session on this device'
     },
     COLLECTIONS: {
         USER: 'User',

@@ -1,16 +1,23 @@
-import jwt, { JwtPayload } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import { GraphQLError } from 'graphql'
 import constants from '../constants'
 
 interface tokenType {
     payload: {
-        sub: string,
+        sub: string
         role: roleType
-    },
-    secret: string,
+        device: string
+    }
+    secret: string
     options: {
         expiresIn: string
     }
+}
+
+interface payload {
+    sub: string
+    role: roleType
+    device: string
 }
 
 enum roleType {
@@ -23,34 +30,7 @@ const generateToken = ({ payload, secret, options }: tokenType): string => {
     return jwt.sign(payload, secret, options)
 }
 
-const verifyToken = (token: string, secret: string): any => {
-    return new Promise((resolve, reject) => {
-        jwt.verify(token, secret, (err, decoded) => {
-            if (err) {
-                if (err.name === 'JsonWebTokenError') {
-                    throw new GraphQLError(constants.MESSAGES.AUTHENTICATION_FAILED, {
-                        extensions: {
-                            code: 'UNAUTHENTICATED'
-                        }
-                    })
-                }
-                throw new GraphQLError(err.message, {
-                    extensions: {
-                        code: 'UNAUTHENTICATED'
-                    }
-                })
-            } else {
-                resolve(decoded)
-            }
-        })
-    })
-}
-
-const generateAuthTokens = async (userId: string, role: roleType = roleType.USER): Promise<authTokens> => {
-    const payload = {
-        sub: userId,
-        role
-    }
+const generateAuthTokens = async (payload: payload): Promise<authTokens> => {
     const accessToken = generateToken({
         payload,
         secret: process.env.ACCESS_TOKEN_SECRET || '',
@@ -71,6 +51,36 @@ const generateAuthTokens = async (userId: string, role: roleType = roleType.USER
 interface authTokens {
     accessToken: string,
     refreshToken: string
+}
+
+const verifyToken = (token: string, secret: string): any => {
+    return new Promise((resolve, reject) => {
+        jwt.verify(token, secret, (error: any, decoded: any) => {
+            if (error) {
+                if (error instanceof jwt.JsonWebTokenError) {
+                    throw new GraphQLError(constants.MESSAGES.INVALID_TOKEN, {
+                        extensions: {
+                            code: 'UNAUTHENTICATED'
+                        }
+                    })
+                }
+                if (error instanceof jwt.TokenExpiredError) {
+                    throw new GraphQLError(constants.MESSAGES.TOKEN_EXPIRED, {
+                        extensions: {
+                            code: 'UNAUTHENTICATED'
+                        }
+                    })
+                }
+                throw new GraphQLError(error.message, {
+                    extensions: {
+                        code: 'UNAUTHENTICATED'
+                    }
+                })
+            } else {
+                resolve(decoded)
+            }
+        })
+    })
 }
 
 export default {

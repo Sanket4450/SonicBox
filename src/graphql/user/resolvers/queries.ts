@@ -6,35 +6,13 @@ import constants from '../../../constants'
 import authService from '../../../services/auth'
 
 const queries = {
-    loginUser: async (_: any, { input }: userData, __: any, info: GraphQLResolveInfo): Promise<userIdAndTokens> => {
+    requestReset: async (_: any, { input }: emailAndDevice, __: any, info: GraphQLResolveInfo): Promise<resetToken> => {
         try {
-            validateSchema(input, authValidation.loginUser)
-
-            validateSelection(info.fieldNodes[0].selectionSet, fields.loginUser)
-
-            const user = await authService.loginUser(input)
-
-            return {
-                _id: user._id,
-                accessToken: user.accessToken,
-                refreshToken: user.refreshToken
-            }
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
-        }
-    },
-
-    requestReset: async (_: any, { email }: email, __: any, info: GraphQLResolveInfo): Promise<resetToken> => {
-        try {
-            validateSchema({ email }, authValidation.requestReset)
+            validateSchema(input, authValidation.requestReset)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.requestReset)
 
-            const resetToken = await authService.requestReset(email)
+            const resetToken = await authService.requestReset(input)
 
             return { resetToken }
         } catch (error: any) {
@@ -83,23 +61,11 @@ const queries = {
     },
 }
 
-interface userData {
+interface emailAndDevice {
     input: {
-        username?: string,
-        email?: string,
-        password: string,
+        email: string,
         deviceToken: string
     }
-}
-
-interface userIdAndTokens {
-    _id: string,
-    accessToken: string,
-    refreshToken: string
-}
-
-type email = {
-    email: string
 }
 
 type resetToken = {
