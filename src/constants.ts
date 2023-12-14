@@ -13,6 +13,7 @@ export default {
         AUTHENTICATION_FAILED: 'Authentication failed',
         INCORRECT_OTP: 'Incorrect OTP',
         USER_NOT_FOUND: 'User not found for this userId',
+        TOKEN_IS_REQUIRED: 'Token is required',
         INVALID_TOKEN: 'Invalid token or signature',
         TOKEN_EXPIRED: 'Token has expired',
         SESSION_NOT_FOUND: 'Session not found for this sessionId',

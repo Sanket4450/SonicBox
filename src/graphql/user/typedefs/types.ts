@@ -67,4 +67,9 @@ export default `#graphql
         accessToken: String!
         refreshToken: String!
     }
+
+    input resetPasswordInput {
+        oldPassword: String!
+        newPassword: String!
+    }
 `

@@ -211,7 +211,7 @@ const updateUserById = async (userId: string, userData: Partial<userData>): Prom
         }
 
         if (userData.username || userData.email) {
-            if (await authService.checkUserAlreadyExist(userData.username || '', userData.email || '')) {
+            if (await authService.checkUserAlreadyExist(userData.username as string, userData.email as string)) {
                 throw new GraphQLError(constants.MESSAGES.USER_ALREADY_EXISTS, {
                     extensions: {
                         code: 'FORBIDDEN'
@@ -220,8 +220,8 @@ const updateUserById = async (userId: string, userData: Partial<userData>): Prom
             }
         }
 
-        userData.role = userData.role === 'admin' ? authService.validateUserRole(roleType.ADMIN, userData.secret || '')
-            : userData.role === 'artist' ? authService.validateUserRole(roleType.ARTIST, userData.secret || '')
+        userData.role = userData.role === 'admin' ? authService.validateUserRole(roleType.ADMIN, userData.secret as string)
+            : userData.role === 'artist' ? authService.validateUserRole(roleType.ARTIST, userData.secret as string)
             : roleType.USER
 
         const data = {
@@ -317,6 +317,27 @@ const getSessionById = async (_id: string): Promise<{ _id: string }> => {
     }
 }
 
+const getSessionByUserIdAndDevice = async (userId: string, device: string): Promise<{ _id: string }> => {
+    try {
+        const query = {
+            userId,
+            device
+        }
+
+        const data = {
+            _id: 1
+        }
+
+        return DbRepo.findOne(constants.COLLECTIONS.SESSION, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 const updateSessionById = async (_id: string, token: string): Promise<void> => {
     try {
         const query = {
@@ -368,6 +389,7 @@ export default {
     deleteAllSessions,
     validateSession,
     getSessionById,
+    getSessionByUserIdAndDevice,
     updateSessionById,
     deleteSessionById
 }

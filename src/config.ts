@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const DB_URI = process.env.DB_URI || ''
+const DB_URI = process.env.DB_URI as string
 
 export default function connectDB(): void {
     console.log(`Inside connectDB => ${DB_URI}`)

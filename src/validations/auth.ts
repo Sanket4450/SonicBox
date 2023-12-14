@@ -50,12 +50,13 @@ const resetForgotPassword = Joi.object({
     resetToken: stringReqValidation
 })
 
-const refreshAuthTokens = Joi.object({
-    token: stringReqValidation
+const resetPassword = Joi.object({
+    oldPassword: passwordValidation,
+    newPassword: passwordValidation
 })
 
-const logoutUser = Joi.object({
-    sessionId: stringReqValidation
+const refreshAuthTokens = Joi.object({
+    token: stringReqValidation
 })
 
 export default {
@@ -64,6 +65,6 @@ export default {
     requestReset,
     verifyResetOtp,
     resetForgotPassword,
-    refreshAuthTokens,
-    logoutUser
+    resetPassword,
+    refreshAuthTokens
 }

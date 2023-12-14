@@ -5,7 +5,7 @@ import fields from '../fields/queries'
 import constants from '../../../constants'
 import authService from '../../../services/auth'
 
-const queries = {
+export default {
     requestReset: async (_: any, { input }: emailAndDevice, __: any, info: GraphQLResolveInfo): Promise<resetToken> => {
         try {
             validateSchema(input, authValidation.requestReset)
@@ -87,5 +87,3 @@ interface authTokens {
     accessToken: string,
     refreshToken: string
 }
-
-export default queries

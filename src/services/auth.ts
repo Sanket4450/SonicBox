@@ -31,8 +31,8 @@ const registerUser = async (userData: userData): Promise<userIdAndTokens> => {
         })
     }
 
-    userData.role = userData.role === 'admin' ? validateUserRole(roleType.ADMIN, userData.secret || '')
-        : userData.role === 'artist' ? validateUserRole(roleType.ARTIST, userData.secret || '')
+    userData.role = userData.role === 'admin' ? validateUserRole(roleType.ADMIN, userData.secret as string)
+        : userData.role === 'artist' ? validateUserRole(roleType.ARTIST, userData.secret as string)
         : roleType.USER
 
     userData.password = await bcrypt.hash(userData.password, 10)
@@ -105,7 +105,7 @@ const loginUser = async (loginData: loginData): Promise<userIdAndTokens> => {
         })
     }
 
-    if (!await checkUserAlreadyExist(loginData.username || '', loginData.email || '')) {
+    if (!await checkUserAlreadyExist(loginData.username as string, loginData.email as string)) {
         throw new GraphQLError(constants.MESSAGES.USER_NOT_EXIST, {
             extensions: {
                 code: 'FORBIDDEN'
@@ -122,8 +122,8 @@ const loginUser = async (loginData: loginData): Promise<userIdAndTokens> => {
     }
 
     const user = loginData.username
-        ? await userService.getUserByUsername(loginData.username || '')
-        : await userService.getUserByEmail(loginData.email || '')
+        ? await userService.getUserByUsername(loginData.username as string)
+        : await userService.getUserByEmail(loginData.email as string)
 
     if (!await bcrypt.compare(loginData.password, user.password)) {
         throw new GraphQLError(constants.MESSAGES.INCORRECT_PASSWORD, {
@@ -176,8 +176,8 @@ const requestReset = async ({ email, deviceToken }: requestResetData): Promise<s
             role,
             device: deviceToken
         },
-        secret: process.env.RESET_TOKEN_SECRET || '',
-        options: { expiresIn: process.env.RESET_TOKEN_EXPIRY || '' }
+        secret: process.env.RESET_TOKEN_SECRET as string,
+        options: { expiresIn: process.env.RESET_TOKEN_EXPIRY as string }
     })
 }
 
@@ -187,7 +187,7 @@ interface requestResetData {
 }
 
 const verifyResetOtp = async ({ otp, resetToken }: otpAndToken): Promise<void> => {
-    const { sub } = await tokenService.verifyToken(resetToken, process.env.RESET_TOKEN_SECRET || '')
+    const { sub } = await tokenService.verifyToken(resetToken, process.env.RESET_TOKEN_SECRET as string)
 
     if (!await userService.getUserById(sub)) {
         throw new GraphQLError(constants.MESSAGES.AUTHENTICATION_FAILED, {
@@ -211,8 +211,8 @@ interface otpAndToken {
     resetToken: string
 }
 
-const resetForgotPassword = async ({ password, resetToken }: passwordAndToken): Promise<void> => {
-    const { sub } = await tokenService.verifyToken(resetToken, process.env.RESET_TOKEN_SECRET || '')
+const resetForgotPassword = async ({ password, resetToken }: passwordAndResetToken): Promise<void> => {
+    const { sub } = await tokenService.verifyToken(resetToken, process.env.RESET_TOKEN_SECRET as string)
 
     if (!await userService.getUserById(sub)) {
         throw new GraphQLError(constants.MESSAGES.AUTHENTICATION_FAILED, {
@@ -229,13 +229,46 @@ const resetForgotPassword = async ({ password, resetToken }: passwordAndToken): 
     await userService.deleteAllSessions(sub)
 }
 
-interface passwordAndToken {
+interface passwordAndResetToken {
     password: string,
     resetToken: string
 }
 
+const resetPassword = async (token: string, { oldPassword, newPassword }: oldNewPassword): Promise<void> => {
+    const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+
+    const user = await userService.getFullUser({ _id: sub }, { password: 1 })
+
+    if (!user) {
+        throw new GraphQLError(constants.MESSAGES.AUTHENTICATION_FAILED, {
+            extensions: {
+                code: 'UNAUTHENTICATED'
+            }
+        })
+    }
+
+    if (!await bcrypt.compare(oldPassword, user.password as string)) {
+        throw new GraphQLError(constants.MESSAGES.INCORRECT_PASSWORD, {
+            extensions: {
+                code: 'FORBIDDEN'
+            }
+        })
+    }
+
+    const password: string = await bcrypt.hash(newPassword, 10)
+
+    await userService.updateUserById(sub, { password })
+
+    await userService.deleteAllSessions(sub)
+}
+
+interface oldNewPassword {
+    oldPassword: string,
+    newPassword: string
+}
+
 const refreshAuthTokens = async (token: string): Promise<authTokens> => {
-    const { sub, role, device } = await tokenService.verifyToken(token, process.env.REFRESH_TOKEN_SECRET || '')
+    const { sub, role, device } = await tokenService.verifyToken(token, process.env.REFRESH_TOKEN_SECRET as string)
 
     if (!await userService.getUserById(sub)) {
         throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
@@ -259,16 +292,19 @@ interface authTokens {
     refreshToken: string
 }
 
-const logoutUser = async (sessionId: string): Promise<void> => {
-    if (!await userService.getSessionById(sessionId)) {
-        throw new GraphQLError(constants.MESSAGES.SESSION_NOT_FOUND, {
+const logoutUser = async (token: string): Promise<void> => {
+    const { sub, device } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+    const session = await userService.getSessionByUserIdAndDevice(sub, device)
+
+    if (!session) {
+        throw new GraphQLError(constants.MESSAGES.NO_SESSION, {
             extensions: {
-                code: 'NOT_FOUND'
+                code: 'CONFLICT'
             }
         })
     }
 
-    await userService.deleteSessionById(sessionId)
+    await userService.deleteSessionById(session._id)
 }
 
 export default {
@@ -279,6 +315,7 @@ export default {
     requestReset,
     verifyResetOtp,
     resetForgotPassword,
+    resetPassword,
     refreshAuthTokens,
     logoutUser
 }

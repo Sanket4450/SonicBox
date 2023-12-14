@@ -4,9 +4,8 @@ import authValidation from '../../../validations/auth'
 import fields from '../fields/mutations'
 import constants from '../../../constants'
 import authService from '../../../services/auth'
-import tokenService from '../../../services/token'
 
-const mutations = {
+export default {
     createUser: async (_: any, { input }: userData, __: any, info: GraphQLResolveInfo): Promise<userIdAndTokens> => {
         try {
             validateSchema(input, authValidation.createUser)
@@ -61,15 +60,29 @@ const mutations = {
         }
     },
 
-    logoutUser: async (_: any, { sessionId }: session, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+    resetPassword: async (_: any, { input }: resetPasswordInput, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
         try {
-            validateSchema({ sessionId }, authValidation.logoutUser)
+            validateSchema(input, authValidation.resetPassword)
 
+            validateSelection(info.fieldNodes[0].selectionSet, fields.resetPassword)
+
+            await authService.resetPassword(token, input)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    logoutUser: async (_: any, __: any, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
             validateSelection(info.fieldNodes[0].selectionSet, fields.logoutUser)
 
-            await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET || '')
-
-            await authService.logoutUser(sessionId)
+            await authService.logoutUser(token)
 
             return { success: true }
         } catch (error: any) {
@@ -134,8 +147,9 @@ interface passwordAndToken {
     }
 }
 
-type session = {
-    sessionId: string
+interface resetPasswordInput {
+    input: {
+        oldPassword: string
+        newPassword: string
+    }
 }
-
-export default mutations
