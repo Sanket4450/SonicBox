@@ -1,15 +1,15 @@
 import { Schema, InferSchemaType, model } from 'mongoose'
 
 const sessionSchema = new Schema({
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     device: {
         type: String,
         trim: true,
         unique: true,
-        required: true
-    },
-    userId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
         required: true
     },
     token: {

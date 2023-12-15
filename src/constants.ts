@@ -19,7 +19,12 @@ export default {
         SESSION_NOT_FOUND: 'Session not found for this sessionId',
         SESSION_EXPIRED: 'Session expired! please log-in again',
         NO_SESSION: 'User has no active session on this device',
-        FOLLOWING_USER_NOT_EXIST: 'Following user does not exist with this userId'
+        FOLLOWING_USER_NOT_EXIST: 'Following user does not exist with this userId',
+        CANNOT_POST_ALBUM: 'Your are not authorized to post an album',
+        ALBUM_ALREADY_EXISTS: 'Album already exists with this album-name',
+        CANNOT_POST_SONG: 'Your are not authorized to post a song',
+        ALBUM_NOT_EXIST: 'Album does not exist with this artistId',
+        SONG_ALREADY_EXISTS: 'Song already exists in this album'
     },
     COLLECTIONS: {
         USER: 'User',

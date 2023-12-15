@@ -162,7 +162,7 @@ interface sessionData {
     token: string
 }
 
-const getSessionByUserIdAndDevice = async (userId: string, device: string): Promise<{ _id: string }> => {
+const getSessionByuserIdAndDevice = async (userId: string, device: string): Promise<{ _id: string }> => {
     try {
         const query = {
             userId,
@@ -418,7 +418,7 @@ export default {
     getFullUser,
     createUser,
     createSession,
-    getSessionByUserIdAndDevice,
+    getSessionByuserIdAndDevice,
     addUserSession,
     updateUserById,
     deleteAllSessions,

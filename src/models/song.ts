@@ -1,20 +1,25 @@
 import { Schema, InferSchemaType, model } from 'mongoose'
 
 const songSchema = new Schema({
-    name: {
-        type: String,
-        required: true
-    },
     artistId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
+        required: true
+    },
+    albumId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Album',
+        required: true
+    },
+    name: {
+        type: String,
         required: true
     },
     image: {
         type: String,
         trim: true
     },
-    url: {
+    fileURL: {
         type: String,
         trim: true,
         required: true

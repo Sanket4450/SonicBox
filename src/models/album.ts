@@ -1,13 +1,13 @@
 import { Schema, InferSchemaType, model } from 'mongoose'
 
 const albumSchema = new Schema({
-    name: {
-        type: String,
-        required: true
-    },
     artistId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
+        required: true
+    },
+    name: {
+        type: String,
         required: true
     },
     image: {
@@ -17,11 +17,7 @@ const albumSchema = new Schema({
     listens: {
         type: Number,
         default: 0
-    },
-    songs: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Song'
-    }]
+    }
 },
     {
         timestamps: true,

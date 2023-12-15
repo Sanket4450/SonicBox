@@ -1,13 +1,13 @@
 import { Schema, InferSchemaType, model } from 'mongoose'
 
 const playlistSchema = new Schema({
-    name: {
-        type: String,
-        required: true
-    },
     userId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
+        required: true
+    },
+    name: {
+        type: String,
         required: true
     },
     image: {

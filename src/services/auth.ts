@@ -117,7 +117,7 @@ const loginUser = async (loginData: loginData): Promise<userIdAndTokens> => {
         ? await userService.getUserByUsername(loginData.username as string)
         : await userService.getUserByEmail(loginData.email as string)
 
-    if (await userService.getSessionByUserIdAndDevice(user._id, loginData.deviceToken)) {
+    if (await userService.getSessionByuserIdAndDevice(user._id, loginData.deviceToken)) {
         throw new GraphQLError(constants.MESSAGES.ALREADY_LOGGED_IN, {
             extensions: {
                 code: 'FORBIDDEN'
@@ -294,7 +294,7 @@ interface authTokens {
 
 const logoutUser = async (token: string): Promise<void> => {
     const { sub, device } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
-    const session = await userService.getSessionByUserIdAndDevice(sub, device)
+    const session = await userService.getSessionByuserIdAndDevice(sub, device)
 
     if (!session) {
         throw new GraphQLError(constants.MESSAGES.NO_SESSION, {
