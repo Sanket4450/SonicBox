@@ -1,9 +1,11 @@
 import { GraphQLResolveInfo, GraphQLError } from 'graphql'
 import { validateSchema, validateSelection } from '../../../utils/validate'
 import authValidation from '../../../validations/auth'
+import userValidation from '../../../validations/user'
 import fields from '../fields/mutations'
 import constants from '../../../constants'
 import authService from '../../../services/auth'
+import userService from '../../../services/user'
 
 export default {
     createUser: async (_: any, { input }: userData, __: any, info: GraphQLResolveInfo): Promise<userIdAndTokens> => {
@@ -92,32 +94,50 @@ export default {
                 }
             })
         }
+    },
+
+    followUser: async (_: any, { input }: followUser, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema(input, userValidation.followUser)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.followUser)
+
+            await userService.followUser(token, input)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 
 interface userData {
     input: {
-        username: string,
-        name?: string,
-        email: string,
-        password: string,
-        gender?: genderType,
-        dateOfBirth?: string,
-        role?: roleType,
-        secret?: string,
-        state?: string,
-        country?: string,
-        profile_picture?: string,
-        description?: string,
+        username: string
+        name?: string
+        email: string
+        password: string
+        gender?: genderType
+        dateOfBirth?: string
+        role?: roleType
+        secret?: string
+        state?: string
+        country?: string
+        profile_picture?: string
+        description?: string
         deviceToken: string
     }
 }
 
 interface loginData {
     input: {
-        username?: string,
-        email?: string,
-        password: string,
+        username?: string
+        email?: string
+        password: string
         deviceToken: string
     }
 }
@@ -135,14 +155,14 @@ enum roleType {
 }
 
 interface userIdAndTokens {
-    userId: string,
-    accessToken: string,
+    userId: string
+    accessToken: string
     refreshToken: string
 }
 
 interface passwordAndToken {
     input: {
-        password: string,
+        password: string
         resetToken: string
     }
 }
@@ -151,5 +171,11 @@ interface resetPasswordInput {
     input: {
         oldPassword: string
         newPassword: string
+    }
+}
+
+interface followUser {
+    input: {
+        userId: string
     }
 }

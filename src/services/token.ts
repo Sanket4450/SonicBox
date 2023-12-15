@@ -49,7 +49,7 @@ const generateAuthTokens = async (payload: payload): Promise<authTokens> => {
 }
 
 interface authTokens {
-    accessToken: string,
+    accessToken: string
     refreshToken: string
 }
 

@@ -63,18 +63,18 @@ export default {
 
 interface emailAndDevice {
     input: {
-        email: string,
+        email: string
         deviceToken: string
     }
 }
 
 type resetToken = {
-    resetToken: string,
+    resetToken: string
 }
 
 interface otpAndToken {
     input: {
-        otp: number,
+        otp: number
         resetToken: string
     }
 }
@@ -84,6 +84,6 @@ type token = {
 }
 
 interface authTokens {
-    accessToken: string,
+    accessToken: string
     refreshToken: string
 }

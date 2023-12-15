@@ -1,7 +1,9 @@
 import { GraphQLError } from 'graphql'
+import mongoose from 'mongoose'
 import DbRepo from '../dbRepo'
 import constants from '../constants'
 import authService from './auth'
+import tokenService from './token'
 
 const getUserById = async (_id: string): Promise<{ _id: string } | null> => {
     const query = {
@@ -56,24 +58,24 @@ const getFullUser = async (userQuery: Partial<idUsernameEmail>, userData: Partia
 }
 
 interface idUsernameEmail {
-    _id: string,
-    username: string,
+    _id: string
+    username: string
     email: string
 }
 
 interface selectUserData {
-    _id: number,
-    username: number,
-    name: number,
-    email: number,
-    password: number,
-    gender: number,
-    dateOfBirth: number,
-    role: number,
-    secret: number,
-    state: number,
-    country: boolean,
-    profile_picture: number,
+    _id: number
+    username: number
+    name: number
+    email: number
+    password: number
+    gender: number
+    dateOfBirth: number
+    role: number
+    secret: number
+    state: number
+    country: boolean
+    profile_picture: number
     description: number
     isVerified: number
 }
@@ -95,34 +97,34 @@ const createUser = async (userData: userData): Promise<getUserData> => {
 }
 
 interface userData {
-    username: string,
-    name?: string,
-    email: string,
-    password: string,
-    gender?: genderType,
-    dateOfBirth?: string,
-    role?: roleType,
-    secret?: string,
-    state?: string,
-    country?: string,
-    profile_picture?: string,
+    username: string
+    name?: string
+    email: string
+    password: string
+    gender?: genderType
+    dateOfBirth?: string
+    role?: roleType
+    secret?: string
+    state?: string
+    country?: string
+    profile_picture?: string
     description?: string
 }
 
 interface getUserData {
-    _id: string,
-    username: string,
-    name?: string,
-    email: string,
-    password: string,
-    gender?: genderType,
-    dateOfBirth?: string,
-    role?: roleType,
-    secret?: string,
-    state?: string,
-    country?: string,
-    profile_picture?: string,
-    description?: string,
+    _id: string
+    username: string
+    name?: string
+    email: string
+    password: string
+    gender?: genderType
+    dateOfBirth?: string
+    role?: roleType
+    secret?: string
+    state?: string
+    country?: string
+    profile_picture?: string
+    description?: string
     isVerified?: boolean
 }
 
@@ -155,9 +157,30 @@ const createSession = async (sessionData: sessionData): Promise<any> => {
 }
 
 interface sessionData {
-    userId: string,
-    device: string,
+    userId: string
+    device: string
     token: string
+}
+
+const getSessionByUserIdAndDevice = async (userId: string, device: string): Promise<{ _id: string }> => {
+    try {
+        const query = {
+            userId,
+            device
+        }
+
+        const data = {
+            _id: 1
+        }
+
+        return DbRepo.findOne(constants.COLLECTIONS.SESSION, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 const addUserSession = async (userId: string, sessionDate: Date): Promise<void> => {
@@ -176,25 +199,6 @@ const addUserSession = async (userId: string, sessionDate: Date): Promise<void> 
         }
 
         await DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
-    } catch (error: any) {
-        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-            extensions: {
-                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-            }
-        })
-    }
-}
-
-const getSessionByDevice = async (deviceToken: string): Promise<object | null> => {
-    try {
-        const query = {
-            device: deviceToken
-        }
-        const data = {
-            _id: 1
-        }
-
-        return DbRepo.findOne(constants.COLLECTIONS.SESSION, { query, data })
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -317,27 +321,6 @@ const getSessionById = async (_id: string): Promise<{ _id: string }> => {
     }
 }
 
-const getSessionByUserIdAndDevice = async (userId: string, device: string): Promise<{ _id: string }> => {
-    try {
-        const query = {
-            userId,
-            device
-        }
-
-        const data = {
-            _id: 1
-        }
-
-        return DbRepo.findOne(constants.COLLECTIONS.SESSION, { query, data })
-    } catch (error: any) {
-        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-            extensions: {
-                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-            }
-        })
-    }
-}
-
 const updateSessionById = async (_id: string, token: string): Promise<void> => {
     try {
         const query = {
@@ -376,6 +359,58 @@ const deleteSessionById = async (_id: string): Promise<void> => {
     }
 }
 
+const followUserById = async (followerId: string, followingId: string): Promise<void> => {
+    try {
+        const query = {
+            $and: [
+                { _id: followerId },
+                { _id: { $ne: followingId } },
+                { follows: { $ne: new mongoose.Types.ObjectId(followingId) } }
+            ]
+        }
+
+        const data = {
+            $push: {
+                follows: new mongoose.Types.ObjectId(followingId)
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const followUser = async (token: string, { userId }: followUserInput): Promise<void> => {
+    const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+
+    if (!await getUserById(sub)) {
+        throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+            extensions: {
+                code: 'NOT_FOUND'
+            }
+        })
+    }
+
+    if (!await getUserById(userId)) {
+        throw new GraphQLError(constants.MESSAGES.FOLLOWING_USER_NOT_EXIST, {
+            extensions: {
+                code: 'NOT_FOUND'
+            }
+        })
+    }
+
+    await followUserById(sub, userId)
+}
+
+interface followUserInput {
+    userId: string
+}
+
 export default {
     getUserById,
     getUserByUsername,
@@ -383,13 +418,13 @@ export default {
     getFullUser,
     createUser,
     createSession,
+    getSessionByUserIdAndDevice,
     addUserSession,
-    getSessionByDevice,
     updateUserById,
     deleteAllSessions,
     validateSession,
     getSessionById,
-    getSessionByUserIdAndDevice,
     updateSessionById,
-    deleteSessionById
+    deleteSessionById,
+    followUser
 }

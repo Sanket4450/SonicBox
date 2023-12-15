@@ -72,4 +72,8 @@ export default `#graphql
         oldPassword: String!
         newPassword: String!
     }
+
+    input followUserInput {
+        userId: ID!
+    }
 `

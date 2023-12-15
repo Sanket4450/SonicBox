@@ -55,18 +55,18 @@ const registerUser = async (userData: userData): Promise<userIdAndTokens> => {
 }
 
 interface userData {
-    username: string,
-    name?: string,
-    email: string,
-    password: string,
-    gender?: genderType,
-    dateOfBirth?: string,
-    role?: roleType,
-    secret?: string,
-    state?: string,
-    country?: string,
-    profile_picture?: string,
-    description?: string,
+    username: string
+    name?: string
+    email: string
+    password: string
+    gender?: genderType
+    dateOfBirth?: string
+    role?: roleType
+    secret?: string
+    state?: string
+    country?: string
+    profile_picture?: string
+    description?: string
     deviceToken: string
 }
 
@@ -113,17 +113,17 @@ const loginUser = async (loginData: loginData): Promise<userIdAndTokens> => {
         })
     }
 
-    if (await userService.getSessionByDevice(loginData.deviceToken)) {
+    const user = loginData.username
+        ? await userService.getUserByUsername(loginData.username as string)
+        : await userService.getUserByEmail(loginData.email as string)
+
+    if (await userService.getSessionByUserIdAndDevice(user._id, loginData.deviceToken)) {
         throw new GraphQLError(constants.MESSAGES.ALREADY_LOGGED_IN, {
             extensions: {
                 code: 'FORBIDDEN'
             }
         })
     }
-
-    const user = loginData.username
-        ? await userService.getUserByUsername(loginData.username as string)
-        : await userService.getUserByEmail(loginData.email as string)
 
     if (!await bcrypt.compare(loginData.password, user.password)) {
         throw new GraphQLError(constants.MESSAGES.INCORRECT_PASSWORD, {
@@ -151,9 +151,9 @@ const loginUser = async (loginData: loginData): Promise<userIdAndTokens> => {
 }
 
 interface loginData {
-    username?: string,
-    email?: string,
-    password: string,
+    username?: string
+    email?: string
+    password: string
     deviceToken: string
 }
 
@@ -182,7 +182,7 @@ const requestReset = async ({ email, deviceToken }: requestResetData): Promise<s
 }
 
 interface requestResetData {
-    email: string,
+    email: string
     deviceToken: string
 }
 
@@ -207,7 +207,7 @@ const verifyResetOtp = async ({ otp, resetToken }: otpAndToken): Promise<void> =
 }
 
 interface otpAndToken {
-    otp: number,
+    otp: number
     resetToken: string
 }
 
@@ -230,7 +230,7 @@ const resetForgotPassword = async ({ password, resetToken }: passwordAndResetTok
 }
 
 interface passwordAndResetToken {
-    password: string,
+    password: string
     resetToken: string
 }
 
@@ -263,7 +263,7 @@ const resetPassword = async (token: string, { oldPassword, newPassword }: oldNew
 }
 
 interface oldNewPassword {
-    oldPassword: string,
+    oldPassword: string
     newPassword: string
 }
 
@@ -288,7 +288,7 @@ const refreshAuthTokens = async (token: string): Promise<authTokens> => {
 }
 
 interface authTokens {
-    accessToken: string,
+    accessToken: string
     refreshToken: string
 }
 

@@ -56,11 +56,7 @@ const userSchema = new Schema({
         type: [Date],
         default: []
     },
-    followers: [{
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-    }],
-    followings: [{
+    follows: [{
         type: Schema.Types.ObjectId,
         ref: 'User'
     }]

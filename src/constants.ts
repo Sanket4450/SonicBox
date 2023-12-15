@@ -18,7 +18,8 @@ export default {
         TOKEN_EXPIRED: 'Token has expired',
         SESSION_NOT_FOUND: 'Session not found for this sessionId',
         SESSION_EXPIRED: 'Session expired! please log-in again',
-        NO_SESSION: 'User has no active session on this device'
+        NO_SESSION: 'User has no active session on this device',
+        FOLLOWING_USER_NOT_EXIST: 'Following user does not exist with this userId'
     },
     COLLECTIONS: {
         USER: 'User',
