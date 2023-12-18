@@ -93,6 +93,22 @@ interface selectUserData {
     isVerified: number
 }
 
+const createLibrary = async (userId: string): Promise<void> => {
+    try {
+        const data = {
+            userId
+        }
+
+        return DbRepo.create(constants.COLLECTIONS.LIBRARY, { data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 const createUser = async (userData: userData): Promise<getUserData> => {
     try {
         const data = {
@@ -221,10 +237,10 @@ const addUserSession = async (userId: string, sessionDate: Date): Promise<void> 
     }
 }
 
-const updateUserById = async (userId: string, userData: Partial<userData>): Promise<void> => {
+const updateUserById = async (_id: string, userData: Partial<userData>): Promise<void> => {
     try {
         const query = {
-            _id: userId
+            _id
         }
 
         if (userData.username || userData.email) {
@@ -237,8 +253,8 @@ const updateUserById = async (userId: string, userData: Partial<userData>): Prom
             }
         }
 
-        userData.role = userData.role === 'admin' ? authService.validateUserRole(roleType.ADMIN, userData.secret as string)
-            : userData.role === 'artist' ? authService.validateUserRole(roleType.ARTIST, userData.secret as string)
+        userData.role = userData.role && userData.role === 'admin' ? authService.validateUserRole(roleType.ADMIN, userData.secret as string)
+            : userData.role && userData.role === 'artist' ? authService.validateUserRole(roleType.ARTIST, userData.secret as string)
             : roleType.USER
 
         const data = {
@@ -248,6 +264,28 @@ const updateUserById = async (userId: string, userData: Partial<userData>): Prom
         }
 
         await DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const updateUser = async (token: string, userData: Partial<userData>): Promise<any> => {
+    try {
+        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+
+        if (!await getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        await updateUserById(sub, userData)
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -430,11 +468,13 @@ export default {
     getUserByEmail,
     getArtistById,
     getFullUser,
+    createLibrary,
     createUser,
     createSession,
     getSessionByuserIdAndDevice,
     addUserSession,
     updateUserById,
+    updateUser,
     deleteAllSessions,
     validateSession,
     getSessionById,

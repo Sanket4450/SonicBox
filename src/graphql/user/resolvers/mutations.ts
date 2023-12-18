@@ -112,6 +112,24 @@ export default {
                 }
             })
         }
+    },
+
+    updateUser: async (_: any, { input }: updateUserInput, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema(input, userValidation.updateUser)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.updateUser)
+
+            await userService.updateUser(token, input)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 
@@ -177,5 +195,21 @@ interface resetPasswordInput {
 interface followUser {
     input: {
         userId: string
+    }
+}
+
+interface updateUserInput {
+    input: {
+        username?: string
+        name?: string
+        email?: string
+        gender?: genderType
+        dateOfBirth?: string
+        role?: roleType
+        secret?: string
+        state?: string
+        country?: string
+        profile_picture?: string
+        description?: string
     }
 }

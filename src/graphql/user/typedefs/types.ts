@@ -76,4 +76,18 @@ export default `#graphql
     input followUserInput {
         userId: ID!
     }
+
+    input updateUserInput {
+        username: String
+        name: String
+        email: String
+        gender: GenderType
+        dateOfBirth: String
+        role: RoleType
+        secret: String
+        state: String
+        country: String
+        profile_picture: String
+        description: String
+    }
 `

@@ -4,6 +4,7 @@ const resetForgotPassword: string[] = ['success']
 const resetPassword: string[] = ['success']
 const logoutUser: string[] = ['success']
 const followUser: string[] = ['success']
+const updateUser: string[] = ['success']
 
 export default {
     createUser,
@@ -11,5 +12,6 @@ export default {
     resetForgotPassword,
     resetPassword,
     logoutUser,
-    followUser
+    followUser,
+    updateUser
 }

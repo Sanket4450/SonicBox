@@ -6,5 +6,6 @@ export default `#graphql
         resetPassword(input: resetPasswordInput!): SuccessResponse!
         logoutUser: SuccessResponse!
         followUser(input: followUserInput!): SuccessResponse!
+        updateUser(input: updateUserInput!): SuccessResponse!
     }
 `

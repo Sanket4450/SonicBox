@@ -39,6 +39,8 @@ const registerUser = async (userData: userData): Promise<userIdAndTokens> => {
 
     const user = await userService.createUser(userData)
 
+    await userService.createLibrary(user._id)
+
     const payload = {
         sub: user._id,
         role: userData.role,

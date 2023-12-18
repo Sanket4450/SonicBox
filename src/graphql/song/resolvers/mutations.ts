@@ -18,9 +18,9 @@ export default {
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createAlbum)
 
-            const { _id, name, artistId, image } = await albumService.createAlbum(token, input)
+            const album = await albumService.createAlbum(token, input)
 
-            return { albumId: _id, name, artistId, image }
+            return { albumId: album._id, ...album }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -36,9 +36,9 @@ export default {
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createSong)
 
-            const { _id, name, fileURL, albumId, artists } = await songService.createSong(token, input)
+            const song = await songService.createSong(token, input)
 
-            return { songId: _id, name, fileURL, albumId, artists }
+            return { songId: song._id, ...song }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -54,9 +54,9 @@ export default {
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createPlaylist)
 
-            const { _id, name, userId, image, description, isPrivate } = await playlistService.createPlaylist(token, input)
+            const playlist = await playlistService.createPlaylist(token, input)
 
-            return { playlistId: _id, name, userId, image, description, isPrivate }
+            return { playlistId: playlist._id, ...playlist }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -72,9 +72,9 @@ export default {
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createCategory)
 
-            const { _id, name, image, description, parent_categoryId, playlists } = await categoryService.createCategory(token, input)
+            const category = await categoryService.createCategory(token, input)
 
-            return { categoryId: _id, name, image, description, parent_categoryId, playlists }
+            return { categoryId: category._id, ...category }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
