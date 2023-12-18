@@ -45,6 +45,19 @@ const getUserByEmail = async (email: string): Promise<Pick<getUserData, '_id' | 
     return DbRepo.findOne(constants.COLLECTIONS.USER, { query, data })
 }
 
+const getArtistById = async (_id: string): Promise<{ _id: string } | null> => {
+    const query = {
+        _id,
+        role: 'artist'
+    }
+
+    const data = {
+        _id: 1
+    }
+
+    return DbRepo.findOne(constants.COLLECTIONS.USER, { query, data })
+}
+
 const getFullUser = async (userQuery: Partial<idUsernameEmail>, userData: Partial<selectUserData>): Promise<Partial<getUserData>> => {
     const query = {
         ...userQuery
@@ -415,6 +428,7 @@ export default {
     getUserById,
     getUserByUsername,
     getUserByEmail,
+    getArtistById,
     getFullUser,
     createUser,
     createSession,

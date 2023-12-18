@@ -5,7 +5,7 @@ import constants from '../constants'
 import userService from './user'
 import tokenService from './token'
 
-const getAlbum = async (albumId: string, artistId: string): Promise<{ _id: string } | null> => {
+const getAlbumByIdAndArtist = async (albumId: string, artistId: string): Promise<{ _id: string } | null> => {
     const query = {
         _id: albumId,
         artistId
@@ -18,9 +18,10 @@ const getAlbum = async (albumId: string, artistId: string): Promise<{ _id: strin
     return DbRepo.findOne(constants.COLLECTIONS.ALBUM, { query, data })
 }
 
-const getAlbumByName = async (name: string): Promise<{ _id: string } | null> => {
+const getAlbumByNameAndArtist = async (name: string, artistId: string): Promise<{ _id: string } | null> => {
     const query = {
-        name: { $regex: name, $options: 'i' }
+        name: { $regex: name, $options: 'i' },
+        artistId
     }
 
     const data = {
@@ -50,7 +51,7 @@ const createAlbum = async (token: string, input: albumInput): Promise<albumData>
             })
         }
 
-        if (await getAlbumByName(input.name)) {
+        if (await getAlbumByNameAndArtist(input.name, sub)) {
             throw new GraphQLError(constants.MESSAGES.ALBUM_ALREADY_EXISTS, {
                 extensions: {
                     code: 'CONFLICT'
@@ -58,12 +59,12 @@ const createAlbum = async (token: string, input: albumInput): Promise<albumData>
             })
         }
 
-            // upload image to cloud & get url from there
+        // upload image to cloud & get url from there
 
-            const data = {
-                ...input,
-                artistId: new mongoose.Types.ObjectId(sub)
-            }
+        const data = {
+            ...input,
+            artistId: new mongoose.Types.ObjectId(sub)
+        }
 
         return DbRepo.create(constants.COLLECTIONS.ALBUM, { data })
     } catch (error: any) {
@@ -88,6 +89,6 @@ interface albumData {
 }
 
 export default {
-    getAlbum,
+    getAlbumByIdAndArtist,
     createAlbum
 }

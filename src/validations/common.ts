@@ -10,7 +10,7 @@ export const integerNumberValidation = numberValidation.integer()
 export const integerNumberReqValidation = integerNumberValidation.required()
 export const booleanValidation = Joi.boolean().strict(true)
 export const dateValidation = Joi.date()
-export const arrayValidation = Joi.array()
+export const arrayValidation = Joi.array().required()
 
 export const pageAndLimit = {
     page: integerNumberValidation.min(1),

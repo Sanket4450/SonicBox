@@ -21,7 +21,7 @@ const getSongByAlbumAndURL = async (albumId: string, fileURL: string): Promise<{
 
 const createSong = async (token: string, input: songInput): Promise<songData> => {
     try {
-        const { sub, role } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
         if (!await userService.getUserById(sub)) {
             throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
@@ -31,15 +31,25 @@ const createSong = async (token: string, input: songInput): Promise<songData> =>
             })
         }
 
-        if (role !== 'artist') {
-            throw new GraphQLError(constants.MESSAGES.CANNOT_POST_SONG, {
+        if (!input.artists.includes(sub)) {
+            throw new GraphQLError(constants.MESSAGES.ARTIST_MUST_INCLUDED, {
                 extensions: {
-                    code: 'UNAUTHORIZED'
+                    code: 'CONFLICT'
                 }
             })
         }
 
-        if (!await albumService.getAlbum(input.albumId, sub)) {
+        for (let artistId of input.artists) {
+            if (!await userService.getArtistById(artistId)) {
+                throw new GraphQLError(constants.MESSAGES.ONE_ARTIST_NOT_EXIST, {
+                    extensions: {
+                        code: 'CONFLICT'
+                    }
+                })
+            }
+        }
+
+        if (!await albumService.getAlbumByIdAndArtist(input.albumId, sub)) {
             throw new GraphQLError(constants.MESSAGES.ALBUM_NOT_EXIST, {
                 extensions: {
                     code: 'CONFLICT'
@@ -76,14 +86,15 @@ interface songInput {
     name: string
     fileURL: string
     albumId: string
+    artists: string[]
 }
 
 interface songData {
     _id: string
     name: string
-    artistId: string
     fileURL: string
     albumId: string
+    artists: string[]
 }
 
 export default {

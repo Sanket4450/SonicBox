@@ -14,6 +14,9 @@ const playlistSchema = new Schema({
         type: String,
         trim: true
     },
+    description: {
+        type: String
+    },
     isPrivate: {
         type: Boolean,
         default: false

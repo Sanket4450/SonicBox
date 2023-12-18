@@ -1,11 +1,6 @@
 import { Schema, InferSchemaType, model } from 'mongoose'
 
 const songSchema = new Schema({
-    artistId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
     albumId: {
         type: Schema.Types.ObjectId,
         ref: 'Album',
@@ -24,6 +19,10 @@ const songSchema = new Schema({
         trim: true,
         required: true
     },
+    artists: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     listens: {
         type: Number,
         default: 0
