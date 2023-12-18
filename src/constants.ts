@@ -2,6 +2,7 @@ export default {
     MESSAGES: {
         USER_ALREADY_EXISTS: 'User already exists with this username or email',
         USER_NOT_AUTHORIZED: 'User not authorized for this role',
+        USER_NOT_ALLOWED: 'User not allowed to do this task',
         SOMETHING_WENT_WRONG: 'Something went wrong! please try again',
         SELECT_REQUIRED_FIELDS: 'Select field-set of all the required fields',
         USERNAME_EMAIL_REQUIRED: 'Username or email is required',
@@ -27,6 +28,8 @@ export default {
         ALBUM_NOT_EXIST: 'Album does not exist with this artistId',
         SONG_ALREADY_EXISTS: 'Song already exists in this album',
         PLAYLIST_ALREADY_EXISTS: 'Playlist already exists for this userId with this playlist-name',
+        CATEGORY_NOT_EXIST: 'Category does not exist with this categoryId',
+        ONLY_ADMIN_PLAYLISTS_ALLOWED: 'Only playlists created by admin are allowed'
     },
     COLLECTIONS: {
         USER: 'User',

@@ -16,7 +16,7 @@ const categorySchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Category'
     },
-    songs: [{
+    playlists: [{
         type: Schema.Types.ObjectId,
         ref: 'Song'
     }]

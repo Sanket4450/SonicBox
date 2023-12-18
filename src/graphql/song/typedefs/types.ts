@@ -41,4 +41,21 @@ export default `#graphql
         description: String
         isPrivate: Boolean
     }
+
+    input createCategoryInput {
+        name: String!
+        image: String
+        description: String
+        parent_categoryId: String
+        playlists: [String!]
+    }
+
+    type createCategoryData {
+        categoryId: String!
+        name: String
+        image: String
+        description: String
+        parent_categoryId: String
+        playlists: [String!]
+    }
 `

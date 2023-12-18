@@ -2,14 +2,14 @@ import Joi from 'joi'
 import {
     stringReqValidation,
     idReqValidation,
-    arrayValidation
+    arrayReqValidation
 } from './common'
 
 const createSong = Joi.object({
     name: stringReqValidation,
     fileURL: stringReqValidation,
     albumId: idReqValidation,
-    artists: arrayValidation.items(idReqValidation).min(1)
+    artists: arrayReqValidation.items(idReqValidation).min(1)
 })
 
 export default {

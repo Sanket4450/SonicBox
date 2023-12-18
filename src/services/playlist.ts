@@ -5,6 +5,19 @@ import constants from '../constants'
 import userService from './user'
 import tokenService from './token'
 
+const getPlaylistByIdAndUser = async (_id: string, userId: string): Promise<{ _id: string } | null> => {
+    const query = {
+        _id,
+        userId
+    }
+
+    const data = {
+        _id: 1
+    }
+
+    return DbRepo.findOne(constants.COLLECTIONS.PLAYLIST, { query, data })
+}
+
 const getPlaylistByNameAndUser = async (name: string, userId: string): Promise<{ _id: string } | null> => {
     const query = {
         name: { $regex: name, $options: 'i' },
@@ -75,5 +88,6 @@ interface playlistData {
 }
 
 export default {
+    getPlaylistByIdAndUser,
     createPlaylist
 }

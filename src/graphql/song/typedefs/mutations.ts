@@ -3,5 +3,6 @@ export default `#graphql
         createAlbum(input: createAlbumInput): createAlbumData!
         createSong(input: createSongInput!): createSongData!
         createPlaylist(input: createPlaylistInput!): createPlaylistData!
+        createCategory(input: createCategoryInput!): createCategoryData!
     }
 `

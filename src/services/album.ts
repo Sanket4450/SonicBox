@@ -59,8 +59,6 @@ const createAlbum = async (token: string, input: albumInput): Promise<albumData>
             })
         }
 
-        // upload image to cloud & get url from there
-
         const data = {
             ...input,
             artistId: new mongoose.Types.ObjectId(sub)

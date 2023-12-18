@@ -3,11 +3,13 @@ import { validateSchema, validateSelection } from '../../../utils/validate'
 import albumValidation from '../../../validations/album'
 import songValidation from '../../../validations/song'
 import plalistValidation from '../../../validations/playlist'
+import categoryValidation from '../../../validations/category'
 import fields from '../fields/mutations'
 import constants from '../../../constants'
 import albumService from '../../../services/album'
 import songService from '../../../services/song'
 import playlistService from '../../../services/playlist'
+import categoryService from '../../../services/category'
 
 export default {
     createAlbum: async (_: any, { input }: createAlbumInput, { token }: any, info: GraphQLResolveInfo): Promise<albumData> => {
@@ -62,6 +64,24 @@ export default {
                 }
             })
         }
+    },
+
+    createCategory: async (_: any, { input }: createCategoryInput, { token }: any, info: GraphQLResolveInfo): Promise<categoryData> => {
+        try {
+            validateSchema(input, categoryValidation.createCategory)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.createCategory)
+
+            const { _id, name, image, description, parent_categoryId, playlists } = await categoryService.createCategory(token, input)
+
+            return { categoryId: _id, name, image, description, parent_categoryId, playlists }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 
@@ -100,7 +120,7 @@ interface createPlaylistInput {
     input: {
         name: string
         image?: string
-        description?: string,
+        description?: string
         isPrivate?: boolean
     }
 }
@@ -112,4 +132,23 @@ interface playlistData {
     image: string
     description: string
     isPrivate: boolean
+}
+
+interface createCategoryInput {
+    input: {
+        name: string
+        image?: string
+        description?: string
+        parent_categoryId?: string
+        playlists?: string[]
+    }
+}
+
+interface categoryData {
+    categoryId: string
+    name: string
+    image: string
+    description: string
+    parent_categoryId: string
+    playlists: string[]
 }
