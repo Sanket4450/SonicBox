@@ -77,6 +77,10 @@ export default `#graphql
         userId: ID!
     }
 
+    input unfollowUserInput {
+        userId: ID!
+    }
+
     input updateUserInput {
         username: String
         name: String

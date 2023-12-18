@@ -4,6 +4,7 @@ const resetForgotPassword: string[] = ['success']
 const resetPassword: string[] = ['success']
 const logoutUser: string[] = ['success']
 const followUser: string[] = ['success']
+const unfollowUser: string[] = ['success']
 const updateUser: string[] = ['success']
 
 export default {
@@ -13,5 +14,6 @@ export default {
     resetPassword,
     logoutUser,
     followUser,
+    unfollowUser,
     updateUser
 }

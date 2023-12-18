@@ -96,13 +96,31 @@ export default {
         }
     },
 
-    followUser: async (_: any, { input }: followUser, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+    followUser: async (_: any, { input }: followUnfollowUser, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
         try {
-            validateSchema(input, userValidation.followUser)
+            validateSchema(input, userValidation.followUnfollowUser)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.followUser)
 
             await userService.followUser(token, input)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    unfollowUser: async (_: any, { input }: followUnfollowUser, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema(input, userValidation.followUnfollowUser)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.unfollowUser)
+
+            await userService.unfollowUser(token, input)
 
             return { success: true }
         } catch (error: any) {
@@ -192,7 +210,7 @@ interface resetPasswordInput {
     }
 }
 
-interface followUser {
+interface followUnfollowUser {
     input: {
         userId: string
     }

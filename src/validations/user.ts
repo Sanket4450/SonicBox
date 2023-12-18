@@ -5,7 +5,7 @@ import {
     dateValidation,
 } from './common'
 
-const followUser = Joi.object({
+const followUnfollowUser = Joi.object({
     userId: idReqValidation
 })
 
@@ -24,6 +24,6 @@ const updateUser = Joi.object({
 })
 
 export default {
-    followUser,
+    followUnfollowUser,
     updateUser
 }

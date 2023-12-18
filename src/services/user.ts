@@ -436,7 +436,7 @@ const followUserById = async (followerId: string, followingId: string): Promise<
     }
 }
 
-const followUser = async (token: string, { userId }: followUserInput): Promise<void> => {
+const followUser = async (token: string, { userId }: followUnfollowUser): Promise<void> => {
     const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
     if (!await getUserById(sub)) {
@@ -458,7 +458,54 @@ const followUser = async (token: string, { userId }: followUserInput): Promise<v
     await followUserById(sub, userId)
 }
 
-interface followUserInput {
+const unfollowUserById = async (followerId: string, followingId: string): Promise<void> => {
+    try {
+        const query = {
+            $and: [
+                { _id: followerId },
+                { follows: new mongoose.Types.ObjectId(followingId) }
+            ]
+        }
+
+        const data = {
+            $pull: {
+                follows: new mongoose.Types.ObjectId(followingId)
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const unfollowUser = async (token: string, { userId }: followUnfollowUser): Promise<void> => {
+    const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+
+    if (!await getUserById(sub)) {
+        throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+            extensions: {
+                code: 'NOT_FOUND'
+            }
+        })
+    }
+
+    if (!await getUserById(userId)) {
+        throw new GraphQLError(constants.MESSAGES.FOLLOWING_USER_NOT_EXIST, {
+            extensions: {
+                code: 'NOT_FOUND'
+            }
+        })
+    }
+
+    await unfollowUserById(sub, userId)
+}
+
+interface followUnfollowUser {
     userId: string
 }
 
@@ -480,5 +527,6 @@ export default {
     getSessionById,
     updateSessionById,
     deleteSessionById,
-    followUser
+    followUser,
+    unfollowUser
 }
