@@ -13,10 +13,6 @@ const albumSchema = new Schema({
     image: {
         type: String,
         trim: true
-    },
-    listens: {
-        type: Number,
-        default: 0
     }
 },
     {

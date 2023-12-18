@@ -25,11 +25,14 @@ export default {
         ALBUM_ALREADY_EXISTS: 'Album already exists for this artistId with this album-name',
         ARTIST_MUST_INCLUDED: 'This artist must be included in artists list',
         ONE_ARTIST_NOT_EXIST: 'One of the artists does not exist',
+        ARTIST_NOT_EXIST: 'Artist does not exist with this artistId',
+        ALBUM_NOT_FOUND: 'Album not found for this albumId',
         ALBUM_NOT_EXIST: 'Album does not exist with this artistId',
         SONG_ALREADY_EXISTS: 'Song already exists in this album',
         PLAYLIST_ALREADY_EXISTS: 'Playlist already exists for this userId with this playlist-name',
         CATEGORY_NOT_EXIST: 'Category does not exist with this categoryId',
-        ONLY_ADMIN_PLAYLISTS_ALLOWED: 'Only playlists created by admin are allowed'
+        ONLY_ADMIN_PLAYLISTS_ALLOWED: 'Only playlists created by admin are allowed',
+        CANNOT_MODIFY_RESOURCE: 'You are not authorized to modify this resource'
     },
     COLLECTIONS: {
         USER: 'User',

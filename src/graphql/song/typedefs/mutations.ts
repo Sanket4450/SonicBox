@@ -4,5 +4,6 @@ export default `#graphql
         createSong(input: createSongInput!): createSongData!
         createPlaylist(input: createPlaylistInput!): createPlaylistData!
         createCategory(input: createCategoryInput!): createCategoryData!
+        updateAlbum(albumId: String! input: updateAlbumInput!): SuccessResponse!
     }
 `

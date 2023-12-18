@@ -82,6 +82,24 @@ export default {
                 }
             })
         }
+    },
+
+    updateAlbum: async (_: any, args: updateAlbumParams, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema(args, albumValidation.updateAlbum)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.updateAlbum)
+
+            await albumService.updateAlbum(token, args)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 
@@ -151,4 +169,13 @@ interface categoryData {
     description: string
     parent_categoryId: string
     playlists: string[]
+}
+
+interface updateAlbumParams {
+    albumId: string
+    input: {
+        artistId?: string
+        name?: string
+        image?: string
+    }
 }

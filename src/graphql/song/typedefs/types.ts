@@ -1,13 +1,17 @@
 export default `#graphql
+    type SuccessResponse {
+        success: Boolean!
+    }
+
     input createAlbumInput {
         name: String!
         image: String!
     }
 
     type createAlbumData {
-        albumId: String!,
-        name: String,
-        artistId: String,
+        albumId: String!
+        name: String
+        artistId: String
         image: String
     }
 
@@ -57,5 +61,11 @@ export default `#graphql
         description: String
         parent_categoryId: String
         playlists: [String!]
+    }
+
+    input updateAlbumInput {
+        name: String
+        image: String
+        artistId: String
     }
 `
