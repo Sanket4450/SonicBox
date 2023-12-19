@@ -74,4 +74,13 @@ export default `#graphql
         addArtist: String
         removeArtist: String
     }
+
+    input updatePlaylistInput {
+        name: String
+        image: String
+        description: String
+        isPrivate: Boolean
+        addSong: String
+        removeSong: String
+    }
 `

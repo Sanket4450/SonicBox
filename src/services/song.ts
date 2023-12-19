@@ -243,6 +243,7 @@ interface updateSongParams {
 }
 
 export default {
+    getSongById,
     createSong,
     updateSong
 }

@@ -32,6 +32,8 @@ export default {
         SONG_NOT_FOUND: 'Song not found for this songId',
         SONG_NOT_EXIST: 'Song does not exist with this artist',
         PLAYLIST_ALREADY_EXISTS: 'Playlist already exists for this userId with this playlist-name',
+        PLAYLIST_NOT_FOUND: 'Playlist not found for this playlistId',
+        PLAYLIST_NOT_EXIST: 'Playlist does not exist with this userId',
         CATEGORY_NOT_EXIST: 'Category does not exist with this categoryId',
         ONLY_ADMIN_PLAYLISTS_ALLOWED: 'Only playlists created by admin are allowed',
         CANNOT_MODIFY_RESOURCE: 'You are not authorized to modify this resource'

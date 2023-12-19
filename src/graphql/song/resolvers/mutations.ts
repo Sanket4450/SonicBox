@@ -118,6 +118,24 @@ export default {
                 }
             })
         }
+    },
+
+    updatePlaylist: async (_: any, args: updatePlaylistParams, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema(args, plalistValidation.updatePlaylist)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.updatePlaylist)
+
+            await playlistService.updatePlaylist(token, args)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 
@@ -204,5 +222,17 @@ interface updateSongParams {
         fileURL?: string
         addArtist?: string
         removeArtist?: string
+    }
+}
+
+interface updatePlaylistParams {
+    playlistId: string
+    input: {
+        name?: string
+        image?: string
+        description?: string
+        isPrivate?: boolean
+        addSong?: string
+        removeSong?: string
     }
 }

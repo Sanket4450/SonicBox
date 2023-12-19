@@ -21,10 +21,6 @@ const playlistSchema = new Schema({
         type: Boolean,
         default: false
     },
-    listens: {
-        type: Number,
-        default: 0
-    },
     songs: [{
         type: Schema.Types.ObjectId,
         ref: 'Song'

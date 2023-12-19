@@ -2,7 +2,9 @@ import Joi from 'joi'
 import {
     stringReqValidation,
     stringValidation,
-    booleanValidation
+    booleanValidation,
+    idReqValidation,
+    idValidation
 } from './common'
 
 const createPlaylist = Joi.object({
@@ -11,6 +13,19 @@ const createPlaylist = Joi.object({
     isPrivate: booleanValidation
 })
 
+const updatePlaylist = Joi.object({
+    playlistId: idReqValidation,
+    input: {
+        name: stringValidation,
+        image: stringValidation,
+        description: stringValidation,
+        isPrivate: booleanValidation,
+        addSong: idValidation,
+        removeSong: idValidation
+    }
+})
+
 export default {
-    createPlaylist
+    createPlaylist,
+    updatePlaylist
 }
