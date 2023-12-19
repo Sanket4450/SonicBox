@@ -19,13 +19,17 @@ const updatePlaylist = Joi.object({
         name: stringValidation,
         image: stringValidation,
         description: stringValidation,
-        isPrivate: booleanValidation,
-        addSong: idValidation,
-        removeSong: idValidation
+        isPrivate: booleanValidation
     }
+})
+
+const addRemoveSong = Joi.object({
+    playlistId: idReqValidation,
+    songId: idReqValidation
 })
 
 export default {
     createPlaylist,
-    updatePlaylist
+    updatePlaylist,
+    addRemoveSong
 }

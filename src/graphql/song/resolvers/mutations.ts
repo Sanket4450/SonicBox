@@ -2,7 +2,7 @@ import { GraphQLResolveInfo, GraphQLError } from 'graphql'
 import { validateSchema, validateSelection } from '../../../utils/validate'
 import albumValidation from '../../../validations/album'
 import songValidation from '../../../validations/song'
-import plalistValidation from '../../../validations/playlist'
+import playlistValidation from '../../../validations/playlist'
 import categoryValidation from '../../../validations/category'
 import fields from '../fields/mutations'
 import constants from '../../../constants'
@@ -50,7 +50,7 @@ export default {
 
     createPlaylist: async (_: any, { input }: createPlaylistInput, { token }: any, info: GraphQLResolveInfo): Promise<createPlaylistData> => {
         try {
-            validateSchema(input, plalistValidation.createPlaylist)
+            validateSchema(input, playlistValidation.createPlaylist)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createPlaylist)
 
@@ -120,13 +120,31 @@ export default {
         }
     },
 
-    updatePlaylist: async (_: any, args: updatePlaylistParams, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+    updatePlaylist: async (_: any, args: updatePlaylistParams, { token }: any, info: GraphQLResolveInfo): Promise<updatePlaylistData> => {
         try {
-            validateSchema(args, plalistValidation.updatePlaylist)
+            validateSchema(args, playlistValidation.updatePlaylist)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.updatePlaylist)
 
-            await playlistService.updatePlaylist(token, args)
+            const { _id, name, image, description, isPrivate } = await playlistService.updatePlaylist(token, args)
+
+            return { playlistId: _id, name, image, description, isPrivate }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    addSong: async (_: any, { input }: addRemoveSongInput, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema(input, playlistValidation.addRemoveSong)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.addSong)
+
+            await playlistService.addSong(token, input)
 
             return { success: true }
         } catch (error: any) {
@@ -138,13 +156,67 @@ export default {
         }
     },
 
-    updateCategory: async (_: any, args: updateCategoryParams, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+    removeSong: async (_: any, { input }: addRemoveSongInput, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema(input, playlistValidation.addRemoveSong)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.removeSong)
+
+            await playlistService.removeSong(token, input)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    updateCategory: async (_: any, args: updateCategoryParams, { token }: any, info: GraphQLResolveInfo): Promise<updateCategoryData> => {
         try {
             validateSchema(args, categoryValidation.updateCategory)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.updateCategory)
 
-            await categoryService.updateCategory(token, args)
+            const { _id, name, image, description, parent_categoryId } = await categoryService.updateCategory(token, args)
+
+            return { categoryId: _id, name, image, description, parent_categoryId }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    addPlaylist: async (_: any, { input }: addRemovePlaylistInput, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema(input, categoryValidation.addRemovePlaylist)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.addPlaylist)
+
+            await categoryService.addPlaylist(token, input)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    removePlaylist: async (_: any, { input }: addRemovePlaylistInput, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema(input, categoryValidation.addRemovePlaylist)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.removePlaylist)
+
+            await categoryService.removePlaylist(token, input)
 
             return { success: true }
         } catch (error: any) {
@@ -266,8 +338,21 @@ interface updatePlaylistParams {
         image?: string
         description?: string
         isPrivate?: boolean
-        addSong?: string
-        removeSong?: string
+    }
+}
+
+interface updatePlaylistData {
+    playlistId: string
+    name: string
+    image: string
+    description: string
+    isPrivate: boolean
+}
+
+interface addRemoveSongInput {
+    input: {
+        playlistId: string
+        songId: string
     }
 }
 
@@ -277,7 +362,20 @@ interface updateCategoryParams {
         name?: string
         image?: string
         description?: string
-        addPlaylist?: string
-        removePlaylist?: string
+    }
+}
+
+interface updateCategoryData {
+    categoryId: string
+    name: string
+    image: string
+    description: string
+    parent_categoryId: string
+}
+
+interface addRemovePlaylistInput {
+    input: {
+        categoryId: string
+        playlistId: string
     }
 }

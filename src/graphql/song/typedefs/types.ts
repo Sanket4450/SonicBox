@@ -1,4 +1,8 @@
 export default `#graphql
+    type SuccessResponse {
+        success: Boolean!
+    }
+
     input createAlbumInput {
         name: String!
         image: String!
@@ -72,7 +76,7 @@ export default `#graphql
     }
 
     input updateSongInput {
-        name: String!
+        name: String
         fileURL: String
         addArtist: String
         removeArtist: String
@@ -92,25 +96,25 @@ export default `#graphql
         image: String
         description: String
         isPrivate: Boolean
-        addSong: String
-        removeSong: String
     }
 
     type updatePlaylistData {
         playlistId: String!
         name: String
-        userId: String
         image: String
         description: String
         isPrivate: Boolean
+    }
+
+    input addRemoveSongInput {
+        playlistId: String!
+        songId: String!
     }
 
     input updateCategoryInput {
         name: String
         image: String
         description: String
-        addPlaylist: String
-        removePlaylist: String
     }
 
     type updateCategoryData {
@@ -119,6 +123,10 @@ export default `#graphql
         image: String
         description: String
         parent_categoryId: String
-        playlists: [String]
+    }
+
+    input addRemovePlaylistInput {
+        categoryId: String!
+        playlistId: String!
     }
 `

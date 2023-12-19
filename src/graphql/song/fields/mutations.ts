@@ -2,10 +2,14 @@ const createAlbum: string[] = ['albumId']
 const createSong: string[] = ['songId']
 const createPlaylist: string[] = ['playlistId']
 const createCategory: string[] = ['categoryId']
-const updateAlbum: string[] = ['success']
-const updateSong: string[] = ['success']
-const updatePlaylist: string[] = ['success']
-const updateCategory: string[] = ['success']
+const updateAlbum: string[] = ['albumId']
+const updateSong: string[] = ['songId']
+const updatePlaylist: string[] = ['playlistId']
+const addSong: string[] = ['success']
+const removeSong: string[] = ['success']
+const updateCategory: string[] = ['categoryId']
+const addPlaylist: string[] = ['success']
+const removePlaylist: string[] = ['success']
 
 export default {
     createAlbum,
@@ -15,5 +19,9 @@ export default {
     updateAlbum,
     updateSong,
     updatePlaylist,
-    updateCategory
+    addSong,
+    removeSong,
+    updateCategory,
+    addPlaylist,
+    removePlaylist
 }

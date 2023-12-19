@@ -26,7 +26,13 @@ const updateCategory = Joi.object({
     }
 })
 
+const addRemovePlaylist = Joi.object({
+    categoryId: idReqValidation,
+    playlistId: idReqValidation
+})
+
 export default {
     createCategory,
-    updateCategory
+    updateCategory,
+    addRemovePlaylist
 }

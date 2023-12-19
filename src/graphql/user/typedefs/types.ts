@@ -1,4 +1,8 @@
 export default `#graphql
+    type SuccessResponse {
+        success: Boolean!
+    }
+
     input createUserInput {
         username: String!
         name: String
@@ -52,10 +56,6 @@ export default `#graphql
     input verifyResetOtpInput {
         otp: Int!
         resetToken: String!
-    }
-
-    type SuccessResponse {
-        success: Boolean!
     }
 
     input resetForgotPasswordInput {
