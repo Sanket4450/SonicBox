@@ -10,10 +10,6 @@ const songSchema = new Schema({
         type: String,
         required: true
     },
-    image: {
-        type: String,
-        trim: true
-    },
     fileURL: {
         type: String,
         trim: true,

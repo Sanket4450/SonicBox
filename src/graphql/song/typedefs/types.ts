@@ -66,6 +66,12 @@ export default `#graphql
     input updateAlbumInput {
         name: String
         image: String
-        artistId: String
+    }
+
+    input updateSongInput {
+        name: String
+        fileURL: String
+        addArtist: String
+        removeArtist: String
     }
 `

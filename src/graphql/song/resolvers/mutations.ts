@@ -100,6 +100,24 @@ export default {
                 }
             })
         }
+    },
+
+    updateSong: async (_: any, args: updateSongParams, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema(args, songValidation.updateSong)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.updateSong)
+
+            await songService.updateSong(token, args)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 
@@ -174,8 +192,17 @@ interface categoryData {
 interface updateAlbumParams {
     albumId: string
     input: {
-        artistId?: string
         name?: string
         image?: string
+    }
+}
+
+interface updateSongParams {
+    songId: string
+    input: {
+        name?: string
+        fileURL?: string
+        addArtist?: string
+        removeArtist?: string
     }
 }

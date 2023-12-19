@@ -29,6 +29,8 @@ export default {
         ALBUM_NOT_FOUND: 'Album not found for this albumId',
         ALBUM_NOT_EXIST: 'Album does not exist with this artistId',
         SONG_ALREADY_EXISTS: 'Song already exists in this album',
+        SONG_NOT_FOUND: 'Song not found for this songId',
+        SONG_NOT_EXIST: 'Song does not exist with this artist',
         PLAYLIST_ALREADY_EXISTS: 'Playlist already exists for this userId with this playlist-name',
         CATEGORY_NOT_EXIST: 'Category does not exist with this categoryId',
         ONLY_ADMIN_PLAYLISTS_ALLOWED: 'Only playlists created by admin are allowed',

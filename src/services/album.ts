@@ -98,7 +98,7 @@ interface albumData {
     image: string
 }
 
-const updateAlbum = async (token: string, { albumId, input }: updateAlbumParams): Promise<albumData> => {
+const updateAlbum = async (token: string, { albumId, input }: updateAlbumParams): Promise<void> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
@@ -126,23 +126,17 @@ const updateAlbum = async (token: string, { albumId, input }: updateAlbumParams)
             })
         }
 
-        if (input.artistId && !await userService.getArtistById(input.artistId)) {
-            throw new GraphQLError(constants.MESSAGES.ARTIST_NOT_EXIST, {
-                extensions: {
-                    code: 'CONFLICT'
-                }
-            })
-        }
-
         const query = {
             _id: albumId
         }
 
         const data = {
-            ...input
+            $set: {
+                ...input
+            }
         }
 
-        return DbRepo.updateOne(constants.COLLECTIONS.ALBUM, { query, data })
+        await DbRepo.updateOne(constants.COLLECTIONS.ALBUM, { query, data })
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -155,7 +149,6 @@ const updateAlbum = async (token: string, { albumId, input }: updateAlbumParams)
 interface updateAlbumParams {
     albumId: string
     input: {
-        artistId?: string
         name?: string
         image?: string
     }
