@@ -136,6 +136,24 @@ export default {
                 }
             })
         }
+    },
+
+    updateCategory: async (_: any, args: updateCategoryParams, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema(args, categoryValidation.updateCategory)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.updateCategory)
+
+            await categoryService.updateCategory(token, args)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 
@@ -234,5 +252,16 @@ interface updatePlaylistParams {
         isPrivate?: boolean
         addSong?: string
         removeSong?: string
+    }
+}
+
+interface updateCategoryParams {
+    categoryId: string
+    input: {
+        name?: string
+        image?: string
+        description?: string
+        addPlaylist?: string
+        removePlaylist?: string
     }
 }

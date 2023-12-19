@@ -83,4 +83,12 @@ export default `#graphql
         addSong: String
         removeSong: String
     }
+
+    input updateCategoryInput {
+        name: String
+        image: String
+        description: String
+        addPlaylist: String
+        removePlaylist: String
+    }
 `

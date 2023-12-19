@@ -3,7 +3,8 @@ import {
     arrayValidation,
     idValidation,
     stringReqValidation,
-    stringValidation
+    stringValidation,
+    idReqValidation
 } from './common'
 
 const createCategory = Joi.object({
@@ -14,6 +15,18 @@ const createCategory = Joi.object({
     playlists: arrayValidation.items(idValidation)
 })
 
+const updateCategory = Joi.object({
+    categoryId: idReqValidation,
+    input: {
+        name: stringValidation,
+        image: stringValidation,
+        description: stringValidation,
+        addPlaylist: idValidation,
+        removePlaylist: idValidation
+    }
+})
+
 export default {
-    createCategory
+    createCategory,
+    updateCategory
 }

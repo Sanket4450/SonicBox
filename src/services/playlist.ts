@@ -222,6 +222,7 @@ interface updatePlaylistParams {
 }
 
 export default {
+    getPlaylistById,
     getPlaylistByIdAndUser,
     createPlaylist,
     updatePlaylist

@@ -5,6 +5,7 @@ const createCategory: string[] = ['categoryId']
 const updateAlbum: string[] = ['success']
 const updateSong: string[] = ['success']
 const updatePlaylist: string[] = ['success']
+const updateCategory: string[] = ['success']
 
 export default {
     createAlbum,
@@ -13,5 +14,6 @@ export default {
     createCategory,
     updateAlbum,
     updateSong,
-    updatePlaylist
+    updatePlaylist,
+    updateCategory
 }

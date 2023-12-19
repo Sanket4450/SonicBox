@@ -7,5 +7,6 @@ export default `#graphql
         updateAlbum(albumId: String! input: updateAlbumInput!): SuccessResponse!
         updateSong(songId: String! input: updateSongInput!): SuccessResponse!
         updatePlaylist(playlistId: String! input: updatePlaylistInput!): SuccessResponse!
+        updateCategory(categoryId: String! input: updateCategoryInput!): SuccessResponse!
     }
 `
