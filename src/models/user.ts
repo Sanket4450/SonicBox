@@ -8,7 +8,8 @@ const userSchema = new Schema({
         required: true
     },
     name: {
-        type: String
+        type: String,
+        default: null
     },
     email: {
         type: String,
@@ -25,10 +26,12 @@ const userSchema = new Schema({
     },
     gender: {
         type: String,
-        enum: ['male', 'female', 'other']
+        enum: ['male', 'female', 'other'],
+        default: null
     },
     dateOfBirth: {
-        type: Date
+        type: Date,
+        default: null
     },
     role: {
         type: String,
@@ -36,17 +39,21 @@ const userSchema = new Schema({
         default: 'user'
     },
     state: {
-        type: String
+        type: String,
+        default: null
     },
     country: {
-        type: String
+        type: String,
+        default: null
     },
     profile_picture: {
         type: String,
-        trim: true
+        trim: true,
+        default: null
     },
     description: {
-        type: String
+        type: String,
+        default: null
     },
     isVerified: {
         type: Boolean,

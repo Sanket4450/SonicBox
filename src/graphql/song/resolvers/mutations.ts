@@ -12,15 +12,15 @@ import playlistService from '../../../services/playlist'
 import categoryService from '../../../services/category'
 
 export default {
-    createAlbum: async (_: any, { input }: createAlbumInput, { token }: any, info: GraphQLResolveInfo): Promise<albumData> => {
+    createAlbum: async (_: any, { input }: createAlbumInput, { token }: any, info: GraphQLResolveInfo): Promise<createAlbumData> => {
         try {
             validateSchema(input, albumValidation.createAlbum)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createAlbum)
 
-            const album = await albumService.createAlbum(token, input)
+            const { _id, name, artistId, image } = await albumService.createAlbum(token, input)
 
-            return { albumId: album._id, ...album }
+            return { albumId: _id, name, artistId, image }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -30,15 +30,15 @@ export default {
         }
     },
 
-    createSong: async (_: any, { input }: createSongInput, { token }: any, info: GraphQLResolveInfo): Promise<songData> => {
+    createSong: async (_: any, { input }: createSongInput, { token }: any, info: GraphQLResolveInfo): Promise<createSongData> => {
         try {
             validateSchema(input, songValidation.createSong)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createSong)
 
-            const song = await songService.createSong(token, input)
+            const { _id, name, fileURL, albumId, artists } = await songService.createSong(token, input)
 
-            return { songId: song._id, ...song }
+            return { songId: _id, name, fileURL, albumId, artists }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -48,15 +48,15 @@ export default {
         }
     },
 
-    createPlaylist: async (_: any, { input }: createPlaylistInput, { token }: any, info: GraphQLResolveInfo): Promise<playlistData> => {
+    createPlaylist: async (_: any, { input }: createPlaylistInput, { token }: any, info: GraphQLResolveInfo): Promise<createPlaylistData> => {
         try {
             validateSchema(input, plalistValidation.createPlaylist)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createPlaylist)
 
-            const playlist = await playlistService.createPlaylist(token, input)
+            const { _id, name, userId, image, description, isPrivate } = await playlistService.createPlaylist(token, input)
 
-            return { playlistId: playlist._id, ...playlist }
+            return { playlistId: _id, name, userId, image, description, isPrivate }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -66,15 +66,15 @@ export default {
         }
     },
 
-    createCategory: async (_: any, { input }: createCategoryInput, { token }: any, info: GraphQLResolveInfo): Promise<categoryData> => {
+    createCategory: async (_: any, { input }: createCategoryInput, { token }: any, info: GraphQLResolveInfo): Promise<createCategoryData> => {
         try {
             validateSchema(input, categoryValidation.createCategory)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.createCategory)
 
-            const category = await categoryService.createCategory(token, input)
+            const { _id, name, image, description, parent_categoryId, playlists } = await categoryService.createCategory(token, input)
 
-            return { categoryId: category._id, ...category }
+            return { categoryId: _id, name, image, description, parent_categoryId, playlists }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -84,15 +84,15 @@ export default {
         }
     },
 
-    updateAlbum: async (_: any, args: updateAlbumParams, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+    updateAlbum: async (_: any, args: updateAlbumParams, { token }: any, info: GraphQLResolveInfo): Promise<updateAlbumData> => {
         try {
             validateSchema(args, albumValidation.updateAlbum)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.updateAlbum)
 
-            await albumService.updateAlbum(token, args)
+            const { _id, name, artistId, image } = await albumService.updateAlbum(token, args)
 
-            return { success: true }
+            return { albumId: _id, name, artistId, image }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -102,15 +102,15 @@ export default {
         }
     },
 
-    updateSong: async (_: any, args: updateSongParams, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+    updateSong: async (_: any, args: updateSongParams, { token }: any, info: GraphQLResolveInfo): Promise<updateSongData> => {
         try {
             validateSchema(args, songValidation.updateSong)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.updateSong)
 
-            await songService.updateSong(token, args)
+            const { _id, name, albumId, fileURL, listens, artists } = await songService.updateSong(token, args)
 
-            return { success: true }
+            return { songId: _id, name, albumId, fileURL, listens, artists }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -164,7 +164,7 @@ interface createAlbumInput {
     }
 }
 
-interface albumData {
+interface createAlbumData {
     albumId: string
     name: string
     artistId: string
@@ -180,7 +180,7 @@ interface createSongInput {
     }
 }
 
-interface songData {
+interface createSongData {
     songId: string
     name: string
     fileURL: string
@@ -197,7 +197,7 @@ interface createPlaylistInput {
     }
 }
 
-interface playlistData {
+interface createPlaylistData {
     playlistId: string
     name: string
     userId: string
@@ -216,7 +216,7 @@ interface createCategoryInput {
     }
 }
 
-interface categoryData {
+interface createCategoryData {
     categoryId: string
     name: string
     image: string
@@ -233,6 +233,13 @@ interface updateAlbumParams {
     }
 }
 
+interface updateAlbumData {
+    albumId: string,
+    name: string,
+    artistId: string,
+    image: string
+}
+
 interface updateSongParams {
     songId: string
     input: {
@@ -241,6 +248,15 @@ interface updateSongParams {
         addArtist?: string
         removeArtist?: string
     }
+}
+
+interface updateSongData {
+    songId: string
+    name: string
+    albumId: string
+    fileURL: string
+    listens: number
+    artists: string[]
 }
 
 interface updatePlaylistParams {

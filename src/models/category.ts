@@ -7,14 +7,17 @@ const categorySchema = new Schema({
     },
     image: {
         type: String,
-        trim: true
+        trim: true,
+        default: null
     },
     description: {
-        type: String
+        type: String,
+        default: null
     },
     parent_categoryId: {
         type: Schema.Types.ObjectId,
-        ref: 'Category'
+        ref: 'Category',
+        default: null
     },
     playlists: [{
         type: Schema.Types.ObjectId,

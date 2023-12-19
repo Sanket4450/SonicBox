@@ -12,7 +12,8 @@ const albumSchema = new Schema({
     },
     image: {
         type: String,
-        trim: true
+        trim: true,
+        required: true
     }
 },
     {

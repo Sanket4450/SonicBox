@@ -5,7 +5,7 @@ const resetPassword: string[] = ['success']
 const logoutUser: string[] = ['success']
 const followUser: string[] = ['success']
 const unfollowUser: string[] = ['success']
-const updateUser: string[] = ['success']
+const updateUser: string[] = ['userId']
 
 export default {
     createUser,

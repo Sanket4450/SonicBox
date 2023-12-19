@@ -7,6 +7,6 @@ export default `#graphql
         logoutUser: SuccessResponse!
         followUser(input: followUserInput!): SuccessResponse!
         unfollowUser(input: unfollowUserInput!): SuccessResponse!
-        updateUser(input: updateUserInput!): SuccessResponse!
+        updateUser(input: updateUserInput!): updateUserData!
     }
 `

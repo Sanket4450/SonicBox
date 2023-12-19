@@ -44,6 +44,16 @@ const getSongByAlbumAndURL = async (albumId: string, fileURL: string): Promise<{
     return DbRepo.findOne(constants.COLLECTIONS.SONG, { query, data })
 }
 
+const getFullSongById = async (_id: string): Promise<updateSongData> => {
+    const query = {
+        _id
+    }
+
+    const data = {}
+
+    return DbRepo.findOne(constants.COLLECTIONS.SONG, { query, data })
+}
+
 const createSong = async (token: string, input: songInput): Promise<songData> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
@@ -155,7 +165,7 @@ const removeArtist = async (songId: string, artistId: string, defaultArtist: str
     await DbRepo.updateOne(constants.COLLECTIONS.SONG, { query, data })
 }
 
-const updateSong = async (token: string, { songId, input }: updateSongParams): Promise<void> => {
+const updateSong = async (token: string, { songId, input }: updateSongParams): Promise<updateSongData> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
@@ -223,6 +233,8 @@ const updateSong = async (token: string, { songId, input }: updateSongParams): P
         }
 
         await DbRepo.updateOne(constants.COLLECTIONS.SONG, { query, data })
+
+        return getFullSongById(songId)
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -240,6 +252,15 @@ interface updateSongParams {
         addArtist?: string
         removeArtist?: string
     }
+}
+
+interface updateSongData {
+    _id: string
+    name: string
+    albumId: string
+    fileURL: string
+    listens: number
+    artists: string[]
 }
 
 export default {

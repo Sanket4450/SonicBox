@@ -94,4 +94,18 @@ export default `#graphql
         profile_picture: String
         description: String
     }
+
+    type updateUserData {
+        userId: ID!
+        username: String
+        name: String
+        email: String
+        gender: GenderType
+        dateOfBirth: String
+        state: String
+        country: String
+        profile_picture: String
+        description: String
+        isVerified: Boolean
+    }
 `

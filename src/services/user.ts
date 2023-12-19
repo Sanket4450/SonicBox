@@ -87,7 +87,7 @@ interface selectUserData {
     role: number
     secret: number
     state: number
-    country: boolean
+    country: number
     profile_picture: number
     description: number
     isVerified: number
@@ -273,7 +273,7 @@ const updateUserById = async (_id: string, userData: Partial<userData>): Promise
     }
 }
 
-const updateUser = async (token: string, userData: Partial<userData>): Promise<any> => {
+const updateUser = async (token: string, userData: Partial<userData>): Promise<updateUserData> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
@@ -286,6 +286,22 @@ const updateUser = async (token: string, userData: Partial<userData>): Promise<a
         }
 
         await updateUserById(sub, userData)
+
+        const userSelection = {
+            _id: 1,
+            username: 1,
+            name: 1,
+            email: 1,
+            gender: 1,
+            dateOfBirth: 1,
+            state: 1,
+            country: 1,
+            profile_picture: 1,
+            description: 1,
+            isVerified: 1
+        }
+
+        return getFullUser({ _id: sub }, { ...userSelection }) as unknown as updateUserData
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -293,6 +309,20 @@ const updateUser = async (token: string, userData: Partial<userData>): Promise<a
             }
         })
     }
+}
+
+interface updateUserData {
+    _id: string
+    username: string
+    name: string
+    email: string
+    gender: genderType
+    dateOfBirth: string
+    state: string
+    country: string
+    profile_picture: string
+    description: string
+    isVerified: boolean
 }
 
 const deleteAllSessions = async (userId: string): Promise<void> => {

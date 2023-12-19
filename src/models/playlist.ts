@@ -12,10 +12,12 @@ const playlistSchema = new Schema({
     },
     image: {
         type: String,
-        trim: true
+        trim: true,
+        default: null
     },
     description: {
-        type: String
+        type: String,
+        default: null
     },
     isPrivate: {
         type: Boolean,

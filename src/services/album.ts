@@ -43,6 +43,16 @@ const getAlbumByNameAndArtist = async (name: string, artistId: string): Promise<
     return DbRepo.findOne(constants.COLLECTIONS.ALBUM, { query, data })
 }
 
+const getFullAlbumById = async (_id: string): Promise<updateAlbumData> => {
+    const query = {
+        _id
+    }
+
+    const data = {}
+
+    return DbRepo.findOne(constants.COLLECTIONS.ALBUM, { query, data })
+}
+
 const createAlbum = async (token: string, input: albumInput): Promise<albumData> => {
     try {
         const { sub, role } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
@@ -98,7 +108,7 @@ interface albumData {
     image: string
 }
 
-const updateAlbum = async (token: string, { albumId, input }: updateAlbumParams): Promise<void> => {
+const updateAlbum = async (token: string, { albumId, input }: updateAlbumParams): Promise<updateAlbumData> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
@@ -137,6 +147,8 @@ const updateAlbum = async (token: string, { albumId, input }: updateAlbumParams)
         }
 
         await DbRepo.updateOne(constants.COLLECTIONS.ALBUM, { query, data })
+
+        return getFullAlbumById(albumId)
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -152,6 +164,13 @@ interface updateAlbumParams {
         name?: string
         image?: string
     }
+}
+
+interface updateAlbumData {
+    _id: string,
+    name: string,
+    artistId: string,
+    image: string
 }
 
 export default {

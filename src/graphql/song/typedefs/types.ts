@@ -1,8 +1,4 @@
 export default `#graphql
-    type SuccessResponse {
-        success: Boolean!
-    }
-
     input createAlbumInput {
         name: String!
         image: String!
@@ -27,7 +23,7 @@ export default `#graphql
         name: String
         fileURL: String
         albumId: String
-        artists: [String!]
+        artists: [String]
     }
 
     input createPlaylistInput {
@@ -51,7 +47,7 @@ export default `#graphql
         image: String
         description: String
         parent_categoryId: String
-        playlists: [String!]
+        playlists: [String]
     }
 
     type createCategoryData {
@@ -60,7 +56,7 @@ export default `#graphql
         image: String
         description: String
         parent_categoryId: String
-        playlists: [String!]
+        playlists: [String]
     }
 
     input updateAlbumInput {
@@ -68,11 +64,27 @@ export default `#graphql
         image: String
     }
 
-    input updateSongInput {
+    type updateAlbumData {
+        albumId: String!
         name: String
+        artistId: String
+        image: String
+    }
+
+    input updateSongInput {
+        name: String!
         fileURL: String
         addArtist: String
         removeArtist: String
+    }
+
+    type updateSongData {
+        songId: String!
+        name: String
+        albumId: String
+        fileURL: String
+        listens: Int
+        artists: [String]
     }
 
     input updatePlaylistInput {
@@ -84,11 +96,29 @@ export default `#graphql
         removeSong: String
     }
 
+    type updatePlaylistData {
+        playlistId: String!
+        name: String
+        userId: String
+        image: String
+        description: String
+        isPrivate: Boolean
+    }
+
     input updateCategoryInput {
         name: String
         image: String
         description: String
         addPlaylist: String
         removePlaylist: String
+    }
+
+    type updateCategoryData {
+        categoryId: String!
+        name: String
+        image: String
+        description: String
+        parent_categoryId: String
+        playlists: [String]
     }
 `

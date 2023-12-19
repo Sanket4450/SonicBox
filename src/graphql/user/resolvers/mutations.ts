@@ -132,15 +132,27 @@ export default {
         }
     },
 
-    updateUser: async (_: any, { input }: updateUserInput, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+    updateUser: async (_: any, { input }: updateUserInput, { token }: any, info: GraphQLResolveInfo): Promise<updateUserData> => {
         try {
             validateSchema(input, userValidation.updateUser)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.updateUser)
 
-            await userService.updateUser(token, input)
+            const user = await userService.updateUser(token, input)
 
-            return { success: true }
+            return {
+                userId: user._id,
+                username: user.username,
+                name: user.name,
+                email: user.email,
+                gender: user.gender,
+                dateOfBirth: user.dateOfBirth,
+                state: user.state,
+                country: user.country,
+                profile_picture: user.profile_picture,
+                description: user.description,
+                isVerified: user.isVerified
+            }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -230,4 +242,18 @@ interface updateUserInput {
         profile_picture?: string
         description?: string
     }
+}
+
+interface updateUserData {
+    userId: string
+    username: string
+    name: string
+    email: string
+    gender: genderType
+    dateOfBirth: string
+    state: string
+    country: string
+    profile_picture: string
+    description: string
+    isVerified: boolean
 }
