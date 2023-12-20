@@ -5,6 +5,7 @@ import constants from '../constants'
 import userService from './user'
 import tokenService from './token'
 import albumService from './album'
+import playlistService from './playlist'
 
 const getSongById = async (_id: string): Promise<{ _id: string } | null> => {
     const query = {
@@ -50,6 +51,18 @@ const getFullSongById = async (_id: string): Promise<updateSongData> => {
     }
 
     const data = {}
+
+    return DbRepo.findOne(constants.COLLECTIONS.SONG, { query, data })
+}
+
+const getSongByAlbum = async (albumId: string): Promise<{ _id: 1 } | null > => {
+    const query = {
+        albumId
+    }
+
+    const data = {
+        _id: 1
+    }
 
     return DbRepo.findOne(constants.COLLECTIONS.SONG, { query, data })
 }
@@ -263,8 +276,54 @@ interface updateSongData {
     artists: string[]
 }
 
+const deleteSong = async (token: string, songId: string): Promise<void> => {
+    try {
+        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+
+        if (!await userService.getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (!await getSongById(songId)) {
+            throw new GraphQLError(constants.MESSAGES.SONG_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (!await getSongByIdAndArtist(songId, sub)) {
+            throw new GraphQLError(constants.MESSAGES.CANNOT_MODIFY_RESOURCE, {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+        }
+
+        const query = {
+            _id: songId
+        }
+
+        await DbRepo.deleteOne(constants.COLLECTIONS.SONG, { query })
+
+        await playlistService.removeAllSongs(songId)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 export default {
     getSongById,
+    getSongByAlbum,
     createSong,
-    updateSong
+    updateSong,
+    deleteSong
 }

@@ -4,6 +4,8 @@ import DbRepo from '../dbRepo'
 import constants from '../constants'
 import userService from './user'
 import tokenService from './token'
+import songService from './song'
+import libraryService from './library'
 
 const getAlbumById = async (_id: string): Promise<{ _id: string } | null> => {
     const query = {
@@ -173,9 +175,62 @@ interface updateAlbumData {
     image: string
 }
 
+const deleteAlbum = async (token: string, albumId: string): Promise<void> => {
+    try {
+        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+
+        if (!await userService.getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (!await getAlbumById(albumId)) {
+            throw new GraphQLError(constants.MESSAGES.ALBUM_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (!await getAlbumByIdAndArtist(albumId, sub)) {
+            throw new GraphQLError(constants.MESSAGES.CANNOT_MODIFY_RESOURCE, {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+        }
+
+        if (await songService.getSongByAlbum(albumId)) {
+            throw new GraphQLError(constants.MESSAGES.ALBUM_MUST_BE_EMPTY, {
+                extensions: {
+                    code: 'CONFLICT'
+                }
+            })
+        }
+
+        const query = {
+            _id: albumId
+        }
+
+        await DbRepo.deleteOne(constants.COLLECTIONS.ALBUM, { query })
+
+        await libraryService.removeAllAlbums(albumId)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 export default {
     getAlbumById,
     getAlbumByIdAndArtist,
     createAlbum,
-    updateAlbum
+    updateAlbum,
+    deleteAlbum
 }

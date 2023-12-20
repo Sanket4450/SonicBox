@@ -12,5 +12,9 @@ export default `#graphql
         updateCategory(categoryId: String! input: updateCategoryInput!): updateCategoryData!
         addPlaylist(input: addRemovePlaylistInput!): SuccessResponse!
         removePlaylist(input: addRemovePlaylistInput!): SuccessResponse!
+        deleteAlbum(albumId: String!): SuccessResponse!
+        deleteSong(songId: String!): SuccessResponse!
+        deletePlaylist(playlistId: String!): SuccessResponse!
+        deleteCategory(categoryId: String!): SuccessResponse!
     }
 `

@@ -19,7 +19,12 @@ const updateAlbum = Joi.object({
     }
 })
 
+const deleteAlbum = Joi.object({
+    albumId: idReqValidation
+})
+
 export default {
     createAlbum,
-    updateAlbum
+    updateAlbum,
+    deleteAlbum
 }

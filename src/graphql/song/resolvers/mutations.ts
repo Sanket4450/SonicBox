@@ -229,6 +229,78 @@ export default {
                 }
             })
         }
+    },
+
+    deleteAlbum: async (_: any, { albumId }: deleteAlbum, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema({ albumId }, albumValidation.deleteAlbum)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.deleteAlbum)
+
+            await albumService.deleteAlbum(token, albumId)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    deleteSong: async (_: any, { songId }: deleteSong, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema({ songId }, songValidation.deleteSong)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.deleteSong)
+
+            await songService.deleteSong(token, songId)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    deletePlaylist: async (_: any, { playlistId }: deletePlaylist, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema({ playlistId }, playlistValidation.deletePlaylist)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.deletePlaylist)
+
+            await playlistService.deletePlaylist(token, playlistId)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    deleteCategory: async (_: any, { categoryId }: deleteCategory, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema({ categoryId }, categoryValidation.deleteCategory)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.deleteCategory)
+
+            await categoryService.deleteCategory(token, categoryId)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 
@@ -381,4 +453,20 @@ interface addRemovePlaylistInput {
         categoryId: string
         playlistId: string
     }
+}
+
+interface deleteAlbum {
+    albumId: string
+}
+
+interface deleteSong {
+    songId: string
+}
+
+interface deletePlaylist {
+    playlistId: string
+}
+
+interface deleteCategory {
+    categoryId: string
 }

@@ -24,6 +24,34 @@ const addPlaylist = async (userId: string, playlistId: string): Promise<void> =>
     await DbRepo.updateOne(constants.COLLECTIONS.LIBRARY, { query, data })
 }
 
+const removeAllPlaylists = async (playlistId: string): Promise<void> => {
+    const query = {
+        playlists: new mongoose.Types.ObjectId(playlistId)
+    }
+
+    const data = {
+        $pull: {
+            playlists: new mongoose.Types.ObjectId(playlistId)
+        }
+    }
+
+    await DbRepo.updateMany(constants.COLLECTIONS.LIBRARY, { query, data })
+}
+
+const removeAllAlbums = async (albumId: string): Promise<void> => {
+    const query = {
+        albums: new mongoose.Types.ObjectId(albumId)
+    }
+
+    const data = {
+        $pull: {
+            albums: new mongoose.Types.ObjectId(albumId)
+        }
+    }
+
+    await DbRepo.updateMany(constants.COLLECTIONS.LIBRARY, { query, data })
+}
+
 const addLibraryPlaylist = async (token: string, playlistId: string): Promise<void> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
@@ -64,23 +92,6 @@ const addLibraryPlaylist = async (token: string, playlistId: string): Promise<vo
     }
 }
 
-const removePlaylist = async (userId: string, playlistId: string): Promise<void> => {
-    const query = {
-        $and: [
-            { userId: new mongoose.Types.ObjectId(userId) },
-            { playlists: new mongoose.Types.ObjectId(playlistId) }
-        ]
-    }
-
-    const data = {
-        $pull: {
-            playlists: new mongoose.Types.ObjectId(playlistId)
-        }
-    }
-
-    await DbRepo.updateOne(constants.COLLECTIONS.LIBRARY, { query, data })
-}
-
 const removeLibraryPlaylist = async (token: string, playlistId: string): Promise<void> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
@@ -101,7 +112,20 @@ const removeLibraryPlaylist = async (token: string, playlistId: string): Promise
             })
         }
 
-        await removePlaylist(sub, playlistId)
+        const query = {
+            $and: [
+                { userId: new mongoose.Types.ObjectId(sub) },
+                { playlists: new mongoose.Types.ObjectId(playlistId) }
+            ]
+        }
+
+        const data = {
+            $pull: {
+                playlists: new mongoose.Types.ObjectId(playlistId)
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.LIBRARY, { query, data })
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -285,8 +309,9 @@ const removeLibraryAlbum = async (token: string, albumId: string): Promise<void>
 
 export default {
     addPlaylist,
+    removeAllPlaylists,
+    removeAllAlbums,
     addLibraryPlaylist,
-    removePlaylist,
     removeLibraryPlaylist,
     addLibraryArtist,
     removeLibraryArtist,

@@ -37,7 +37,8 @@ export default {
         PRIVATE_PLAYLIST: 'Cannot save private playlist to library',
         CATEGORY_NOT_EXIST: 'Category does not exist with this categoryId',
         ONLY_ADMIN_PLAYLISTS_ALLOWED: 'Only playlists created by admin are allowed',
-        CANNOT_MODIFY_RESOURCE: 'You are not authorized to modify this resource'
+        CANNOT_MODIFY_RESOURCE: 'You are not authorized to modify this resource',
+        ALBUM_MUST_BE_EMPTY: 'Album must be empty to be deleted'
     },
     COLLECTIONS: {
         USER: 'User',

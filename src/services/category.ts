@@ -28,6 +28,20 @@ const getFullCategory = async (_id: string): Promise<updateCategoryData> => {
     return DbRepo.findOne(constants.COLLECTIONS.CATEGORY, { query, data })
 }
 
+const removeAllPlaylists = async (playlistId: string): Promise<void> => {
+    const query = {
+        playlists: new mongoose.Types.ObjectId(playlistId)
+    }
+
+    const data = {
+        $pull: {
+            playlists: new mongoose.Types.ObjectId(playlistId)
+        }
+    }
+
+    await DbRepo.updateMany(constants.COLLECTIONS.CATEGORY, { query, data })
+}
+
 const createCategory = async (token: string, input: categoryInput): Promise<categoryData> => {
     try {
         const { sub, role } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
@@ -273,9 +287,53 @@ interface addRemovePlaylist {
     playlistId: string
 }
 
+const deleteCategory = async (token: string, categoryId: string): Promise<void> => {
+    try {
+        const { sub, role } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+
+        if (!await userService.getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (role !== 'admin') {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_ALLOWED, {
+                extensions: {
+                    code: 'FORBIDDEN'
+                }
+            })
+        }
+
+        if (!await getCategoryById(categoryId)) {
+            throw new GraphQLError(constants.MESSAGES.CATEGORY_NOT_EXIST, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        const query = {
+            _id: categoryId
+        }
+
+        await DbRepo.deleteOne(constants.COLLECTIONS.CATEGORY, { query })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 export default {
+    removeAllPlaylists,
     createCategory,
     updateCategory,
     addPlaylist,
-    removePlaylist
+    removePlaylist,
+    deleteCategory
 }

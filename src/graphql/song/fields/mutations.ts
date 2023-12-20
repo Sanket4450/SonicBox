@@ -10,6 +10,10 @@ const removeSong: string[] = ['success']
 const updateCategory: string[] = ['categoryId']
 const addPlaylist: string[] = ['success']
 const removePlaylist: string[] = ['success']
+const deleteAlbum: string[] = ['success']
+const deleteSong: string[] = ['success']
+const deletePlaylist: string[] = ['success']
+const deleteCategory: string[] = ['success']
 
 export default {
     createAlbum,
@@ -23,5 +27,9 @@ export default {
     removeSong,
     updateCategory,
     addPlaylist,
-    removePlaylist
+    removePlaylist,
+    deleteAlbum,
+    deleteSong,
+    deletePlaylist,
+    deleteCategory
 }

@@ -5,6 +5,8 @@ import constants from '../constants'
 import userService from './user'
 import tokenService from './token'
 import songService from './song'
+import categoryService from './category'
+import libraryService from './library'
 
 const getPlaylistById = async (_id: string): Promise<{ _id: string } | null> => {
     const query = {
@@ -65,6 +67,20 @@ const checkPlaylistPrivate = async (_id: string): Promise<{ isPrivate: 1 }> => {
     }
 
     return DbRepo.findOne(constants.COLLECTIONS.PLAYLIST, { query, data })
+}
+
+const removeAllSongs = async (songId: string): Promise<void> => {
+    const query = {
+        songs: new mongoose.Types.ObjectId(songId)
+    }
+
+    const data = {
+        $pull: {
+            songs: new mongoose.Types.ObjectId(songId)
+        }
+    }
+
+    await DbRepo.updateMany(constants.COLLECTIONS.PLAYLIST, { query, data })
 }
 
 const createPlaylist = async (token: string, input: playlistInput): Promise<playlistData> => {
@@ -296,12 +312,60 @@ interface addRemoveSong {
     songId: string
 }
 
+const deletePlaylist = async (token: string, playlistId: string): Promise<void> => {
+    try {
+        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+
+        if (!await userService.getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (!await getPlaylistById(playlistId)) {
+            throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (!await getPlaylistByIdAndUser(playlistId, sub)) {
+            throw new GraphQLError(constants.MESSAGES.CANNOT_MODIFY_RESOURCE, {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+        }
+
+        const query = {
+            _id: playlistId
+        }
+
+        await DbRepo.deleteOne(constants.COLLECTIONS.PLAYLIST, { query })
+
+        await categoryService.removeAllPlaylists(playlistId)
+
+        await libraryService.removeAllPlaylists(playlistId)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 export default {
     getPlaylistById,
     getPlaylistByIdAndUser,
     checkPlaylistPrivate,
+    removeAllSongs,
     createPlaylist,
     updatePlaylist,
     addSong,
-    removeSong
+    removeSong,
+    deletePlaylist
 }

@@ -22,6 +22,22 @@ export default class DbRepo {
         })
     }
 
+    public static find(collectionName: string, queryObject: QueryObject, sortQuery: object = {}): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const collection = (domain as Record<string, any>)[collectionName]
+
+            collection
+                .find(queryObject.query, queryObject.data)
+                .sort(sortQuery)
+                .then((results: object[]) => {
+                    resolve(results)
+                })
+                .catch((error: any) => {
+                    reject(error)
+                })
+        })
+    }
+
     public static create(collectionName: string, queryObject: Omit<QueryObject, 'query' | 'options'>): Promise<any> {
         return new Promise((resolve, reject) => {
             const collection = (domain as Record<string, any>)[collectionName]
@@ -43,6 +59,21 @@ export default class DbRepo {
 
             collection
                 .updateOne(queryObject.query, queryObject.data, queryObject.options)
+                .then((results: object) => {
+                    resolve(results)
+                })
+                .catch((error: any) => {
+                    reject(error)
+                })
+        })
+    }
+
+    public static updateMany(collectionName: string, queryObject: QueryObject): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const collection = (domain as Record<string, any>)[collectionName]
+
+            collection
+                .updateMany(queryObject.query, queryObject.data, queryObject.options)
                 .then((results: object) => {
                     resolve(results)
                 })
@@ -74,22 +105,6 @@ export default class DbRepo {
             collection
                 .deleteMany(queryObject.query)
                 .then((results: object) => {
-                    resolve(results)
-                })
-                .catch((error: any) => {
-                    reject(error)
-                })
-        })
-    }
-
-    public static find(collectionName: string, queryObject: QueryObject, sortQuery: object = {}): Promise<any> {
-        return new Promise((resolve, reject) => {
-            const collection = (domain as Record<string, any>)[collectionName]
-
-            collection
-                .find(queryObject.query, queryObject.data)
-                .sort(sortQuery)
-                .then((results: object[]) => {
                     resolve(results)
                 })
                 .catch((error: any) => {

@@ -25,7 +25,12 @@ const updateSong = Joi.object({
     }
 })
 
+const deleteSong = Joi.object({
+    songId: idReqValidation
+})
+
 export default {
     createSong,
-    updateSong
+    updateSong,
+    deleteSong
 }
