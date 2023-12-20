@@ -10,6 +10,7 @@ import albumService from '../../../services/album'
 import songService from '../../../services/song'
 import playlistService from '../../../services/playlist'
 import categoryService from '../../../services/category'
+import libraryService from '../../../services/library'
 
 export default {
     createAlbum: async (_: any, { input }: createAlbumInput, { token }: any, info: GraphQLResolveInfo): Promise<createAlbumData> => {
@@ -55,6 +56,8 @@ export default {
             validateSelection(info.fieldNodes[0].selectionSet, fields.createPlaylist)
 
             const { _id, name, userId, image, description, isPrivate } = await playlistService.createPlaylist(token, input)
+
+            await libraryService.addPlaylist(userId, _id)
 
             return { playlistId: _id, name, userId, image, description, isPrivate }
         } catch (error: any) {

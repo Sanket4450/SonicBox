@@ -2,10 +2,12 @@ import { GraphQLResolveInfo, GraphQLError } from 'graphql'
 import { validateSchema, validateSelection } from '../../../utils/validate'
 import authValidation from '../../../validations/auth'
 import userValidation from '../../../validations/user'
+import libraryValidation from '../../../validations/library'
 import fields from '../fields/mutations'
 import constants from '../../../constants'
 import authService from '../../../services/auth'
 import userService from '../../../services/user'
+import libraryService from '../../../services/library'
 
 export default {
     createUser: async (_: any, { input }: userData, __: any, info: GraphQLResolveInfo): Promise<userIdAndTokens> => {
@@ -160,6 +162,114 @@ export default {
                 }
             })
         }
+    },
+
+    addLibraryPlaylist: async (_: any, { playlistId }: addRemoveLibraryPlaylist, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema({ playlistId }, libraryValidation.addRemoveLibraryPlaylist)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.addLibraryPlaylist)
+
+            await libraryService.addLibraryPlaylist(token, playlistId)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    removeLibraryPlaylist: async (_: any, { playlistId }: addRemoveLibraryPlaylist, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema({ playlistId }, libraryValidation.addRemoveLibraryPlaylist)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.removeLibraryPlaylist)
+
+            await libraryService.removeLibraryPlaylist(token, playlistId)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    addLibraryArtist: async (_: any, { artistId }: addRemoveLibraryArtist, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema({ artistId }, libraryValidation.addRemoveLibraryArtist)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.addLibraryArtist)
+
+            await libraryService.addLibraryArtist(token, artistId)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    removeLibraryArtist: async (_: any, { artistId }: addRemoveLibraryArtist, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema({ artistId }, libraryValidation.addRemoveLibraryArtist)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.removeLibraryArtist)
+
+            await libraryService.removeLibraryArtist(token, artistId)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    addLibraryAlbum: async (_: any, { albumId }: addRemoveLibraryAlbum, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema({ albumId }, libraryValidation.addRemoveLibraryAlbum)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.addLibraryAlbum)
+
+            await libraryService.addLibraryAlbum(token, albumId)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    removeLibraryAlbum: async (_: any, { albumId }: addRemoveLibraryAlbum, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSchema({ albumId }, libraryValidation.addRemoveLibraryAlbum)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.removeLibraryAlbum)
+
+            await libraryService.removeLibraryAlbum(token, albumId)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 
@@ -256,4 +366,16 @@ interface updateUserData {
     profile_picture: string
     description: string
     isVerified: boolean
+}
+
+interface addRemoveLibraryPlaylist {
+    playlistId: string
+}
+
+interface addRemoveLibraryArtist {
+    artistId: string
+}
+
+interface addRemoveLibraryAlbum {
+    albumId: string
 }

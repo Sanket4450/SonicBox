@@ -54,6 +54,19 @@ const getFullPlaylistById = async (_id: string): Promise<updatePlaylistData> => 
     return DbRepo.findOne(constants.COLLECTIONS.PLAYLIST, { query, data })
 }
 
+const checkPlaylistPrivate = async (_id: string): Promise<{ isPrivate: 1 }> => {
+    const query = {
+        _id
+    }
+
+    const data = {
+        isPrivate: 1,
+        _id: 0
+    }
+
+    return DbRepo.findOne(constants.COLLECTIONS.PLAYLIST, { query, data })
+}
+
 const createPlaylist = async (token: string, input: playlistInput): Promise<playlistData> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
@@ -286,6 +299,7 @@ interface addRemoveSong {
 export default {
     getPlaylistById,
     getPlaylistByIdAndUser,
+    checkPlaylistPrivate,
     createPlaylist,
     updatePlaylist,
     addSong,

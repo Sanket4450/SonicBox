@@ -174,6 +174,7 @@ interface updateAlbumData {
 }
 
 export default {
+    getAlbumById,
     getAlbumByIdAndArtist,
     createAlbum,
     updateAlbum

@@ -6,6 +6,12 @@ const logoutUser: string[] = ['success']
 const followUser: string[] = ['success']
 const unfollowUser: string[] = ['success']
 const updateUser: string[] = ['userId']
+const addLibraryPlaylist: string[] = ['success']
+const removeLibraryPlaylist: string[] = ['success']
+const addLibraryArtist: string[] = ['success']
+const removeLibraryArtist: string[] = ['success']
+const addLibraryAlbum: string[] = ['success']
+const removeLibraryAlbum: string[] = ['success']
 
 export default {
     createUser,
@@ -15,5 +21,11 @@ export default {
     logoutUser,
     followUser,
     unfollowUser,
-    updateUser
+    updateUser,
+    addLibraryPlaylist,
+    removeLibraryPlaylist,
+    addLibraryArtist,
+    removeLibraryArtist,
+    addLibraryAlbum,
+    removeLibraryAlbum
 }

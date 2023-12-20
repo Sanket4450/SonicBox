@@ -10,6 +10,7 @@ import {
 const createPlaylist = Joi.object({
     name: stringReqValidation,
     image: stringValidation,
+    description: stringValidation,
     isPrivate: booleanValidation
 })
 

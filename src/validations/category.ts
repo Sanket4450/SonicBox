@@ -20,9 +20,7 @@ const updateCategory = Joi.object({
     input: {
         name: stringValidation,
         image: stringValidation,
-        description: stringValidation,
-        addPlaylist: idValidation,
-        removePlaylist: idValidation
+        description: stringValidation
     }
 })
 
