@@ -29,17 +29,25 @@ const getFullCategory = async (_id: string): Promise<updateCategoryData> => {
 }
 
 const removeAllPlaylists = async (playlistId: string): Promise<void> => {
-    const query = {
-        playlists: new mongoose.Types.ObjectId(playlistId)
-    }
-
-    const data = {
-        $pull: {
+    try {
+        const query = {
             playlists: new mongoose.Types.ObjectId(playlistId)
         }
-    }
 
-    await DbRepo.updateMany(constants.COLLECTIONS.CATEGORY, { query, data })
+        const data = {
+            $pull: {
+                playlists: new mongoose.Types.ObjectId(playlistId)
+            }
+        }
+
+        await DbRepo.updateMany(constants.COLLECTIONS.CATEGORY, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 const createCategory = async (token: string, input: categoryInput): Promise<categoryData> => {
@@ -181,105 +189,121 @@ interface updateCategoryData {
 }
 
 const addPlaylist = async (token: string, { categoryId, playlistId }: addRemovePlaylist): Promise<void> => {
-    const { sub, role } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+    try {
+        const { sub, role } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
-    if (!await userService.getUserById(sub)) {
-        throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    if (role !== 'admin') {
-        throw new GraphQLError(constants.MESSAGES.USER_NOT_ALLOWED, {
-            extensions: {
-                code: 'FORBIDDEN'
-            }
-        })
-    }
-
-    if (!await getCategoryById(categoryId)) {
-        throw new GraphQLError(constants.MESSAGES.CATEGORY_NOT_EXIST, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    if (!await playlistService.getPlaylistById(playlistId)) {
-        throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    const query = {
-        $and: [
-            { _id: categoryId },
-            { playlists: { $ne: new mongoose.Types.ObjectId(playlistId) } }
-        ]
-    }
-
-    const data = {
-        $push: {
-            playlists: new mongoose.Types.ObjectId(playlistId)
+        if (!await userService.getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
         }
-    }
 
-    await DbRepo.updateOne(constants.COLLECTIONS.CATEGORY, { query, data })
+        if (role !== 'admin') {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_ALLOWED, {
+                extensions: {
+                    code: 'FORBIDDEN'
+                }
+            })
+        }
+
+        if (!await getCategoryById(categoryId)) {
+            throw new GraphQLError(constants.MESSAGES.CATEGORY_NOT_EXIST, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (!await playlistService.getPlaylistById(playlistId)) {
+            throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        const query = {
+            $and: [
+                { _id: categoryId },
+                { playlists: { $ne: new mongoose.Types.ObjectId(playlistId) } }
+            ]
+        }
+
+        const data = {
+            $push: {
+                playlists: new mongoose.Types.ObjectId(playlistId)
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.CATEGORY, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 const removePlaylist = async (token: string, { categoryId, playlistId }: addRemovePlaylist): Promise<void> => {
-    const { sub, role } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+    try {
+        const { sub, role } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
-    if (!await userService.getUserById(sub)) {
-        throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    if (role !== 'admin') {
-        throw new GraphQLError(constants.MESSAGES.USER_NOT_ALLOWED, {
-            extensions: {
-                code: 'FORBIDDEN'
-            }
-        })
-    }
-
-    if (!await getCategoryById(categoryId)) {
-        throw new GraphQLError(constants.MESSAGES.CATEGORY_NOT_EXIST, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    if (!await playlistService.getPlaylistById(playlistId)) {
-        throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    const query = {
-        $and: [
-            { _id: categoryId },
-            { playlists: new mongoose.Types.ObjectId(playlistId) }
-        ]
-    }
-
-    const data = {
-        $pull: {
-            playlists: new mongoose.Types.ObjectId(playlistId)
+        if (!await userService.getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
         }
-    }
 
-    await DbRepo.updateOne(constants.COLLECTIONS.CATEGORY, { query, data })
+        if (role !== 'admin') {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_ALLOWED, {
+                extensions: {
+                    code: 'FORBIDDEN'
+                }
+            })
+        }
+
+        if (!await getCategoryById(categoryId)) {
+            throw new GraphQLError(constants.MESSAGES.CATEGORY_NOT_EXIST, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (!await playlistService.getPlaylistById(playlistId)) {
+            throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        const query = {
+            $and: [
+                { _id: categoryId },
+                { playlists: new mongoose.Types.ObjectId(playlistId) }
+            ]
+        }
+
+        const data = {
+            $pull: {
+                playlists: new mongoose.Types.ObjectId(playlistId)
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.CATEGORY, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 interface addRemovePlaylist {

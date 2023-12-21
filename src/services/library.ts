@@ -8,48 +8,72 @@ import playlistService from './playlist'
 import albumService from './album'
 
 const addPlaylist = async (userId: string, playlistId: string): Promise<void> => {
-    const query = {
-        $and: [
-            { userId: new mongoose.Types.ObjectId(userId) },
-            { playlists: { $ne: new mongoose.Types.ObjectId(playlistId) } }
-        ]
-    }
-
-    const data = {
-        $push: {
-            playlists: new mongoose.Types.ObjectId(playlistId)
+    try {
+        const query = {
+            $and: [
+                { userId: new mongoose.Types.ObjectId(userId) },
+                { playlists: { $ne: new mongoose.Types.ObjectId(playlistId) } }
+            ]
         }
-    }
 
-    await DbRepo.updateOne(constants.COLLECTIONS.LIBRARY, { query, data })
+        const data = {
+            $push: {
+                playlists: new mongoose.Types.ObjectId(playlistId)
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.LIBRARY, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 const removeAllPlaylists = async (playlistId: string): Promise<void> => {
-    const query = {
-        playlists: new mongoose.Types.ObjectId(playlistId)
-    }
-
-    const data = {
-        $pull: {
+    try {
+        const query = {
             playlists: new mongoose.Types.ObjectId(playlistId)
         }
-    }
 
-    await DbRepo.updateMany(constants.COLLECTIONS.LIBRARY, { query, data })
+        const data = {
+            $pull: {
+                playlists: new mongoose.Types.ObjectId(playlistId)
+            }
+        }
+
+        await DbRepo.updateMany(constants.COLLECTIONS.LIBRARY, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 const removeAllAlbums = async (albumId: string): Promise<void> => {
-    const query = {
-        albums: new mongoose.Types.ObjectId(albumId)
-    }
-
-    const data = {
-        $pull: {
+    try {
+        const query = {
             albums: new mongoose.Types.ObjectId(albumId)
         }
-    }
 
-    await DbRepo.updateMany(constants.COLLECTIONS.LIBRARY, { query, data })
+        const data = {
+            $pull: {
+                albums: new mongoose.Types.ObjectId(albumId)
+            }
+        }
+
+        await DbRepo.updateMany(constants.COLLECTIONS.LIBRARY, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 const addLibraryPlaylist = async (token: string, playlistId: string): Promise<void> => {
@@ -307,6 +331,22 @@ const removeLibraryAlbum = async (token: string, albumId: string): Promise<void>
     }
 }
 
+const deleteLibraryByUserId = async (userId: string): Promise<void> => {
+    try {
+        const query = {
+            userId: new mongoose.Types.ObjectId(userId)
+        }
+
+        await DbRepo.deleteOne(constants.COLLECTIONS.LIBRARY, { query })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 export default {
     addPlaylist,
     removeAllPlaylists,
@@ -316,5 +356,6 @@ export default {
     addLibraryArtist,
     removeLibraryArtist,
     addLibraryAlbum,
-    removeLibraryAlbum
+    removeLibraryAlbum,
+    deleteLibraryByUserId
 }

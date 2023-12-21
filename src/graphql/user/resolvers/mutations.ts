@@ -270,6 +270,22 @@ export default {
                 }
             })
         }
+    },
+
+    deleteUser: async (_: any, __: any, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+        try {
+            validateSelection(info.fieldNodes[0].selectionSet, fields.deleteUser)
+
+            await userService.deleteUser(token)
+
+            return { success: true }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 

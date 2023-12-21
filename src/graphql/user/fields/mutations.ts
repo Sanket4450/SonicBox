@@ -12,6 +12,7 @@ const addLibraryArtist: string[] = ['success']
 const removeLibraryArtist: string[] = ['success']
 const addLibraryAlbum: string[] = ['success']
 const removeLibraryAlbum: string[] = ['success']
+const deleteUser: string[] = ['success']
 
 export default {
     createUser,
@@ -27,5 +28,6 @@ export default {
     addLibraryArtist,
     removeLibraryArtist,
     addLibraryAlbum,
-    removeLibraryAlbum
+    removeLibraryAlbum,
+    deleteUser
 }

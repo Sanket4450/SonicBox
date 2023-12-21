@@ -38,7 +38,9 @@ export default {
         CATEGORY_NOT_EXIST: 'Category does not exist with this categoryId',
         ONLY_ADMIN_PLAYLISTS_ALLOWED: 'Only playlists created by admin are allowed',
         CANNOT_MODIFY_RESOURCE: 'You are not authorized to modify this resource',
-        ALBUM_MUST_BE_EMPTY: 'Album must be empty to be deleted'
+        ALBUM_MUST_BE_EMPTY: 'Album must be empty to be deleted',
+        ARTIST_NOT_DELETE: 'Artist is not allowed to delete account',
+        ADMIN_NOT_DELETE: 'Admin is not allowed to delete account'
     },
     COLLECTIONS: {
         USER: 'User',

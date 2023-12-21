@@ -14,5 +14,6 @@ export default `#graphql
         removeLibraryArtist(artistId: String!): SuccessResponse!
         addLibraryAlbum(albumId: String!): SuccessResponse!
         removeLibraryAlbum(albumId: String!): SuccessResponse!
+        deleteUser: SuccessResponse!
     }
 `

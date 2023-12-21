@@ -31,20 +31,28 @@ const generateToken = ({ payload, secret, options }: tokenType): string => {
 }
 
 const generateAuthTokens = async (payload: payload): Promise<authTokens> => {
-    const accessToken = generateToken({
-        payload,
-        secret: process.env.ACCESS_TOKEN_SECRET as string,
-        options: { expiresIn: process.env.ACCESS_TOKEN_EXPIRY as string }
-    })
-    const refreshToken = generateToken({
-        payload,
-        secret: process.env.REFRESH_TOKEN_SECRET as string,
-        options: { expiresIn: process.env.REFRESH_TOKEN_EXPIRY as string }
-    })
+    try {
+        const accessToken = generateToken({
+            payload,
+            secret: process.env.ACCESS_TOKEN_SECRET as string,
+            options: { expiresIn: process.env.ACCESS_TOKEN_EXPIRY as string }
+        })
+        const refreshToken = generateToken({
+            payload,
+            secret: process.env.REFRESH_TOKEN_SECRET as string,
+            options: { expiresIn: process.env.REFRESH_TOKEN_EXPIRY as string }
+        })
 
-    return {
-        accessToken,
-        refreshToken
+        return {
+            accessToken,
+            refreshToken
+        }
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
     }
 }
 

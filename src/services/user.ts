@@ -4,6 +4,8 @@ import DbRepo from '../dbRepo'
 import constants from '../constants'
 import authService from './auth'
 import tokenService from './token'
+import playlistService from './playlist'
+import libraryService from './library'
 
 const getUserById = async (_id: string): Promise<{ _id: string } | null> => {
     const query = {
@@ -328,7 +330,7 @@ interface updateUserData {
 const deleteAllSessions = async (userId: string): Promise<void> => {
     try {
         const query = {
-            userId
+            userId: new mongoose.Types.ObjectId(userId)
         }
 
         await DbRepo.deleteMany(constants.COLLECTIONS.SESSION, { query })
@@ -467,25 +469,33 @@ const followUserById = async (followerId: string, followingId: string): Promise<
 }
 
 const followUser = async (token: string, { userId }: followUnfollowUser): Promise<void> => {
-    const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+    try {
+        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
-    if (!await getUserById(sub)) {
-        throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+        if (!await getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (!await getUserById(userId)) {
+            throw new GraphQLError(constants.MESSAGES.FOLLOWING_USER_NOT_EXIST, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        await followUserById(sub, userId)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
-                code: 'NOT_FOUND'
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
             }
         })
     }
-
-    if (!await getUserById(userId)) {
-        throw new GraphQLError(constants.MESSAGES.FOLLOWING_USER_NOT_EXIST, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    await followUserById(sub, userId)
 }
 
 const unfollowUserById = async (followerId: string, followingId: string): Promise<void> => {
@@ -514,29 +524,97 @@ const unfollowUserById = async (followerId: string, followingId: string): Promis
 }
 
 const unfollowUser = async (token: string, { userId }: followUnfollowUser): Promise<void> => {
-    const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+    try {
+        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
-    if (!await getUserById(sub)) {
-        throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+        if (!await getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (!await getUserById(userId)) {
+            throw new GraphQLError(constants.MESSAGES.FOLLOWING_USER_NOT_EXIST, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        await unfollowUserById(sub, userId)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
-                code: 'NOT_FOUND'
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
             }
         })
     }
-
-    if (!await getUserById(userId)) {
-        throw new GraphQLError(constants.MESSAGES.FOLLOWING_USER_NOT_EXIST, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    await unfollowUserById(sub, userId)
 }
 
 interface followUnfollowUser {
     userId: string
+}
+
+const deleteUserById = async (_id: string) => {
+    try {
+        const query = {
+            _id
+        }
+
+        await DbRepo.deleteOne(constants.COLLECTIONS.USER, { query })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const deleteUser = async (token: string): Promise<void> => {
+    try {
+        const { sub, role } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+
+        if (!await getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (role === 'artist') {
+            throw new GraphQLError(constants.MESSAGES.ARTIST_NOT_DELETE, {
+                extensions: {
+                    code: 'FORBIDDEN'
+                }
+            })
+        }
+
+        if (role === 'admin') {
+            throw new GraphQLError(constants.MESSAGES.ADMIN_NOT_DELETE, {
+                extensions: {
+                    code: 'FORBIDDEN'
+                }
+            })
+        }
+
+        await deleteUserById(sub)
+
+        await deleteAllSessions(sub)
+
+        await libraryService.deleteLibraryByUserId(sub)
+
+        await playlistService.deleteAllPlaylistsByUserId(sub)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 export default {
@@ -558,5 +636,6 @@ export default {
     updateSessionById,
     deleteSessionById,
     followUser,
-    unfollowUser
+    unfollowUser,
+    deleteUser
 }

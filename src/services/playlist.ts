@@ -70,17 +70,25 @@ const checkPlaylistPrivate = async (_id: string): Promise<{ isPrivate: 1 }> => {
 }
 
 const removeAllSongs = async (songId: string): Promise<void> => {
-    const query = {
-        songs: new mongoose.Types.ObjectId(songId)
-    }
-
-    const data = {
-        $pull: {
+    try {
+        const query = {
             songs: new mongoose.Types.ObjectId(songId)
         }
-    }
 
-    await DbRepo.updateMany(constants.COLLECTIONS.PLAYLIST, { query, data })
+        const data = {
+            $pull: {
+                songs: new mongoose.Types.ObjectId(songId)
+            }
+        }
+
+        await DbRepo.updateMany(constants.COLLECTIONS.PLAYLIST, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 const createPlaylist = async (token: string, input: playlistInput): Promise<playlistData> => {
@@ -206,105 +214,121 @@ interface updatePlaylistData {
 }
 
 const addSong = async (token: string, { playlistId, songId }: addRemoveSong): Promise<void> => {
-    const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+    try {
+        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
-    if (!await userService.getUserById(sub)) {
-        throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    if (!await getPlaylistById(playlistId)) {
-        throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    if (!await getPlaylistByIdAndUser(playlistId, sub)) {
-        throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_EXIST, {
-            extensions: {
-                code: 'CONFLICT'
-            }
-        })
-    }
-
-    if (!await songService.getSongById(songId)) {
-        throw new GraphQLError(constants.MESSAGES.SONG_NOT_FOUND, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    const query = {
-        $and: [
-            { _id: playlistId },
-            { songs: { $ne: new mongoose.Types.ObjectId(songId) } }
-        ]
-    }
-
-    const data = {
-        $push: {
-            songs: new mongoose.Types.ObjectId(songId)
+        if (!await userService.getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
         }
-    }
 
-    await DbRepo.updateOne(constants.COLLECTIONS.PLAYLIST, { query, data })
+        if (!await getPlaylistById(playlistId)) {
+            throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (!await getPlaylistByIdAndUser(playlistId, sub)) {
+            throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_EXIST, {
+                extensions: {
+                    code: 'CONFLICT'
+                }
+            })
+        }
+
+        if (!await songService.getSongById(songId)) {
+            throw new GraphQLError(constants.MESSAGES.SONG_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        const query = {
+            $and: [
+                { _id: playlistId },
+                { songs: { $ne: new mongoose.Types.ObjectId(songId) } }
+            ]
+        }
+
+        const data = {
+            $push: {
+                songs: new mongoose.Types.ObjectId(songId)
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.PLAYLIST, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 const removeSong = async (token: string, { playlistId, songId }: addRemoveSong): Promise<void> => {
-    const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+    try {
+        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
-    if (!await userService.getUserById(sub)) {
-        throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    if (!await getPlaylistById(playlistId)) {
-        throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-
-    if (!await getPlaylistByIdAndUser(playlistId, sub)) {
-        throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_EXIST, {
-            extensions: {
-                code: 'CONFLICT'
-            }
-        })
-    }
-
-    if (!await songService.getSongById(songId)) {
-        throw new GraphQLError(constants.MESSAGES.SONG_NOT_FOUND, {
-            extensions: {
-                code: 'NOT_FOUND'
-            }
-        })
-    }
-    
-    const query = {
-        $and: [
-            { _id: playlistId },
-            { songs: new mongoose.Types.ObjectId(songId) }
-        ]
-    }
-
-    const data = {
-        $pull: {
-            songs: new mongoose.Types.ObjectId(songId)
+        if (!await userService.getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
         }
-    }
 
-    await DbRepo.updateOne(constants.COLLECTIONS.PLAYLIST, { query, data })
+        if (!await getPlaylistById(playlistId)) {
+            throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (!await getPlaylistByIdAndUser(playlistId, sub)) {
+            throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_EXIST, {
+                extensions: {
+                    code: 'CONFLICT'
+                }
+            })
+        }
+
+        if (!await songService.getSongById(songId)) {
+            throw new GraphQLError(constants.MESSAGES.SONG_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        const query = {
+            $and: [
+                { _id: playlistId },
+                { songs: new mongoose.Types.ObjectId(songId) }
+            ]
+        }
+
+        const data = {
+            $pull: {
+                songs: new mongoose.Types.ObjectId(songId)
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.PLAYLIST, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 interface addRemoveSong {
@@ -358,6 +382,22 @@ const deletePlaylist = async (token: string, playlistId: string): Promise<void> 
     }
 }
 
+const deleteAllPlaylistsByUserId = async (userId: string): Promise<void> => {
+    try {
+        const query = {
+            userId: new mongoose.Types.ObjectId(userId)
+        }
+
+        await DbRepo.deleteMany(constants.COLLECTIONS.PLAYLIST, { query })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 export default {
     getPlaylistById,
     getPlaylistByIdAndUser,
@@ -367,5 +407,6 @@ export default {
     updatePlaylist,
     addSong,
     removeSong,
-    deletePlaylist
+    deletePlaylist,
+    deleteAllPlaylistsByUserId
 }

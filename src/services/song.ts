@@ -144,38 +144,54 @@ interface songData {
 }
 
 const addArtist = async (songId: string, artistId: string): Promise<void> => {
-    const query = {
-        $and: [
-            { _id: songId },
-            { artists: { $ne: new mongoose.Types.ObjectId(artistId) } }
-        ]
-    }
-
-    const data = {
-        $push: {
-            artists: new mongoose.Types.ObjectId(artistId)
+    try {
+        const query = {
+            $and: [
+                { _id: songId },
+                { artists: { $ne: new mongoose.Types.ObjectId(artistId) } }
+            ]
         }
-    }
 
-    await DbRepo.updateOne(constants.COLLECTIONS.SONG, { query, data })
+        const data = {
+            $push: {
+                artists: new mongoose.Types.ObjectId(artistId)
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.SONG, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 const removeArtist = async (songId: string, artistId: string, defaultArtist: string): Promise<void> => {
-    const query = {
-        $and: [
-            { _id: songId },
-            { artists: new mongoose.Types.ObjectId(artistId) },
-            { artists: { $ne: new mongoose.Types.ObjectId(defaultArtist) } }
-        ]
-    }
-
-    const data = {
-        $pull: {
-            artists: new mongoose.Types.ObjectId(artistId)
+    try {
+        const query = {
+            $and: [
+                { _id: songId },
+                { artists: new mongoose.Types.ObjectId(artistId) },
+                { artists: { $ne: new mongoose.Types.ObjectId(defaultArtist) } }
+            ]
         }
-    }
 
-    await DbRepo.updateOne(constants.COLLECTIONS.SONG, { query, data })
+        const data = {
+            $pull: {
+                artists: new mongoose.Types.ObjectId(artistId)
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.SONG, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
 }
 
 const updateSong = async (token: string, { songId, input }: updateSongParams): Promise<updateSongData> => {
