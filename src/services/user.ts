@@ -617,6 +617,108 @@ const deleteUser = async (token: string): Promise<void> => {
     }
 }
 
+const getUsers = async (input: usersInput = {}): Promise<user[]> => {
+    try {
+        const keyword: string = input.keyword || ''
+        const page: number = input.page || 1
+        const limit: number = input.limit || 10
+
+        const pipeline: object[] = [
+            {
+                $match: {
+                    $or: [
+                        { username: { $regex: keyword, $options: 'i' } },
+                        { name: { $regex: keyword, $options: 'i' } },
+                        { email: { $regex: keyword, $options: 'i' } },
+                        { state: { $regex: keyword, $options: 'i' } },
+                        { country: { $regex: keyword, $options: 'i' } },
+                        { description: { $regex: keyword, $options: 'i' } }
+                    ]
+                }
+            },
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: '_id',
+                    foreignField: 'follows',
+                    as: 'followers'
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    username: { $first: '$username' },
+                    name: { $first: '$name' },
+                    email: { $first: '$email' },
+                    gender: { $first: '$gender' },
+                    dateOfBirth: { $first: '$dateOfBirth' },
+                    state: { $first: '$state' },
+                    country: { $first: '$country' },
+                    profile_picture: { $first: '$profile_picture' },
+                    description: { $first: '$description' },
+                    isVerified: { $first: '$isVerfied' },
+                    followingsCount: { $sum: { $size: '$follows' } },
+                    followersCount: { $sum: { $size: '$followers' } }
+                }
+            },
+            {
+                $project: {
+                    username: 1,
+                    name: 1,
+                    email: 1,
+                    gender: 1,
+                    dateOfBirth: 1,
+                    state: 1,
+                    country: 1,
+                    profile_picture: 1,
+                    description: 1,
+                    isVerified: 1,
+                    followingsCount: 1,
+                    followersCount: 1,
+                    _id: 0,
+                    userId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.USER, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface usersInput {
+    keyword?: string
+    page?: number
+    limit?: number
+}
+
+interface user {
+    userId: string,
+    username: string,
+    name: string,
+    email: string,
+    gender: string,
+    dateOfBirth: string,
+    state: string,
+    country: string,
+    profile_picture: string,
+    description: string,
+    isVerified: boolean,
+    followingsCount: number,
+    followersCount: number
+}
+
 export default {
     getUserById,
     getUserByUsername,
@@ -637,5 +739,6 @@ export default {
     deleteSessionById,
     followUser,
     unfollowUser,
-    deleteUser
+    deleteUser,
+    getUsers
 }

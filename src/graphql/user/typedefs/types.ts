@@ -108,4 +108,32 @@ export default `#graphql
         description: String
         isVerified: Boolean
     }
+
+    type User {
+        userId: String!
+        username: String
+        name: String
+        email: String
+        gender: GenderType
+        dateOfBirth: String
+        state: String
+        country: String
+        profile_picture: String
+        description: String
+        isVerified: Boolean
+        # followings(page: String limit: String): [User]
+        followingsCount: Int
+        # followers(page: String limit: String): [User]
+        followersCount: Int
+        # playlists: [Playlist]
+        # libraryPlaylists: [Playlist]
+        # libraryArtists: [User]
+        # libraryAlbums: [Album]
+    }
+
+    input usersInput {
+        keyword: String
+        page: Int = 1
+        limit: Int = 10
+    }
 `

@@ -1,9 +1,11 @@
 import { GraphQLResolveInfo, GraphQLError } from 'graphql'
 import { validateSchema, validateSelection } from '../../../utils/validate'
 import authValidation from '../../../validations/auth'
+import userValidation from '../../../validations/user'
 import fields from '../fields/queries'
 import constants from '../../../constants'
 import authService from '../../../services/auth'
+import userService from '../../../services/user'
 
 export default {
     requestReset: async (_: any, { input }: emailAndDevice, __: any, info: GraphQLResolveInfo): Promise<resetToken> => {
@@ -59,6 +61,24 @@ export default {
             })
         }
     },
+
+    users: async (_: any, { input }: usersInput, __: any, info: GraphQLResolveInfo): Promise<user[]> => {
+        try {
+            validateSchema(input, userValidation.users)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.users)
+
+            const users = await userService.getUsers(input)
+
+            return users
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    }
 }
 
 interface emailAndDevice {
@@ -86,4 +106,28 @@ type token = {
 interface authTokens {
     accessToken: string
     refreshToken: string
+}
+
+interface usersInput {
+    input: {
+        keyword?: string
+        page?: number
+        limit?: number
+    }
+}
+
+interface user {
+    userId: string,
+    username: string,
+    name: string,
+    email: string,
+    gender: string,
+    dateOfBirth: string,
+    state: string,
+    country: string,
+    profile_picture: string,
+    description: string,
+    isVerified: boolean,
+    followingsCount: number,
+    followersCount: number
 }

@@ -3,6 +3,7 @@ import {
     idReqValidation,
     stringValidation,
     dateValidation,
+    pageAndLimit
 } from './common'
 
 const followUnfollowUser = Joi.object({
@@ -23,7 +24,18 @@ const updateUser = Joi.object({
     description: stringValidation,
 })
 
+const users = Joi.object({
+    keyword: stringValidation,
+    ...pageAndLimit
+})
+
+const user = Joi.object({
+    userId: idReqValidation
+})
+
 export default {
     followUnfollowUser,
-    updateUser
+    updateUser,
+    users,
+    user
 }

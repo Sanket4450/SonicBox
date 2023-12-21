@@ -129,4 +129,11 @@ export default `#graphql
         categoryId: String!
         playlistId: String!
     }
+
+    input CategoriesInput {
+        categoryId: String
+        root: Boolean = false
+        page: Int = 1
+        limit: Int = 10
+    }
 `

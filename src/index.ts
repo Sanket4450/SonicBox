@@ -28,6 +28,10 @@ const init = async () => {
         context: setContext
     }))
 
+    app.use((req, res) => {
+        res.json({ success: 'false', message: 'Route not found' })
+    })
+
     app.listen(port, () => {
         console.log(`Server is listening on PORT: ${port}`)
     })
