@@ -18,6 +18,10 @@ export const pageAndLimit = {
     limit: integerNumberValidation.min(1)
 }
 
+export const pageAndLimitSchema = Joi.object({
+    ...pageAndLimit
+})
+
 export const secretValidation = stringValidation
     .pattern(new RegExp('^[A-Za-z0-9_@/?%]*$'))
     .messages({ 'string.pattern.base': 'Invalid secret. Secret does not match with the pattern' })

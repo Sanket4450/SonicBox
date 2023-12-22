@@ -78,6 +78,24 @@ export default {
                 }
             })
         }
+    },
+
+    user: async (_: any, { userId }: userId, __: any, info: GraphQLResolveInfo): Promise<user> => {
+        try {
+            validateSchema({ userId }, userValidation.user)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.user)
+
+            const [user] = await userService.getSingleUser(userId)
+
+            return user
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 
@@ -130,4 +148,8 @@ interface user {
     isVerified: boolean,
     followingsCount: number,
     followersCount: number
+}
+
+interface userId {
+    userId: string
 }
