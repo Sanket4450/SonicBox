@@ -5,5 +5,6 @@ export default `#graphql
         refreshAuthTokens(token: String!): AuthTokens!
         users(input: usersInput): [User]!
         user(id: String!): SingleUser!
+        profile: profile!
     }
 `

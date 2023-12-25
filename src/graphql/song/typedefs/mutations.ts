@@ -1,6 +1,6 @@
 export default `#graphql
     type Mutation {
-        createAlbum(input: createAlbumInput): createAlbumData!
+        createAlbum(input: createAlbumInput!): createAlbumData!
         createSong(input: createSongInput!): createSongData!
         createPlaylist(input: createPlaylistInput!): createPlaylistData!
         createCategory(input: createCategoryInput!): createCategoryData!

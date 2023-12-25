@@ -818,8 +818,11 @@ const getSingleUser = async (userId: string): Promise<user[]> => {
     }
 }
 
-const getUserFollowers = async (userId: string) => {
+const getUserFollowers = async ({ userId, page, limit }: userIdPageAndLimit): Promise<user[]> => {
     try {
+        page ||= 1
+        limit ||= 10
+
         const pipeline: object[] = [
             {
                 $match: {
@@ -838,6 +841,12 @@ const getUserFollowers = async (userId: string) => {
                 $unwind: {
                     path: '$followers'
                 }
+            },
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
             },
             {
                 $lookup: {
@@ -895,8 +904,17 @@ const getUserFollowers = async (userId: string) => {
     }
 }
 
-const getUserFollowings = async (userId: string) => {
+interface userIdPageAndLimit {
+    userId: string
+    page: number
+    limit: number
+}
+
+const getUserFollowings = async ({ userId, page, limit }: userIdPageAndLimit): Promise<user[]> => {
     try {
+        page ||= 1
+        limit ||= 10
+
         const pipeline: object[] = [
             {
                 $match: {
@@ -915,6 +933,12 @@ const getUserFollowings = async (userId: string) => {
                 $unwind: {
                     path: '$followings'
                 }
+            },
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
             },
             {
                 $lookup: {
@@ -972,6 +996,87 @@ const getUserFollowings = async (userId: string) => {
     }
 }
 
+const getProfile = async (token: string): Promise<user[]> => {
+    try {
+        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+
+        if (!await getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        const pipeline: object[] = [
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(sub)
+                }
+            },
+            {
+                $lookup: {
+                    from: 'followers',
+                    localField: '_id',
+                    foreignField: 'userId',
+                    as: 'followers'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'followers',
+                    localField: '_id',
+                    foreignField: 'followerId',
+                    as: 'followings'
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    username: { $first: '$username' },
+                    name: { $first: '$name' },
+                    email: { $first: '$email' },
+                    gender: { $first: '$gender' },
+                    dateOfBirth: { $first: '$dateOfBirth' },
+                    state: { $first: '$state' },
+                    country: { $first: '$country' },
+                    profile_picture: { $first: '$profile_picture' },
+                    description: { $first: '$description' },
+                    isVerified: { $first: '$isVerified' },
+                    followersCount: { $sum: { $size: '$followers' } },
+                    followingsCount: { $sum: { $size: '$followings' } },
+                }
+            },
+            {
+                $project: {
+                    username: 1,
+                    name: 1,
+                    email: 1,
+                    gender: 1,
+                    dateOfBirth: 1,
+                    state: 1,
+                    country: 1,
+                    profile_picture: 1,
+                    description: 1,
+                    isVerified: 1,
+                    followersCount: 1,
+                    followingsCount: 1,
+                    _id: 0,
+                    userId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.USER, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 export default {
     getUserById,
     getUserByUsername,
@@ -995,5 +1100,6 @@ export default {
     getUsers,
     getSingleUser,
     getUserFollowings,
-    getUserFollowers
+    getUserFollowers,
+    getProfile
 }

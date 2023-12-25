@@ -347,6 +347,230 @@ const deleteLibraryByUserId = async (userId: string): Promise<void> => {
     }
 }
 
+const getUserLibraryPlaylists = async ({ userId, page, limit }: userIdPageAndLimit): Promise<playlist[]> => {
+    try {
+        page ||= 1
+        limit ||= 10
+
+        const pipeline: object[] = [
+            {
+                $match: {
+                    userId: new mongoose.Types.ObjectId(userId)
+                }
+            },
+            {
+                $lookup: {
+                    from: 'playlists',
+                    localField: 'playlists',
+                    foreignField: '_id',
+                    as: 'playlists'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$playlists'
+                }
+            },
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
+            },
+            {
+                $group: {
+                    _id: '$playlists._id',
+                    name: { $first: '$playlists.name' },
+                    image: { $first: '$playlists.image' },
+                    description: { $first: '$playlists.description' },
+                    isPrivate: { $first: '$playlists.isPrivate' },
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    image: 1,
+                    description: 1,
+                    isPrivate: 1,
+                    _id: 0,
+                    playlistId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.LIBRARY, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface userIdPageAndLimit {
+    userId: string
+    page: number
+    limit: number
+}
+
+interface playlist {
+    playlistId: string
+    name: string
+    image: string
+    description: string
+    isPrivate: boolean
+}
+
+const getUserLibraryArtists = async ({ userId, page, limit }: userIdPageAndLimit): Promise<artist[]> => {
+    try {
+        page ||= 1
+        limit ||= 10
+
+        const pipeline: object[] = [
+            {
+                $match: {
+                    userId: new mongoose.Types.ObjectId(userId)
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'artists',
+                    foreignField: '_id',
+                    as: 'artists'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$artists'
+                }
+            },
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
+            },
+            {
+                $group: {
+                    _id: '$artists._id',
+                    username: { $first: '$artists.username' },
+                    name: { $first: '$artists.name' },
+                    gender: { $first: '$artists.gender' },
+                    dateOfBirth: { $first: '$artists.dateOfBirth' },
+                    state: { $first: '$artists.state' },
+                    country: { $first: '$artists.country' },
+                    profile_picture: { $first: '$artists.profile_picture' },
+                    description: { $first: '$artists.description' },
+                    isVerified: { $first: '$artists.isVerified' }
+                }
+            },
+            {
+                $project: {
+                    username: 1,
+                    name: 1,
+                    email: 1,
+                    gender: 1,
+                    dateOfBirth: 1,
+                    state: 1,
+                    country: 1,
+                    profile_picture: 1,
+                    description: 1,
+                    isVerified: 1,
+                    _id: 0,
+                    artistId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.LIBRARY, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface artist {
+    artistId: string
+    username: string
+    name: string
+    email: string
+    gender: string
+    dateOfBirth: string
+    state: string
+    country: string
+    profile_picture: string
+    description: string
+    isVerified: boolean
+}
+
+const getUserLibraryAlbums = async ({ userId, page, limit }: userIdPageAndLimit): Promise<album[]> => {
+    try {
+        page ||= 1
+        limit ||= 10
+
+        const pipeline: object[] = [
+            {
+                $match: {
+                    userId: new mongoose.Types.ObjectId(userId)
+                }
+            },
+            {
+                $lookup: {
+                    from: 'albums',
+                    localField: 'albums',
+                    foreignField: '_id',
+                    as: 'albums'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$albums'
+                }
+            },
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
+            },
+            {
+                $group: {
+                    _id: '$albums._id',
+                    name: { $first: '$albums.name' },
+                    image: { $first: '$albums.image' },
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    image: 1,
+                    _id: 0,
+                    albumId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.LIBRARY, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface album {
+    albumId: string
+    name: string
+    image: string
+}
+
 export default {
     addPlaylist,
     removeAllPlaylists,
@@ -357,5 +581,8 @@ export default {
     removeLibraryArtist,
     addLibraryAlbum,
     removeLibraryAlbum,
-    deleteLibraryByUserId
+    deleteLibraryByUserId,
+    getUserLibraryPlaylists,
+    getUserLibraryArtists,
+    getUserLibraryAlbums
 }

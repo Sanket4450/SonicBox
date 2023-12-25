@@ -1,5 +1,11 @@
 const users: string[] = ['userId']
+const playlists: string[] = ['playlistId']
+const artists: string[] = ['artistId']
+const albums: string[] = ['albumId']
 
 export default {
-    users
+    users,
+    playlists,
+    artists,
+    albums
 }

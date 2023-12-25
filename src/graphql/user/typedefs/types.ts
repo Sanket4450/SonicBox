@@ -143,22 +143,66 @@ export default `#graphql
         profile_picture: String
         description: String
         isVerified: Boolean
-        followers(page: String limit: String): [User]!
+        followers(page: Int = 1, limit: Int = 10): [User]!
         followersCount: Int
-        followings(page: String limit: String): [User]!
+        followings(page: Int = 1, limit: Int = 10): [User]!
         followingsCount: Int
-        playlists: [Playlist]!
-        # libraryPlaylists: [Playlist]
-        # libraryArtists: [User]
-        # libraryAlbums: [Album]
+        playlists(page: Int = 1, limit: Int = 10): [PublicPlaylist]!
+    }
+
+    type PublicPlaylist {
+        playlistId: String!
+        name: String
+        image: String
+        description: String
+    }
+
+    type profile {
+        userId: String!
+        username: String
+        name: String
+        email: String
+        gender: GenderType
+        dateOfBirth: String
+        state: String
+        country: String
+        profile_picture: String
+        description: String
+        isVerified: Boolean
+        followers(page: Int = 1, limit: Int = 10): [User]!
+        followersCount: Int
+        followings(page: Int = 1, limit: Int = 10): [User]!
+        followingsCount: Int
+        playlists(page: Int = 1, limit: Int = 10): [Playlist]!
+        libraryPlaylists(page: Int = 1, limit: Int = 10): [Playlist]!
+        libraryArtists(page: Int = 1, limit: Int = 10): [Artist]!
+        libraryAlbums(page: Int = 1, limit: Int = 10): [Album]!
     }
 
     type Playlist {
         playlistId: String!
         name: String
-        userId: String
         image: String
         description: String
         isPrivate: Boolean
+    }
+
+    type Artist {
+        artistId: String!
+        username: String
+        name: String
+        gender: GenderType
+        dateOfBirth: String
+        state: String
+        country: String
+        profile_picture: String
+        description: String
+        isVerified: Boolean
+    }
+
+    type Album {
+        albumId: String!
+        name: String
+        image: String
     }
 `

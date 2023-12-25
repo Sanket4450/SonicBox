@@ -96,6 +96,22 @@ export default {
                 }
             })
         }
+    },
+
+    profile: async (_: any, __: any, { token }: any, info: GraphQLResolveInfo): Promise<user> => {
+        try {
+            validateSelection(info.fieldNodes[0].selectionSet, fields.user)
+
+            const [user] = await userService.getProfile(token)
+
+            return user
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 

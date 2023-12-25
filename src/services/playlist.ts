@@ -398,6 +398,98 @@ const deleteAllPlaylistsByUserId = async (userId: string): Promise<void> => {
     }
 }
 
+const getUserPlaylists = async ({ userId, page, limit }: userIdPageAndLimit): Promise<playlist[]> => {
+    try {
+        page ||= 1
+        limit ||= 10
+
+        const pipeline: object[] = [
+            {
+                $match: {
+                    userId: new mongoose.Types.ObjectId(userId),
+                    isPrivate: false
+                }
+            },
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
+            },
+            {
+                $project: {
+                    name: 1,
+                    image: 1,
+                    description: 1,
+                    _id: 0,
+                    playlistId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.PLAYLIST, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const getProfilePlaylists = async ({ userId, page, limit }: userIdPageAndLimit): Promise<playlist[]> => {
+    try {
+        page ||= 1
+        limit ||= 10
+
+        const pipeline: object[] = [
+            {
+                $match: {
+                    userId: new mongoose.Types.ObjectId(userId)
+                }
+            },
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
+            },
+            {
+                $project: {
+                    name: 1,
+                    image: 1,
+                    description: 1,
+                    isPrivate: 1,
+                    _id: 0,
+                    playlistId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.PLAYLIST, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface userIdPageAndLimit {
+    userId: string
+    page: number
+    limit: number
+}
+
+interface playlist {
+    playlistId: string
+    name: string
+    image: string
+    description: string
+    isPrivate: boolean
+}
+
 export default {
     getPlaylistById,
     getPlaylistByIdAndUser,
@@ -408,5 +500,7 @@ export default {
     addSong,
     removeSong,
     deletePlaylist,
-    deleteAllPlaylistsByUserId
+    deleteAllPlaylistsByUserId,
+    getUserPlaylists,
+    getProfilePlaylists
 }
