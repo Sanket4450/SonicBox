@@ -4,6 +4,6 @@ export default `#graphql
         verifyResetOtp(input: verifyResetOtpInput!): SuccessResponse!
         refreshAuthTokens(token: String!): AuthTokens!
         users(input: usersInput): [User]!
-        user(userId: String!): SingleUser!
+        user(id: String!): SingleUser!
     }
 `

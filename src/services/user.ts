@@ -214,31 +214,6 @@ const getSessionByuserIdAndDevice = async (userId: string, device: string): Prom
     }
 }
 
-const addUserSession = async (userId: string, sessionDate: Date): Promise<void> => {
-    try {
-        const query = {
-            _id: userId
-        }
-
-        const data = {
-            $push: {
-                session_logins: {
-                    $each: [sessionDate],
-                    $position: 0
-                }
-            }
-        }
-
-        await DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
-    } catch (error: any) {
-        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-            extensions: {
-                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-            }
-        })
-    }
-}
-
 const updateUserById = async (_id: string, userData: Partial<userData>): Promise<void> => {
     try {
         const query = {
@@ -442,23 +417,35 @@ const deleteSessionById = async (_id: string): Promise<void> => {
     }
 }
 
-const followUserById = async (followerId: string, followingId: string): Promise<void> => {
+const getUserAndFollower = async (followingId: string, followerId: string): Promise<{ _id: 1 } | null> => {
     try {
         const query = {
-            $and: [
-                { _id: followerId },
-                { _id: { $ne: followingId } },
-                { follows: { $ne: new mongoose.Types.ObjectId(followingId) } }
-            ]
+            userId: new mongoose.Types.ObjectId(followingId),
+            followerId: new mongoose.Types.ObjectId(followerId)
         }
 
         const data = {
-            $push: {
-                follows: new mongoose.Types.ObjectId(followingId)
-            }
+            _id: 1
         }
 
-        await DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
+        return DbRepo.findOne(constants.COLLECTIONS.FOLLOWER, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const followUserById = async (followingId: string, followerId: string): Promise<void> => {
+    try {
+        const data = {
+            userId: new mongoose.Types.ObjectId(followingId),
+            followerId: new mongoose.Types.ObjectId(followerId)
+        }
+
+        await DbRepo.create(constants.COLLECTIONS.FOLLOWER, { data })
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -488,7 +475,17 @@ const followUser = async (token: string, { userId }: followUnfollowUser): Promis
             })
         }
 
-        await followUserById(sub, userId)
+        if (sub === userId) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_ALLOWED, {
+                extensions: {
+                    code: 'CONFLICT'
+                }
+            })
+        }
+
+        if (!await getUserAndFollower(userId, sub)) {
+            await followUserById(userId, sub)
+        }
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -498,22 +495,14 @@ const followUser = async (token: string, { userId }: followUnfollowUser): Promis
     }
 }
 
-const unfollowUserById = async (followerId: string, followingId: string): Promise<void> => {
+const unfollowUserById = async (followingId: string, followerId: string): Promise<void> => {
     try {
         const query = {
-            $and: [
-                { _id: followerId },
-                { follows: new mongoose.Types.ObjectId(followingId) }
-            ]
+            userId: new mongoose.Types.ObjectId(followingId),
+            followerId: new mongoose.Types.ObjectId(followerId)
         }
 
-        const data = {
-            $pull: {
-                follows: new mongoose.Types.ObjectId(followingId)
-            }
-        }
-
-        await DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
+        await DbRepo.deleteOne(constants.COLLECTIONS.FOLLOWER, { query })
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -543,7 +532,17 @@ const unfollowUser = async (token: string, { userId }: followUnfollowUser): Prom
             })
         }
 
-        await unfollowUserById(sub, userId)
+        if (sub === userId) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_ALLOWED, {
+                extensions: {
+                    code: 'CONFLICT'
+                }
+            })
+        }
+
+        if (await getUserAndFollower(userId, sub)) {
+            await unfollowUserById(userId, sub)
+        }
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -557,10 +556,29 @@ interface followUnfollowUser {
     userId: string
 }
 
-const deleteUserById = async (_id: string) => {
+const deleteAllFollowersAndFollowings = async (_id: string): Promise<void> => {
     try {
         const query = {
-            _id
+            $or: [
+                { userId: new mongoose.Types.ObjectId(_id) },
+                { followerId: new mongoose.Types.ObjectId(_id) }
+            ]
+        }
+
+        await DbRepo.deleteMany(constants.COLLECTIONS.FOLLOWER, { query })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const deleteUserById = async (_id: string): Promise<void> => {
+    try {
+        const query = {
+            _id: new mongoose.Types.ObjectId(_id)
         }
 
         await DbRepo.deleteOne(constants.COLLECTIONS.USER, { query })
@@ -601,9 +619,11 @@ const deleteUser = async (token: string): Promise<void> => {
             })
         }
 
+        await deleteAllSessions(sub)
+
         await deleteUserById(sub)
 
-        await deleteAllSessions(sub)
+        await deleteAllFollowersAndFollowings(sub)
 
         await libraryService.deleteLibraryByUserId(sub)
 
@@ -644,10 +664,18 @@ const getUsers = async (input: usersInput = {}): Promise<user[]> => {
             },
             {
                 $lookup: {
-                    from: 'users',
+                    from: 'followers',
                     localField: '_id',
-                    foreignField: 'follows',
+                    foreignField: 'userId',
                     as: 'followers'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'followers',
+                    localField: '_id',
+                    foreignField: 'followerId',
+                    as: 'followings'
                 }
             },
             {
@@ -662,9 +690,9 @@ const getUsers = async (input: usersInput = {}): Promise<user[]> => {
                     country: { $first: '$country' },
                     profile_picture: { $first: '$profile_picture' },
                     description: { $first: '$description' },
-                    isVerified: { $first: '$isVerfied' },
-                    followingsCount: { $sum: { $size: '$follows' } },
-                    followersCount: { $sum: { $size: '$followers' } }
+                    isVerified: { $first: '$isVerified' },
+                    followersCount: { $sum: { $size: '$followers' } },
+                    followingsCount: { $sum: { $size: '$followings' } },
                 }
             },
             {
@@ -679,8 +707,8 @@ const getUsers = async (input: usersInput = {}): Promise<user[]> => {
                     profile_picture: 1,
                     description: 1,
                     isVerified: 1,
-                    followingsCount: 1,
                     followersCount: 1,
+                    followingsCount: 1,
                     _id: 0,
                     userId: '$_id'
                 }
@@ -697,6 +725,28 @@ const getUsers = async (input: usersInput = {}): Promise<user[]> => {
     }
 }
 
+interface usersInput {
+    keyword?: string
+    page?: number
+    limit?: number
+}
+
+interface user {
+    userId: string
+    username: string
+    name: string
+    email: string
+    gender: string
+    dateOfBirth: string
+    state: string
+    country: string
+    profile_picture: string
+    description: string
+    isVerified: boolean
+    followingsCount: number
+    followersCount: number
+}
+
 const getSingleUser = async (userId: string): Promise<user[]> => {
     try {
         const pipeline: object[] = [
@@ -707,10 +757,18 @@ const getSingleUser = async (userId: string): Promise<user[]> => {
             },
             {
                 $lookup: {
-                    from: 'users',
+                    from: 'followers',
                     localField: '_id',
-                    foreignField: 'follows',
+                    foreignField: 'userId',
                     as: 'followers'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'followers',
+                    localField: '_id',
+                    foreignField: 'followerId',
+                    as: 'followings'
                 }
             },
             {
@@ -725,9 +783,9 @@ const getSingleUser = async (userId: string): Promise<user[]> => {
                     country: { $first: '$country' },
                     profile_picture: { $first: '$profile_picture' },
                     description: { $first: '$description' },
-                    isVerified: { $first: '$isVerfied' },
-                    followingsCount: { $sum: { $size: '$follows' } },
-                    followersCount: { $sum: { $size: '$followers' } }
+                    isVerified: { $first: '$isVerified' },
+                    followersCount: { $sum: { $size: '$followers' } },
+                    followingsCount: { $sum: { $size: '$followings' } },
                 }
             },
             {
@@ -742,8 +800,85 @@ const getSingleUser = async (userId: string): Promise<user[]> => {
                     profile_picture: 1,
                     description: 1,
                     isVerified: 1,
-                    followingsCount: 1,
                     followersCount: 1,
+                    followingsCount: 1,
+                    _id: 0,
+                    userId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.USER, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+const getUserFollowers = async (userId: string) => {
+    try {
+        const pipeline: object[] = [
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(userId)
+                }
+            },
+            {
+                $lookup: {
+                    from: 'followers',
+                    localField: '_id',
+                    foreignField: 'userId',
+                    as: 'followers'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$followers'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'followers.followerId',
+                    foreignField: '_id',
+                    as: 'followers'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$followers'
+                }
+            },
+            {
+                $group: {
+                    _id: '$followers._id',
+                    username: { $first: '$followers.username' },
+                    name: { $first: '$followers.name' },
+                    email: { $first: '$followers.email' },
+                    gender: { $first: '$followers.gender' },
+                    dateOfBirth: { $first: '$followers.dateOfBirth' },
+                    state: { $first: '$followers.state' },
+                    country: { $first: '$followers.country' },
+                    profile_picture: { $first: '$followers.profile_picture' },
+                    description: { $first: '$followers.description' },
+                    isVerified: { $first: '$followers.isVerified' }
+                }
+            },
+            {
+                $project: {
+                    username: 1,
+                    name: 1,
+                    email: 1,
+                    gender: 1,
+                    dateOfBirth: 1,
+                    state: 1,
+                    country: 1,
+                    profile_picture: 1,
+                    description: 1,
+                    isVerified: 1,
                     _id: 0,
                     userId: '$_id'
                 }
@@ -770,16 +905,28 @@ const getUserFollowings = async (userId: string) => {
             },
             {
                 $lookup: {
+                    from: 'followers',
+                    localField: '_id',
+                    foreignField: 'followerId',
+                    as: 'followings'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$followings'
+                }
+            },
+            {
+                $lookup: {
                     from: 'users',
-                    localField: 'follows',
+                    localField: 'followings.userId',
                     foreignField: '_id',
                     as: 'followings'
                 }
             },
             {
                 $unwind: {
-                    path: '$followings',
-                    preserveNullAndEmptyArrays: true
+                    path: '$followings'
                 }
             },
             {
@@ -794,7 +941,7 @@ const getUserFollowings = async (userId: string) => {
                     country: { $first: '$followings.country' },
                     profile_picture: { $first: '$followings.profile_picture' },
                     description: { $first: '$followings.description' },
-                    isVerified: { $first: '$followings.isVerfied' }
+                    isVerified: { $first: '$followings.isVerified' }
                 }
             },
             {
@@ -825,28 +972,6 @@ const getUserFollowings = async (userId: string) => {
     }
 }
 
-interface usersInput {
-    keyword?: string
-    page?: number
-    limit?: number
-}
-
-interface user {
-    userId: string,
-    username: string,
-    name: string,
-    email: string,
-    gender: string,
-    dateOfBirth: string,
-    state: string,
-    country: string,
-    profile_picture: string,
-    description: string,
-    isVerified: boolean,
-    followingsCount: number,
-    followersCount: number
-}
-
 export default {
     getUserById,
     getUserByUsername,
@@ -857,7 +982,6 @@ export default {
     createUser,
     createSession,
     getSessionByuserIdAndDevice,
-    addUserSession,
     updateUserById,
     updateUser,
     deleteAllSessions,
@@ -870,5 +994,6 @@ export default {
     deleteUser,
     getUsers,
     getSingleUser,
-    getUserFollowings
+    getUserFollowings,
+    getUserFollowers
 }

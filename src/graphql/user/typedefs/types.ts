@@ -127,8 +127,8 @@ export default `#graphql
         profile_picture: String
         description: String
         isVerified: Boolean
-        followingsCount: Int
         followersCount: Int
+        followingsCount: Int
     }
 
     type SingleUser {
@@ -143,13 +143,22 @@ export default `#graphql
         profile_picture: String
         description: String
         isVerified: Boolean
-        followings(page: String limit: String): [User]
-        followingsCount: Int
-        # followers(page: String limit: String): [User]
+        followers(page: String limit: String): [User]!
         followersCount: Int
-        # playlists: [Playlist]
+        followings(page: String limit: String): [User]!
+        followingsCount: Int
+        playlists: [Playlist]!
         # libraryPlaylists: [Playlist]
         # libraryArtists: [User]
         # libraryAlbums: [Album]
+    }
+
+    type Playlist {
+        playlistId: String!
+        name: String
+        userId: String
+        image: String
+        description: String
+        isPrivate: Boolean
     }
 `

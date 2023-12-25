@@ -80,13 +80,13 @@ export default {
         }
     },
 
-    user: async (_: any, { userId }: userId, __: any, info: GraphQLResolveInfo): Promise<user> => {
+    user: async (_: any, { id }: id, __: any, info: GraphQLResolveInfo): Promise<user> => {
         try {
-            validateSchema({ userId }, userValidation.user)
+            validateSchema({ id }, userValidation.user)
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.user)
 
-            const [user] = await userService.getSingleUser(userId)
+            const [user] = await userService.getSingleUser(id)
 
             return user
         } catch (error: any) {
@@ -150,6 +150,6 @@ interface user {
     followersCount: number
 }
 
-interface userId {
-    userId: string
+interface id {
+    id: string
 }

@@ -45,6 +45,7 @@ export default {
     COLLECTIONS: {
         USER: 'User',
         SESSION: 'Session',
+        FOLLOWER: 'Follower',
         LIBRARY: 'Library',
         SONG: 'Song',
         PLAYLIST: 'Playlist',

@@ -49,9 +49,7 @@ const registerUser = async (userData: userData): Promise<userIdAndTokens> => {
 
     const { accessToken, refreshToken } = await tokenService.generateAuthTokens(payload)
 
-    const { createdAt } = await userService.createSession({ userId: user._id, device: userData.deviceToken, token: refreshToken })
-
-    await userService.addUserSession(user._id, createdAt)
+    await userService.createSession({ userId: user._id, device: userData.deviceToken, token: refreshToken })
 
     return { userId: user._id, accessToken, refreshToken }
 }
@@ -145,9 +143,7 @@ const loginUser = async (loginData: loginData): Promise<userIdAndTokens> => {
 
     const { accessToken, refreshToken } = await tokenService.generateAuthTokens(payload)
 
-    const { createdAt } = await userService.createSession({ userId: user._id, device: loginData.deviceToken, token: refreshToken })
-
-    await userService.addUserSession(user._id, createdAt)
+    await userService.createSession({ userId: user._id, device: loginData.deviceToken, token: refreshToken })
 
     return { userId: user._id, accessToken, refreshToken }
 }

@@ -30,7 +30,7 @@ const users = Joi.object({
 })
 
 const user = Joi.object({
-    userId: idReqValidation
+    id: idReqValidation
 })
 
 export default {

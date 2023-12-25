@@ -58,15 +58,7 @@ const userSchema = new Schema({
     isVerified: {
         type: Boolean,
         default: false
-    },
-    session_logins: {
-        type: [Date],
-        default: []
-    },
-    follows: [{
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-    }]
+    }
 },
     {
         timestamps: true,
