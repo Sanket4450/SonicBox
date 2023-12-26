@@ -338,7 +338,7 @@ interface artist {
     isVerified: boolean
 }
 
-const getSingleAlbum = async (albumId: string): Promise<album[]> => {
+const getSingleAlbum = async (albumId: string): Promise<singleAlbum[]> => {
     try {
         const pipeline: object[] = [
             {
@@ -352,6 +352,14 @@ const getSingleAlbum = async (albumId: string): Promise<album[]> => {
                     localField: 'artistId',
                     foreignField: '_id',
                     as: 'artist'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'songs',
+                    localField: '_id',
+                    foreignField: 'albumId',
+                    as: 'songs'
                 }
             },
             {
@@ -372,7 +380,8 @@ const getSingleAlbum = async (albumId: string): Promise<album[]> => {
                             description: { $first: '$artist.description' },
                             isVerified: { $first: '$artist.isVerified' },
                         }
-                    }
+                    },
+                    songs: { $first: '$songs' }
                 }
             },
             {
@@ -395,7 +404,18 @@ const getSingleAlbum = async (albumId: string): Promise<album[]> => {
                     'artist.description': 1,
                     'artist.isVerified': 1,
                     _id: 0,
-                    albumId: '$_id'
+                    albumId: '$_id',
+                    songs: {
+                        $map: {
+                            input: '$songs',
+                            as: 'song',
+                            in: {
+                                songId: '$$song._id',
+                                name: '$$song.name',
+                                fileURL: '$$song.fileURL',
+                            }
+                        }
+                    }
                 }
             }
         ]
@@ -408,6 +428,20 @@ const getSingleAlbum = async (albumId: string): Promise<album[]> => {
             }
         })
     }
+}
+
+interface singleAlbum {
+    albumId: string
+    name: string
+    image: string
+    artist: artist
+    songs: song[]
+}
+
+interface song {
+    songId: string
+    name: string
+    fileURL: string
 }
 
 export default {

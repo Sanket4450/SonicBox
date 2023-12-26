@@ -24,7 +24,7 @@ export default {
         }
     },
 
-    album: async (_: any, { id }: id, __: any, info: GraphQLResolveInfo): Promise<album> => {
+    album: async (_: any, { id }: id, __: any, info: GraphQLResolveInfo): Promise<singleAlbum> => {
         try {
             validateSchema({ id }, albumValidation.album)
 
@@ -73,4 +73,18 @@ interface artist {
 
 interface id {
     id: string
+}
+
+interface singleAlbum {
+    albumId: string
+    name: string
+    image: string
+    artist: artist
+    songs: song[]
+}
+
+interface song {
+    songId: string
+    name: string
+    fileURL: string
 }
