@@ -236,10 +236,7 @@ const getAlbums = async (input: albumsInput = {}): Promise<album[]> => {
         const pipeline: object[] = [
             {
                 $match: {
-                    $or: [
-                        { name: { $regex: keyword, $options: 'i' } },
-                        { image: { $regex: keyword, $options: 'i' } }
-                    ]
+                    name: { $regex: keyword, $options: 'i' }
                 }
             },
             {

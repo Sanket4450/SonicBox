@@ -336,10 +336,228 @@ const deleteSong = async (token: string, songId: string): Promise<void> => {
     }
 }
 
+const getSongs = async (input: songsInput = {}): Promise<song[]> => {
+    try {
+        const keyword: string = input.keyword || ''
+        const page: number = input.page || 1
+        const limit: number = input.limit || 10
+
+        const pipeline: object[] = [
+            {
+                $match: {
+                    name: { $regex: keyword, $options: 'i' }
+                }
+            },
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'artists',
+                    foreignField: '_id',
+                    as: 'artists'
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    name: { $first: '$name' },
+                    fileURL: { $first: '$fileURL' },
+                    artists: { $first: '$artists' }
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    fileURL: 1,
+                    _id: 0,
+                    songId: '$_id',
+                    artists: {
+                        $map: {
+                            input: '$artists',
+                            as: 'artist',
+                            in: {
+                                artistId: '$$artist._id',
+                                username: '$$artist.username',
+                                name: '$$artist.name',
+                                gender: '$$artist.gender',
+                                dateOfBirth: '$$artist.dateOfBirth',
+                                state: '$$artist.state',
+                                country: '$$artist.country',
+                                profile_picture: '$$artist.profile_picture',
+                                description: '$$artist.description',
+                                isVerified: '$$artist.isVerified',
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.SONG, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface songsInput {
+    keyword?: string
+    page?: number
+    limit?: number
+}
+
+interface song {
+    songId: string
+    name: string
+    fileURL: string
+    artists: artist[]
+}
+
+interface artist {
+    artistId: string
+    username: string
+    name: string
+    gender: string
+    dateOfBirth: string
+    state: string
+    country: string
+    profile_picture: string
+    description: string
+    isVerified: boolean
+}
+
+const getSingleSong = async (songId: string): Promise<singleSong[]> => {
+    try {
+        const pipeline: object[] = [
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(songId)
+                }
+            },
+            {
+                $lookup: {
+                    from: 'albums',
+                    localField: 'albumId',
+                    foreignField: '_id',
+                    as: 'album'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'album.artistId',
+                    foreignField: '_id',
+                    as: 'albumArtist'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'artists',
+                    foreignField: '_id',
+                    as: 'artists'
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    name: { $first: '$name' },
+                    fileURL: { $first: '$fileURL' },
+                    album: {
+                        $addToSet: {
+                            albumId: { $first: '$album._id' },
+                            name: { $first: '$album.name' },
+                            image: { $first: '$album.image' },
+                            artist: {
+                                artistId: { $first: '$albumArtist._id' },
+                                username: { $first: '$albumArtist.username' },
+                                name: { $first: '$albumArtist.name' },
+                                gender: { $first: '$albumArtist.gender' },
+                                dateOfBirth: { $first: '$albumArtist.dateOfBirth' },
+                                state: { $first: '$albumArtist.state' },
+                                country: { $first: '$albumArtist.country' },
+                                profile_picture: { $first: '$albumArtist.profile_picture' },
+                                description: { $first: '$albumArtist.description' },
+                                isVerified: { $first: '$albumArtist.isVerified' },
+                            }
+                        }
+                    },
+                    artists: { $first: '$artists' }
+                }
+            },
+            {
+                $unwind: {
+                    path: '$album'
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    fileURL: 1,
+                    _id: 0,
+                    songId: '$_id',
+                    album: 1,
+                    artists: {
+                        $map: {
+                            input: '$artists',
+                            as: 'artist',
+                            in: {
+                                artistId: '$$artist._id',
+                                username: '$$artist.username',
+                                name: '$$artist.name',
+                                gender: '$$artist.gender',
+                                dateOfBirth: '$$artist.dateOfBirth',
+                                state: '$$artist.state',
+                                country: '$$artist.country',
+                                profile_picture: '$$artist.profile_picture',
+                                description: '$$artist.description',
+                                isVerified: '$$artist.isVerified',
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.SONG, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface singleSong {
+    songId: string
+    name: string
+    fileURL: string
+    album: album
+    artists: artist[]
+}
+
+interface album {
+    albumId: string
+    name: string
+    image: string
+    artist: artist
+}
+
 export default {
     getSongById,
     getSongByAlbum,
     createSong,
     updateSong,
-    deleteSong
+    deleteSong,
+    getSongs,
+    getSingleSong
 }

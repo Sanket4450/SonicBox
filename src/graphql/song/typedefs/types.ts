@@ -163,4 +163,25 @@ export default `#graphql
         name: String
         fileURL: String
     }
+
+    type SongWithArtists {
+        songId: String!
+        name: String
+        fileURL: String
+        artists: [Artist]!
+    }
+
+    input songsInput {
+        keyword: String
+        page: Int = 1
+        limit: Int = 10
+    }
+
+    type SongWithAlbumAndArtists {
+        songId: String!
+        name: String
+        fileURL: String
+        album: AlbumWithArtist!
+        artists: [Artist]!
+    }
 `
