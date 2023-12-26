@@ -136,4 +136,17 @@ export default `#graphql
         page: Int = 1
         limit: Int = 10
     }
+
+    input albumsInput {
+        keyword: String
+        page: Int = 1
+        limit: Int = 10
+    }
+
+    type AlbumWithArtist {
+        albumId: String!
+        name: String
+        image: String
+        artist: Artist!
+    }
 `

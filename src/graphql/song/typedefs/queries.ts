@@ -1,5 +1,6 @@
 export default `#graphql
     type Query {
-        test: String
+        albums(input: albumsInput): [AlbumWithArtist]!
+        album(id: String!): AlbumWithArtist!
     }
 `

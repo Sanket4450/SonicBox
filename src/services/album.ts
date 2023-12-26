@@ -227,10 +227,195 @@ const deleteAlbum = async (token: string, albumId: string): Promise<void> => {
     }
 }
 
+const getAlbums = async (input: albumsInput = {}): Promise<album[]> => {
+    try {
+        const keyword: string = input.keyword || ''
+        const page: number = input.page || 1
+        const limit: number = input.limit || 10
+
+        const pipeline: object[] = [
+            {
+                $match: {
+                    $or: [
+                        { name: { $regex: keyword, $options: 'i' } },
+                        { image: { $regex: keyword, $options: 'i' } }
+                    ]
+                }
+            },
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'artistId',
+                    foreignField: '_id',
+                    as: 'artist'
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    name: { $first: '$name' },
+                    image: { $first: '$image' },
+                    artist: {
+                        $addToSet: {
+                            artistId: { $first: '$artist._id' },
+                            username: { $first: '$artist.username' },
+                            name: { $first: '$artist.name' },
+                            gender: { $first: '$artist.ge' },
+                            dateOfBirth: { $first: '$artist.dateOfBirth' },
+                            state: { $first: '$artist.state' },
+                            country: { $first: '$artist.country' },
+                            profile_picture: { $first: '$artist.profile_picture' },
+                            description: { $first: '$artist.description' },
+                            isVerified: { $first: '$artist.isVerified' },
+                        }
+                    }
+                }
+            },
+            {
+                $unwind: {
+                    path: '$artist'
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    image: 1,
+                    'artist.artistId': 1,
+                    'artist.username': 1,
+                    'artist.name': 1,
+                    'artist.gender': 1,
+                    'artist.dateOfBirth': 1,
+                    'artist.state': 1,
+                    'artist.country': 1,
+                    'artist.profile_picture': 1,
+                    'artist.description': 1,
+                    'artist.isVerified': 1,
+                    _id: 0,
+                    albumId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.ALBUM, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface albumsInput {
+    keyword?: string
+    page?: number
+    limit?: number
+}
+
+interface album {
+    albumId: string
+    name: string
+    image: string
+    artist: artist
+}
+
+interface artist {
+    artistId: string
+    username: string
+    name: string
+    gender: string
+    dateOfBirth: string
+    state: string
+    country: string
+    profile_picture: string
+    description: string
+    isVerified: boolean
+}
+
+const getSingleAlbum = async (albumId: string): Promise<album[]> => {
+    try {
+        const pipeline: object[] = [
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(albumId)
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'artistId',
+                    foreignField: '_id',
+                    as: 'artist'
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    name: { $first: '$name' },
+                    image: { $first: '$image' },
+                    artist: {
+                        $addToSet: {
+                            artistId: { $first: '$artist._id' },
+                            username: { $first: '$artist.username' },
+                            name: { $first: '$artist.name' },
+                            gender: { $first: '$artist.ge' },
+                            dateOfBirth: { $first: '$artist.dateOfBirth' },
+                            state: { $first: '$artist.state' },
+                            country: { $first: '$artist.country' },
+                            profile_picture: { $first: '$artist.profile_picture' },
+                            description: { $first: '$artist.description' },
+                            isVerified: { $first: '$artist.isVerified' },
+                        }
+                    }
+                }
+            },
+            {
+                $unwind: {
+                    path: '$artist'
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    image: 1,
+                    'artist.artistId': 1,
+                    'artist.username': 1,
+                    'artist.name': 1,
+                    'artist.gender': 1,
+                    'artist.dateOfBirth': 1,
+                    'artist.state': 1,
+                    'artist.country': 1,
+                    'artist.profile_picture': 1,
+                    'artist.description': 1,
+                    'artist.isVerified': 1,
+                    _id: 0,
+                    albumId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.ALBUM, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 export default {
     getAlbumById,
     getAlbumByIdAndArtist,
     createAlbum,
     updateAlbum,
-    deleteAlbum
+    deleteAlbum,
+    getAlbums,
+    getSingleAlbum
 }

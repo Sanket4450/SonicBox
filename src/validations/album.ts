@@ -2,7 +2,8 @@ import Joi from 'joi'
 import {
     idReqValidation,
     stringReqValidation,
-    stringValidation
+    stringValidation,
+    pageAndLimit
 } from './common'
 
 const createAlbum = Joi.object({
@@ -23,8 +24,19 @@ const deleteAlbum = Joi.object({
     albumId: idReqValidation
 })
 
+const albums = Joi.object({
+    keyword: stringValidation,
+    ...pageAndLimit
+})
+
+const album = Joi.object({
+    id: idReqValidation
+})
+
 export default {
     createAlbum,
     updateAlbum,
-    deleteAlbum
+    deleteAlbum,
+    albums,
+    album
 }

@@ -151,18 +151,18 @@ interface usersInput {
 }
 
 interface user {
-    userId: string,
-    username: string,
-    name: string,
-    email: string,
-    gender: string,
-    dateOfBirth: string,
-    state: string,
-    country: string,
-    profile_picture: string,
-    description: string,
-    isVerified: boolean,
-    followingsCount: number,
+    userId: string
+    username: string
+    name: string
+    email: string
+    gender: string
+    dateOfBirth: string
+    state: string
+    country: string
+    profile_picture: string
+    description: string
+    isVerified: boolean
+    followingsCount: number
     followersCount: number
 }
 
