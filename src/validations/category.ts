@@ -4,7 +4,8 @@ import {
     idValidation,
     stringReqValidation,
     stringValidation,
-    idReqValidation
+    idReqValidation,
+    pageAndLimit
 } from './common'
 
 const createCategory = Joi.object({
@@ -33,9 +34,19 @@ const deleteCategory = Joi.object({
     categoryId: idReqValidation
 })
 
+const categories = Joi.object({
+    ...pageAndLimit
+})
+
+const category = Joi.object({
+    id: idReqValidation
+})
+
 export default {
     createCategory,
     updateCategory,
     addRemovePlaylist,
-    deleteCategory
+    deleteCategory,
+    categories,
+    category
 }

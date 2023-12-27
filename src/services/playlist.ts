@@ -490,6 +490,213 @@ interface playlist {
     isPrivate: boolean
 }
 
+const getPlaylists = async (input: playlistsInput = {}): Promise<playlist[]> => {
+    try {
+        const keyword: string = input.keyword || ''
+        const page: number = input.page || 1
+        const limit: number = input.limit || 10
+
+        const pipeline: object[] = [
+            {
+                $match: {
+                    name: { $regex: keyword, $options: 'i' },
+                    isPrivate: false
+                }
+            },
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
+            },
+            {
+                $project: {
+                    name: 1,
+                    image: 1,
+                    description: 1,
+                    _id: 0,
+                    playlistId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.PLAYLIST, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface playlistsInput {
+    keyword?: string
+    page?: number
+    limit?: number
+}
+
+interface playlist {
+    playlistId: string
+    name: string
+    image: string
+    description: string
+}
+
+const getSinglePlaylist = async (playlistId: string): Promise<singlePlaylist[]> => {
+    try {
+        const pipeline: object[] = [
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(playlistId),
+                    isPrivate: false
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'songs',
+                    localField: 'songs',
+                    foreignField: '_id',
+                    as: 'songs'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$songs'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'albums',
+                    localField: 'songs.albumId',
+                    foreignField: '_id',
+                    as: 'songs.album'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$songs.album'
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    name: { $first: '$name' },
+                    image: { $first: '$image' },
+                    description: { $first: '$description' },
+                    user: {
+                        $addToSet: {
+                            userId: { $first: '$user._id' },
+                            username: { $first: '$user.username' },
+                            name: { $first: '$user.name' },
+                            email: { $first: '$user.email' },
+                            gender: { $first: '$user.ge' },
+                            dateOfBirth: { $first: '$user.dateOfBirth' },
+                            state: { $first: '$user.state' },
+                            country: { $first: '$user.country' },
+                            profile_picture: { $first: '$user.profile_picture' },
+                            description: { $first: '$user.description' }
+                        }
+                    },
+                    songs: {
+                        $push: {
+                            $mergeObjects: [
+                                "$songs",
+                                {
+                                    album: "$songs.album"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $unwind: {
+                    path: '$user'
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    image: 1,
+                    description: 1,
+                    _id: 0,
+                    playlistId: '$_id',
+                    user: 1,
+                    songs: {
+                        $map: {
+                            input: '$songs',
+                            as: 'song',
+                            in: {
+                                songId: '$$song._id',
+                                name: '$$song.name',
+                                fileURL: '$$song.fileURL',
+                                album: {
+                                    albumId: '$$song.album._id',
+                                    name: '$$song.album.name',
+                                    image: '$$song.album.image',
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.PLAYLIST, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface singlePlaylist {
+    playlistId: string
+    name: string
+    image: string
+    description: string
+    user: user
+    songs: song[]
+}
+
+interface user {
+    userId: string
+    username: string
+    name: string
+    email: string
+    password: string
+    gender: string
+    dateOfBirth: string
+    state: string
+    country: string
+    profile_picture: string
+    description: string
+}
+
+interface song {
+    songId: string
+    name: string
+    fileURL: string
+    album: album
+}
+
+interface album {
+    albumId: string
+    name: string
+    image: string
+}
+
 export default {
     getPlaylistById,
     getPlaylistByIdAndUser,
@@ -502,5 +709,7 @@ export default {
     deletePlaylist,
     deleteAllPlaylistsByUserId,
     getUserPlaylists,
-    getProfilePlaylists
+    getProfilePlaylists,
+    getPlaylists,
+    getSinglePlaylist
 }

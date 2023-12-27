@@ -353,11 +353,160 @@ const deleteCategory = async (token: string, categoryId: string): Promise<void> 
     }
 }
 
+const getCategories = async (input: categoriesInput = {}): Promise<category[]> => {
+    try {
+        const page: number = input.page || 1
+        const limit: number = input.limit || 10
+
+        const pipeline: object[] = [
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
+            },
+            {
+                $project: {
+                    name: 1,
+                    image: 1,
+                    description: 1,
+                    _id: 0,
+                    categoryId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.CATEGORY, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface categoriesInput {
+    page?: number
+    limit?: number
+}
+
+interface category {
+    categoryId: string
+    name: string
+    image: string
+    description: string
+}
+
+const getSingleCategory = async (categoryId: string): Promise<singleCategory[]> => {
+    try {
+        const pipeline: object[] = [
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(categoryId)
+                }
+            },
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: '_id',
+                    foreignField: 'parent_categoryId',
+                    as: 'childCategories'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'playlists',
+                    localField: 'playlists',
+                    foreignField: '_id',
+                    as: 'playlists'
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    name: { $first: '$name' },
+                    image: { $first: '$image' },
+                    description: { $first: '$description' },
+                    childCategories: { $first: '$childCategories' },
+                    playlists: { $first: '$playlists' }
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    image: 1,
+                    description: 1,
+                    _id: 0,
+                    categoryId: '$_id',
+                    childCategories: {
+                        $map: {
+                            input: '$childCategories',
+                            as: 'childCategory',
+                            in: {
+                                categoryId: '$$childCategory._id',
+                                name: '$$childCategory.name',
+                                image: '$$childCategory.image',
+                                description: '$$childCategory.description'
+                            }
+                        }
+                    },
+                    playlists: {
+                        $map: {
+                            input: '$playlists',
+                            as: 'playlist',
+                            in: {
+                                playlistId: '$$playlist._id',
+                                name: '$$playlist.name',
+                                image: '$$playlist.image',
+                                description: '$$playlist.description'
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.CATEGORY, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface singleCategory {
+    categoryId: string
+    name: string
+    image: string
+    description: string
+    childCategories: category[]
+    playlists: playlist[]
+}
+
+interface category {
+    categoryId: string
+    name: string
+    image: string
+    description: string
+}
+
+interface playlist {
+    playlistId: string
+    name: string
+    image: string
+    description: string
+}
+
 export default {
     removeAllPlaylists,
     createCategory,
     updateCategory,
     addPlaylist,
     removePlaylist,
-    deleteCategory
+    deleteCategory,
+    getCategories,
+    getSingleCategory
 }

@@ -4,7 +4,7 @@ import {
     stringValidation,
     booleanValidation,
     idReqValidation,
-    idValidation
+    pageAndLimit
 } from './common'
 
 const createPlaylist = Joi.object({
@@ -33,9 +33,20 @@ const deletePlaylist = Joi.object({
     playlistId: idReqValidation
 })
 
+const playlists = Joi.object({
+    keyword: stringValidation,
+    ...pageAndLimit
+})
+
+const playlist = Joi.object({
+    id: idReqValidation
+})
+
 export default {
     createPlaylist,
     updatePlaylist,
     addRemoveSong,
-    deletePlaylist
+    deletePlaylist,
+    playlists,
+    playlist
 }

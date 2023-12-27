@@ -12,7 +12,7 @@ import playlistService from '../../../services/playlist'
 import categoryService from '../../../services/category'
 
 export default {
-    albums: async (_: any, { input }: albumsInput, __: any, info: GraphQLResolveInfo): Promise<album[]> => {
+    albums: async (_: any, { input }: albumsInput, __: any, info: GraphQLResolveInfo): Promise<albumWithArtist[]> => {
         try {
             validateSchema(input, albumValidation.albums)
 
@@ -83,6 +83,78 @@ export default {
             })
         }
     },
+
+    playlists: async (_: any, { input }: playlistsInput, __: any, info: GraphQLResolveInfo): Promise<playlist[]> => {
+        try {
+            validateSchema(input, playlistValidation.playlists)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.playlists)
+
+            const playlists = await playlistService.getPlaylists(input)
+
+            return playlists
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    playlist: async (_: any, { id }: id, __: any, info: GraphQLResolveInfo): Promise<singlePlaylist> => {
+        try {
+            validateSchema({ id }, playlistValidation.playlist)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.playlist)
+
+            const [playlist] = await playlistService.getSinglePlaylist(id)
+            console.log(playlist.songs)
+            return playlist
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    categories: async (_: any, { input }: categoriesInput, __: any, info: GraphQLResolveInfo): Promise<category[]> => {
+        try {
+            validateSchema(input, categoryValidation.categories)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.categories)
+
+            const categories = await categoryService.getCategories(input)
+
+            return categories
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
+
+    category: async (_: any, { id }: id, __: any, info: GraphQLResolveInfo): Promise<singleCategory> => {
+        try {
+            validateSchema({ id }, categoryValidation.category)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.category)
+
+            const [category] = await categoryService.getSingleCategory(id)
+
+            return category
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    }
 }
 
 interface albumsInput {
@@ -94,6 +166,12 @@ interface albumsInput {
 }
 
 interface album {
+    albumId: string
+    name: string
+    image: string
+}
+
+interface albumWithArtist {
     albumId: string
     name: string
     image: string
@@ -131,6 +209,13 @@ interface song {
     fileURL: string
 }
 
+interface songWithAlbum {
+    songId: string
+    name: string
+    fileURL: string
+    album: album
+}
+
 interface songsInput {
     input: {
         keyword?: string
@@ -150,6 +235,66 @@ interface singleSong {
     songId: string
     name: string
     fileURL: string
-    album: album
+    album: albumWithArtist
     artists: artist[]
+}
+
+interface playlistsInput {
+    input: {
+        keyword?: string
+        page?: number
+        limit?: number
+    }
+}
+
+interface playlist {
+    playlistId: string
+    name: string
+    image: string
+    description: string
+}
+
+interface singlePlaylist {
+    playlistId: string
+    name: string
+    image: string
+    description: string
+    user: user
+    songs: songWithAlbum[]
+}
+
+interface user {
+    username: string
+    name: string
+    email: string
+    password: string
+    gender: string
+    dateOfBirth: string
+    state: string
+    country: string
+    profile_picture: string
+    description: string
+}
+
+interface categoriesInput {
+    input: {
+        page?: number
+        limit?: number
+    }
+}
+
+interface category {
+    categoryId: string
+    name: string
+    image: string
+    description: string
+}
+
+interface singleCategory {
+    categoryId: string
+    name: string
+    image: string
+    description: string
+    childCategories: category[]
+    playlists: playlist[]
 }

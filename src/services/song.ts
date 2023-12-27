@@ -541,11 +541,11 @@ interface singleSong {
     songId: string
     name: string
     fileURL: string
-    album: album
+    album: albumWithArtist
     artists: artist[]
 }
 
-interface album {
+interface albumWithArtist {
     albumId: string
     name: string
     image: string

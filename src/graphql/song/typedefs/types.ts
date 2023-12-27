@@ -131,7 +131,7 @@ export default `#graphql
     }
 
     input CategoriesInput {
-        categoryId: String
+        categoryId: String!
         root: Boolean = false
         page: Int = 1
         limit: Int = 10
@@ -164,6 +164,13 @@ export default `#graphql
         fileURL: String
     }
 
+    type SongWithAlbum {
+        songId: String!
+        name: String
+        fileURL: String
+        album: Album!
+    }
+
     type SongWithArtists {
         songId: String!
         name: String
@@ -183,5 +190,54 @@ export default `#graphql
         fileURL: String
         album: AlbumWithArtist!
         artists: [Artist]!
+    }
+
+    input playlistsInput {
+        keyword: String
+        page: Int = 1
+        limit: Int = 10
+    }
+
+    type PlaylistWithUserAndSongs {
+        playlistId: String!
+        name: String
+        image: String
+        description: String
+        user: UserFields!
+        songs: [SongWithAlbum]!
+    }
+
+    type UserFields {
+        userId: String!
+        username: String
+        name: String
+        email: String
+        gender: GenderType
+        dateOfBirth: String
+        state: String
+        country: String
+        profile_picture: String
+        description: String
+    }
+
+    input categoryInput {
+        page: Int = 1
+        limit: Int = 10
+    }
+
+    type Category {
+        categoryId: String!
+        name: String
+        image: String
+        description: String
+    }
+
+    type FullCategory {
+        categoryId: String!
+        name: String
+        image: String
+        description: String
+        childCategories: [Category]!
+        playlists: [PublicPlaylist]!
     }
 `
