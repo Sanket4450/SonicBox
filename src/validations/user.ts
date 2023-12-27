@@ -33,9 +33,20 @@ const user = Joi.object({
     id: idReqValidation
 })
 
+const artists = Joi.object({
+    keyword: stringValidation,
+    ...pageAndLimit
+})
+
+const artist = Joi.object({
+    id: idReqValidation
+})
+
 export default {
     followUnfollowUser,
     updateUser,
     users,
-    user
+    user,
+    artists,
+    artist
 }

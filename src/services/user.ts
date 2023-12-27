@@ -1077,6 +1077,116 @@ const getProfile = async (token: string): Promise<user[]> => {
     }
 }
 
+const getArtists = async (input: artistsInput = {}): Promise<artist[]> => {
+    try {
+        const keyword: string = input.keyword || ''
+        const page: number = input.page || 1
+        const limit: number = input.limit || 10
+
+        const pipeline: object[] = [
+            {
+                $match: {
+                    role: 'artist',
+                    $or: [
+                        { username: { $regex: keyword, $options: 'i' } },
+                        { name: { $regex: keyword, $options: 'i' } },
+                        { email: { $regex: keyword, $options: 'i' } },
+                        { state: { $regex: keyword, $options: 'i' } },
+                        { country: { $regex: keyword, $options: 'i' } },
+                        { description: { $regex: keyword, $options: 'i' } }
+                    ]
+                }
+            },
+            {
+                $skip: ((page - 1) * limit)
+            },
+            {
+                $limit: limit
+            },
+            {
+                $lookup: {
+                    from: 'followers',
+                    localField: '_id',
+                    foreignField: 'userId',
+                    as: 'followers'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'followers',
+                    localField: '_id',
+                    foreignField: 'followerId',
+                    as: 'followings'
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    username: { $first: '$username' },
+                    name: { $first: '$name' },
+                    email: { $first: '$email' },
+                    gender: { $first: '$gender' },
+                    dateOfBirth: { $first: '$dateOfBirth' },
+                    state: { $first: '$state' },
+                    country: { $first: '$country' },
+                    profile_picture: { $first: '$profile_picture' },
+                    description: { $first: '$description' },
+                    isVerified: { $first: '$isVerified' },
+                    followersCount: { $sum: { $size: '$followers' } },
+                    followingsCount: { $sum: { $size: '$followings' } },
+                }
+            },
+            {
+                $project: {
+                    username: 1,
+                    name: 1,
+                    email: 1,
+                    gender: 1,
+                    dateOfBirth: 1,
+                    state: 1,
+                    country: 1,
+                    profile_picture: 1,
+                    description: 1,
+                    isVerified: 1,
+                    followersCount: 1,
+                    followingsCount: 1,
+                    _id: 0,
+                    artistId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.USER, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface artistsInput {
+    keyword?: string
+    page?: number
+    limit?: number
+}
+
+interface artist {
+    artistId: string
+    username: string
+    name: string
+    gender: string
+    dateOfBirth: string
+    state: string
+    country: string
+    profile_picture: string
+    description: string
+    isVerified: boolean
+    followingsCount: number
+    followersCount: number
+}
+
 export default {
     getUserById,
     getUserByUsername,
@@ -1101,5 +1211,6 @@ export default {
     getSingleUser,
     getUserFollowings,
     getUserFollowers,
-    getProfile
+    getProfile,
+    getArtists
 }

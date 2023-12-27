@@ -112,7 +112,25 @@ export default {
                 }
             })
         }
-    }
+    },
+
+    artists: async (_: any, { input }: artistsInput, __: any, info: GraphQLResolveInfo): Promise<artist[]> => {
+        try {
+            validateSchema(input, userValidation.artists)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.artists)
+
+            const artists = await userService.getArtists(input)
+
+            return artists
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    },
 }
 
 interface emailAndDevice {
@@ -168,4 +186,27 @@ interface user {
 
 interface id {
     id: string
+}
+
+interface artistsInput {
+    input: {
+        keyword?: string
+        page?: number
+        limit?: number
+    }
+}
+
+interface artist {
+    artistId: string
+    username: string
+    name: string
+    gender: string
+    dateOfBirth: string
+    state: string
+    country: string
+    profile_picture: string
+    description: string
+    isVerified: boolean
+    followingsCount: number
+    followersCount: number
 }

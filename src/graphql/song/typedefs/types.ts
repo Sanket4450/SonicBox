@@ -143,6 +143,12 @@ export default `#graphql
         limit: Int = 10
     }
 
+    type Album {
+        albumId: String!
+        name: String
+        image: String
+    }
+
     type AlbumWithArtist {
         albumId: String!
         name: String
@@ -205,6 +211,21 @@ export default `#graphql
         description: String
         user: UserFields!
         songs: [SongWithAlbum]!
+    }
+
+    type Playlist {
+        playlistId: String!
+        name: String
+        image: String
+        description: String
+        isPrivate: Boolean
+    }
+
+    type PublicPlaylist {
+        playlistId: String!
+        name: String
+        image: String
+        description: String
     }
 
     type UserFields {

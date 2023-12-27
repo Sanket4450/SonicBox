@@ -109,7 +109,7 @@ export default {
             validateSelection(info.fieldNodes[0].selectionSet, fields.playlist)
 
             const [playlist] = await playlistService.getSinglePlaylist(id)
-            console.log(playlist.songs)
+
             return playlist
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {

@@ -150,13 +150,6 @@ export default `#graphql
         playlists(page: Int = 1, limit: Int = 10): [PublicPlaylist]!
     }
 
-    type PublicPlaylist {
-        playlistId: String!
-        name: String
-        image: String
-        description: String
-    }
-
     type profile {
         userId: String!
         username: String
@@ -179,12 +172,10 @@ export default `#graphql
         libraryAlbums(page: Int = 1, limit: Int = 10): [Album]!
     }
 
-    type Playlist {
-        playlistId: String!
-        name: String
-        image: String
-        description: String
-        isPrivate: Boolean
+    input artistsInput {
+        keyword: String
+        page: Int = 1
+        limit: Int = 10
     }
 
     type Artist {
@@ -198,11 +189,7 @@ export default `#graphql
         profile_picture: String
         description: String
         isVerified: Boolean
-    }
-
-    type Album {
-        albumId: String!
-        name: String
-        image: String
+        followersCount: Int
+        followingsCount: Int
     }
 `
