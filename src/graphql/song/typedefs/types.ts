@@ -209,7 +209,7 @@ export default `#graphql
         name: String
         image: String
         description: String
-        user: UserFields!
+        user: UserData!
         songs: [SongWithAlbum]!
     }
 
@@ -225,19 +225,6 @@ export default `#graphql
         playlistId: String!
         name: String
         image: String
-        description: String
-    }
-
-    type UserFields {
-        userId: String!
-        username: String
-        name: String
-        email: String
-        gender: GenderType
-        dateOfBirth: String
-        state: String
-        country: String
-        profile_picture: String
         description: String
     }
 

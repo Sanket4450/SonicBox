@@ -274,6 +274,7 @@ interface user {
     country: string
     profile_picture: string
     description: string
+    isVerified: boolean
 }
 
 interface categoriesInput {

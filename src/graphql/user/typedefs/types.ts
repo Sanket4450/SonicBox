@@ -131,6 +131,20 @@ export default `#graphql
         followingsCount: Int
     }
 
+    type UserData {
+        userId: String!
+        username: String
+        name: String
+        email: String
+        gender: GenderType
+        dateOfBirth: String
+        state: String
+        country: String
+        profile_picture: String
+        description: String
+        isVerified: Boolean
+    }
+
     type SingleUser {
         userId: String!
         username: String
@@ -143,9 +157,9 @@ export default `#graphql
         profile_picture: String
         description: String
         isVerified: Boolean
-        followers(page: Int = 1, limit: Int = 10): [User]!
+        followers(page: Int = 1, limit: Int = 10): [UserData]!
         followersCount: Int
-        followings(page: Int = 1, limit: Int = 10): [User]!
+        followings(page: Int = 1, limit: Int = 10): [UserData]!
         followingsCount: Int
         playlists(page: Int = 1, limit: Int = 10): [PublicPlaylist]!
     }
@@ -162,9 +176,9 @@ export default `#graphql
         profile_picture: String
         description: String
         isVerified: Boolean
-        followers(page: Int = 1, limit: Int = 10): [User]!
+        followers(page: Int = 1, limit: Int = 10): [UserData]!
         followersCount: Int
-        followings(page: Int = 1, limit: Int = 10): [User]!
+        followings(page: Int = 1, limit: Int = 10): [UserData]!
         followingsCount: Int
         playlists(page: Int = 1, limit: Int = 10): [Playlist]!
         libraryPlaylists(page: Int = 1, limit: Int = 10): [Playlist]!
@@ -191,5 +205,23 @@ export default `#graphql
         isVerified: Boolean
         followersCount: Int
         followingsCount: Int
+    }
+
+    type SingleArtist {
+        artistId: String!
+        username: String
+        name: String
+        gender: GenderType
+        dateOfBirth: String
+        state: String
+        country: String
+        profile_picture: String
+        description: String
+        isVerified: Boolean
+        followers(page: Int = 1, limit: Int = 10): [UserData]!
+        followersCount: Int
+        followings(page: Int = 1, limit: Int = 10): [UserData]!
+        followingsCount: Int
+        playlists(page: Int = 1, limit: Int = 10): [PublicPlaylist]!
     }
 `

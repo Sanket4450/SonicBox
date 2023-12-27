@@ -398,7 +398,7 @@ const deleteAllPlaylistsByUserId = async (userId: string): Promise<void> => {
     }
 }
 
-const getUserPlaylists = async ({ userId, page, limit }: userIdPageAndLimit): Promise<playlist[]> => {
+const getUserPlaylists = async ({ userId, page, limit }: userIdPageAndLimit): Promise<publicPlaylist[]> => {
     try {
         page ||= 1
         limit ||= 10
@@ -435,6 +435,13 @@ const getUserPlaylists = async ({ userId, page, limit }: userIdPageAndLimit): Pr
             }
         })
     }
+}
+
+interface publicPlaylist {
+    playlistId: string
+    name: string
+    image: string
+    description: string
 }
 
 const getProfilePlaylists = async ({ userId, page, limit }: userIdPageAndLimit): Promise<playlist[]> => {
@@ -490,7 +497,7 @@ interface playlist {
     isPrivate: boolean
 }
 
-const getPlaylists = async (input: playlistsInput = {}): Promise<playlist[]> => {
+const getPlaylists = async (input: playlistsInput = {}): Promise<publicPlaylist[]> => {
     try {
         const keyword: string = input.keyword || ''
         const page: number = input.page || 1
@@ -534,13 +541,6 @@ interface playlistsInput {
     keyword?: string
     page?: number
     limit?: number
-}
-
-interface playlist {
-    playlistId: string
-    name: string
-    image: string
-    description: string
 }
 
 const getSinglePlaylist = async (playlistId: string): Promise<singlePlaylist[]> => {
@@ -603,7 +603,8 @@ const getSinglePlaylist = async (playlistId: string): Promise<singlePlaylist[]> 
                             state: { $first: '$user.state' },
                             country: { $first: '$user.country' },
                             profile_picture: { $first: '$user.profile_picture' },
-                            description: { $first: '$user.description' }
+                            description: { $first: '$user.description' },
+                            isVerified: { $first: '$user.isVerified' }
                         }
                     },
                     songs: {
@@ -682,6 +683,7 @@ interface user {
     country: string
     profile_picture: string
     description: string
+    isVerified: boolean
 }
 
 interface song {

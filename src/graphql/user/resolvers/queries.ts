@@ -131,6 +131,24 @@ export default {
             })
         }
     },
+
+    artist: async (_: any, { id }: id, __: any, info: GraphQLResolveInfo): Promise<artist> => {
+        try {
+            validateSchema({ id }, userValidation.artist)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.artist)
+
+            const [artist] = await userService.getSingleArtist(id)
+
+            return artist
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
+    }
 }
 
 interface emailAndDevice {

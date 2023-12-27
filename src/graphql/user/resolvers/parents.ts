@@ -45,7 +45,7 @@ export default {
             }
         },
 
-        playlists: async ({ userId }: any, { page, limit }: pageAndLimit, __: any, info: GraphQLResolveInfo): Promise<playlist[]> => {
+        playlists: async ({ userId }: any, { page, limit }: pageAndLimit, __: any, info: GraphQLResolveInfo): Promise<publicPlaylist[]> => {
             try {
                 validateSchema({ page, limit }, pageAndLimitSchema)
 
@@ -172,7 +172,63 @@ export default {
                 })
             }
         }
-    }
+    },
+
+    SingleArtist: {
+        followers: async ({ artistId }: any, { page, limit }: pageAndLimit, __: any, info: GraphQLResolveInfo): Promise<user[]> => {
+            try {
+                validateSchema({ page, limit }, pageAndLimitSchema)
+
+                validateSelection(info.fieldNodes[0].selectionSet, fields.users)
+
+                const followers = await userService.getUserFollowers({ userId: artistId, page, limit })
+
+                return followers
+            } catch (error: any) {
+                throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                    extensions: {
+                        code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                    }
+                })
+            }
+        },
+
+        followings: async ({ artistId }: any, { page, limit }: pageAndLimit, __: any, info: GraphQLResolveInfo): Promise<user[]> => {
+            try {
+                validateSchema({ page, limit }, pageAndLimitSchema)
+
+                validateSelection(info.fieldNodes[0].selectionSet, fields.users)
+
+                const followings = await userService.getUserFollowings({ userId: artistId, page, limit })
+
+                return followings
+            } catch (error: any) {
+                throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                    extensions: {
+                        code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                    }
+                })
+            }
+        },
+
+        playlists: async ({ artistId }: any, { page, limit }: pageAndLimit, __: any, info: GraphQLResolveInfo): Promise<publicPlaylist[]> => {
+            try {
+                validateSchema({ page, limit }, pageAndLimitSchema)
+
+                validateSelection(info.fieldNodes[0].selectionSet, fields.playlists)
+
+                const playlists = await playlistService.getUserPlaylists({ userId: artistId, page, limit })
+
+                return playlists
+            } catch (error: any) {
+                throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                    extensions: {
+                        code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                    }
+                })
+            }
+        }
+    } 
 }
 
 interface pageAndLimit {
@@ -192,6 +248,13 @@ interface user {
     profile_picture: string
     description: string
     isVerified: boolean
+}
+
+interface publicPlaylist {
+    playlistId: string
+    name: string
+    image: string
+    description: string
 }
 
 interface playlist {

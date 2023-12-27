@@ -3,9 +3,10 @@ export default `#graphql
         requestReset(input: requestResetInput!): ResetToken!
         verifyResetOtp(input: verifyResetOtpInput!): SuccessResponse!
         refreshAuthTokens(token: String!): AuthTokens!
-        artists(input: artistsInput): [Artist]!
         users(input: usersInput): [User]!
         user(id: String!): SingleUser!
         profile: profile!
+        artists(input: artistsInput): [Artist]!
+        artist(id: String!): SingleArtist!
     }
 `

@@ -1187,6 +1187,76 @@ interface artist {
     followersCount: number
 }
 
+const getSingleArtist = async (artistId: string): Promise<artist[]> => {
+    try {
+        const pipeline: object[] = [
+            {
+                $match: {
+                    role: 'artist',
+                    _id: new mongoose.Types.ObjectId(artistId)
+                }
+            },
+            {
+                $lookup: {
+                    from: 'followers',
+                    localField: '_id',
+                    foreignField: 'userId',
+                    as: 'followers'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'followers',
+                    localField: '_id',
+                    foreignField: 'followerId',
+                    as: 'followings'
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    username: { $first: '$username' },
+                    name: { $first: '$name' },
+                    gender: { $first: '$gender' },
+                    dateOfBirth: { $first: '$dateOfBirth' },
+                    state: { $first: '$state' },
+                    country: { $first: '$country' },
+                    profile_picture: { $first: '$profile_picture' },
+                    description: { $first: '$description' },
+                    isVerified: { $first: '$isVerified' },
+                    followersCount: { $sum: { $size: '$followers' } },
+                    followingsCount: { $sum: { $size: '$followings' } },
+                }
+            },
+            {
+                $project: {
+                    username: 1,
+                    name: 1,
+                    gender: 1,
+                    dateOfBirth: 1,
+                    state: 1,
+                    country: 1,
+                    profile_picture: 1,
+                    description: 1,
+                    isVerified: 1,
+                    followersCount: 1,
+                    followingsCount: 1,
+                    _id: 0,
+                    artistId: '$_id'
+                }
+            }
+        ]
+
+        return DbRepo.aggregate(constants.COLLECTIONS.USER, pipeline)
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 export default {
     getUserById,
     getUserByUsername,
@@ -1212,5 +1282,6 @@ export default {
     getUserFollowings,
     getUserFollowers,
     getProfile,
-    getArtists
+    getArtists,
+    getSingleArtist
 }
