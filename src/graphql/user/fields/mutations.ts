@@ -13,6 +13,7 @@ const removeLibraryArtist: string[] = ['success']
 const addLibraryAlbum: string[] = ['success']
 const removeLibraryAlbum: string[] = ['success']
 const deleteUser: string[] = ['success']
+const verifyUser: string[] = ['isVerified']
 
 export default {
     createUser,
@@ -29,5 +30,6 @@ export default {
     removeLibraryArtist,
     addLibraryAlbum,
     removeLibraryAlbum,
-    deleteUser
+    deleteUser,
+    verifyUser
 }

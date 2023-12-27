@@ -1257,6 +1257,52 @@ const getSingleArtist = async (artistId: string): Promise<artist[]> => {
     }
 }
 
+const verifyUser = async (token: string, { userId, isVerified }: verifyUserInput): Promise<void> => {
+    try {
+        const { sub, role } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
+
+        if (!await getUserById(sub)) {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                extensions: {
+                    code: 'NOT_FOUND'
+                }
+            })
+        }
+
+        if (role !== 'admin') {
+            throw new GraphQLError(constants.MESSAGES.USER_NOT_ALLOWED, {
+                extensions: {
+                    code: 'UNAUTHORIZED'
+                }
+            })
+        }
+
+        const query = {
+            _id: new mongoose.Types.ObjectId(userId),
+            isVerified: { $ne: isVerified }
+        }
+
+        const data = {
+            $set: {
+                isVerified
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.USER, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
+interface verifyUserInput {
+    userId: string
+    isVerified: boolean
+}
+
 export default {
     getUserById,
     getUserByUsername,
@@ -1283,5 +1329,6 @@ export default {
     getUserFollowers,
     getProfile,
     getArtists,
-    getSingleArtist
+    getSingleArtist,
+    verifyUser
 }

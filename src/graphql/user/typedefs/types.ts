@@ -237,4 +237,13 @@ export default `#graphql
         followingsCount: Int
         playlists(page: Int = 1, limit: Int = 10): [PublicPlaylist]!
     }
+
+    input verifyUserInput {
+        userId: String!
+        isVerified: Boolean!
+    }
+
+    type verifyUserData {
+        isVerified: Boolean!
+    }
 `

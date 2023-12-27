@@ -3,7 +3,8 @@ import {
     idReqValidation,
     stringValidation,
     dateValidation,
-    pageAndLimit
+    pageAndLimit,
+    booleanValidation
 } from './common'
 
 const followUnfollowUser = Joi.object({
@@ -42,11 +43,17 @@ const artist = Joi.object({
     id: idReqValidation
 })
 
+const verifyUser = Joi.object({
+    userId: idReqValidation,
+    isVerified: booleanValidation.required()
+})
+
 export default {
     followUnfollowUser,
     updateUser,
     users,
     user,
     artists,
-    artist
+    artist,
+    verifyUser
 }

@@ -286,6 +286,24 @@ export default {
                 }
             })
         }
+    },
+
+    verifyUser: async (_: any, { input }: verifyUserInput, { token }: any, info: GraphQLResolveInfo): Promise<{ isVerified: boolean }> => {
+        try {
+            validateSchema(input, userValidation.verifyUser)
+
+            validateSelection(info.fieldNodes[0].selectionSet, fields.verifyUser)
+
+            await userService.verifyUser(token, input)
+
+            return { isVerified: input.isVerified }
+        } catch (error: any) {
+            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+                extensions: {
+                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+                }
+            })
+        }
     }
 }
 
@@ -394,4 +412,11 @@ interface addRemoveLibraryArtist {
 
 interface addRemoveLibraryAlbum {
     albumId: string
+}
+
+interface verifyUserInput {
+    input: {
+        userId: string
+        isVerified: boolean
+    }
 }

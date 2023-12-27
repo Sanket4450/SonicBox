@@ -15,5 +15,6 @@ export default `#graphql
         addLibraryAlbum(albumId: String!): SuccessResponse!
         removeLibraryAlbum(albumId: String!): SuccessResponse!
         deleteUser: SuccessResponse!
+        verifyUser(input: verifyUserInput!): verifyUserData!
     }
 `
