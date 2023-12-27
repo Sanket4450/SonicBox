@@ -153,7 +153,7 @@ export default `#graphql
         albumId: String!
         name: String
         image: String
-        artist: Artist!
+        artist: ArtistData!
     }
 
     type AlbumWithArtistAndSongs {

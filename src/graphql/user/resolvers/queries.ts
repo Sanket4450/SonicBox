@@ -88,6 +88,13 @@ export default {
 
             const [user] = await userService.getSingleUser(id)
 
+            if (!user) {
+                throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
+                    extensions: {
+                        code: 'NOT_FOUND'
+                    }
+                })
+            }
             return user
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
@@ -140,6 +147,13 @@ export default {
 
             const [artist] = await userService.getSingleArtist(id)
 
+            if (!artist) {
+                throw new GraphQLError(constants.MESSAGES.ARTIST_NOT_EXIST, {
+                    extensions: {
+                        code: 'NOT_FOUND'
+                    }
+                })
+            }
             return artist
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {

@@ -207,6 +207,19 @@ export default `#graphql
         followingsCount: Int
     }
 
+    type ArtistData {
+        artistId: String!
+        username: String
+        name: String
+        gender: GenderType
+        dateOfBirth: String
+        state: String
+        country: String
+        profile_picture: String
+        description: String
+        isVerified: Boolean
+    }
+
     type SingleArtist {
         artistId: String!
         username: String

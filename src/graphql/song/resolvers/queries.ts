@@ -38,6 +38,13 @@ export default {
 
             const [album] = await albumService.getSingleAlbum(id)
 
+            if (!album) {
+                throw new GraphQLError(constants.MESSAGES.ALBUM_NOT_FOUND, {
+                    extensions: {
+                        code: 'NOT_FOUND'
+                    }
+                })
+            }
             return album
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
@@ -74,6 +81,13 @@ export default {
 
             const [song] = await songService.getSingleSong(id)
 
+            if (!song) {
+                throw new GraphQLError(constants.MESSAGES.SONG_NOT_FOUND, {
+                    extensions: {
+                        code: 'NOT_FOUND'
+                    }
+                })
+            }
             return song
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
@@ -110,6 +124,13 @@ export default {
 
             const [playlist] = await playlistService.getSinglePlaylist(id)
 
+            if (!playlist) {
+                throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
+                    extensions: {
+                        code: 'NOT_FOUND'
+                    }
+                })
+            }
             return playlist
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
@@ -146,6 +167,13 @@ export default {
 
             const [category] = await categoryService.getSingleCategory(id)
 
+            if (!category) {
+                throw new GraphQLError(constants.MESSAGES.CATEGORY_NOT_EXIST, {
+                    extensions: {
+                        code: 'NOT_FOUND'
+                    }
+                })
+            }
             return category
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {

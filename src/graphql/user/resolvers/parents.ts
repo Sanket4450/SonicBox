@@ -228,7 +228,7 @@ export default {
                 })
             }
         }
-    } 
+    }
 }
 
 interface pageAndLimit {
