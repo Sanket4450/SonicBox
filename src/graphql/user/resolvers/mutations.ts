@@ -188,7 +188,7 @@ export default {
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.addRemoveLibraryAlbum)
 
-            await libraryService.addLibraryAlbum(token, input.albumId)
+            await libraryService.addRemoveLibraryAlbum(token, input)
 
             return { isAdded: input.isAdded }
         } catch (error: any) {

@@ -248,7 +248,7 @@ interface addRemoveLibraryArtist {
     isAdded: boolean
 }
 
-const addLibraryAlbum = async (token: string, albumId: string): Promise<void> => {
+const addRemoveLibraryAlbum = async (token: string, { albumId, isAdded }: addRemoveLibraryAlbum): Promise<void> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
@@ -268,15 +268,24 @@ const addLibraryAlbum = async (token: string, albumId: string): Promise<void> =>
             })
         }
 
-        const query = {
+        const query = isAdded ? {
             $and: [
                 { userId: new mongoose.Types.ObjectId(sub) },
                 { albums: { $ne: new mongoose.Types.ObjectId(albumId) } }
             ]
+        } : {
+            $and: [
+                { userId: new mongoose.Types.ObjectId(sub) },
+                { albums: new mongoose.Types.ObjectId(albumId) }
+            ]
         }
 
-        const data = {
+        const data = isAdded ? {
             $push: {
+                albums: new mongoose.Types.ObjectId(albumId)
+            }
+        } : {
+            $pull: {
                 albums: new mongoose.Types.ObjectId(albumId)
             }
         }
@@ -291,47 +300,9 @@ const addLibraryAlbum = async (token: string, albumId: string): Promise<void> =>
     }
 }
 
-const removeLibraryAlbum = async (token: string, albumId: string): Promise<void> => {
-    try {
-        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
-
-        if (!await userService.getUserById(sub)) {
-            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
-
-        if (!await albumService.getAlbumById(albumId)) {
-            throw new GraphQLError(constants.MESSAGES.ALBUM_NOT_FOUND, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
-
-        const query = {
-            $and: [
-                { userId: new mongoose.Types.ObjectId(sub) },
-                { albums: new mongoose.Types.ObjectId(albumId) }
-            ]
-        }
-
-        const data = {
-            $pull: {
-                albums: new mongoose.Types.ObjectId(albumId)
-            }
-        }
-
-        await DbRepo.updateOne(constants.COLLECTIONS.LIBRARY, { query, data })
-    } catch (error: any) {
-        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-            extensions: {
-                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-            }
-        })
-    }
+interface addRemoveLibraryAlbum {
+    albumId: string
+    isAdded: boolean
 }
 
 const deleteLibraryByUserId = async (userId: string): Promise<void> => {
@@ -580,8 +551,7 @@ export default {
     removeAllAlbums,
     addRemoveLibraryPlaylist,
     addRemoveLibraryArtist,
-    addLibraryAlbum,
-    removeLibraryAlbum,
+    addRemoveLibraryAlbum,
     deleteLibraryByUserId,
     getUserLibraryPlaylists,
     getUserLibraryArtists,
