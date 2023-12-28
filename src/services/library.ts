@@ -191,7 +191,7 @@ const addLibraryArtist = async (token: string, artistId: string): Promise<void> 
     }
 }
 
-const removeLibraryArtist = async (token: string, artistId: string): Promise<void> => {
+const addRemoveLibraryArtist = async (token: string, { artistId, isAdded }: addRemoveLibraryArtist): Promise<void> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
@@ -211,14 +211,23 @@ const removeLibraryArtist = async (token: string, artistId: string): Promise<voi
             })
         }
 
-        const query = {
+        const query = isAdded ? {
+            $and: [
+                { userId: new mongoose.Types.ObjectId(sub) },
+                { artists: { $ne: new mongoose.Types.ObjectId(artistId) } }
+            ]
+        } : {
             $and: [
                 { userId: new mongoose.Types.ObjectId(sub) },
                 { artists: new mongoose.Types.ObjectId(artistId) }
             ]
         }
 
-        const data = {
+        const data = isAdded ? {
+            $push: {
+                artists: new mongoose.Types.ObjectId(artistId)
+            }
+        } : {
             $pull: {
                 artists: new mongoose.Types.ObjectId(artistId)
             }
@@ -232,6 +241,11 @@ const removeLibraryArtist = async (token: string, artistId: string): Promise<voi
             }
         })
     }
+}
+
+interface addRemoveLibraryArtist {
+    artistId: string
+    isAdded: boolean
 }
 
 const addLibraryAlbum = async (token: string, albumId: string): Promise<void> => {
@@ -565,8 +579,7 @@ export default {
     removeAllPlaylists,
     removeAllAlbums,
     addRemoveLibraryPlaylist,
-    addLibraryArtist,
-    removeLibraryArtist,
+    addRemoveLibraryArtist,
     addLibraryAlbum,
     removeLibraryAlbum,
     deleteLibraryByUserId,

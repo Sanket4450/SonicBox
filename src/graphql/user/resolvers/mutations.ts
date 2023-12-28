@@ -170,7 +170,7 @@ export default {
 
             validateSelection(info.fieldNodes[0].selectionSet, fields.addRemoveLibraryArtist)
 
-            await libraryService.removeLibraryArtist(token, input.artistId)
+            await libraryService.addRemoveLibraryArtist(token, input)
 
             return { isAdded: input.isAdded }
         } catch (error: any) {
