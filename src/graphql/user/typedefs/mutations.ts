@@ -5,8 +5,7 @@ export default `#graphql
         resetForgotPassword(input: resetForgotPasswordInput!): SuccessResponse!
         resetPassword(input: resetPasswordInput!): SuccessResponse!
         logoutUser: SuccessResponse!
-        followUser(input: followUserInput!): SuccessResponse!
-        unfollowUser(input: unfollowUserInput!): SuccessResponse!
+        followUnfollowUser(input: followUnfollowUserInput!): followUnfollowUserData!
         updateUser(input: updateUserInput!): updateUserData!
         addLibraryPlaylist(playlistId: String!): SuccessResponse!
         removeLibraryPlaylist(playlistId: String!): SuccessResponse!

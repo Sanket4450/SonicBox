@@ -455,46 +455,6 @@ const followUserById = async (followingId: string, followerId: string): Promise<
     }
 }
 
-const followUser = async (token: string, { userId }: followUnfollowUser): Promise<void> => {
-    try {
-        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
-
-        if (!await getUserById(sub)) {
-            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
-
-        if (!await getUserById(userId)) {
-            throw new GraphQLError(constants.MESSAGES.FOLLOWING_USER_NOT_EXIST, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
-
-        if (sub === userId) {
-            throw new GraphQLError(constants.MESSAGES.USER_NOT_ALLOWED, {
-                extensions: {
-                    code: 'CONFLICT'
-                }
-            })
-        }
-
-        if (!await getUserAndFollower(userId, sub)) {
-            await followUserById(userId, sub)
-        }
-    } catch (error: any) {
-        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-            extensions: {
-                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-            }
-        })
-    }
-}
-
 const unfollowUserById = async (followingId: string, followerId: string): Promise<void> => {
     try {
         const query = {
@@ -512,7 +472,7 @@ const unfollowUserById = async (followingId: string, followerId: string): Promis
     }
 }
 
-const unfollowUser = async (token: string, { userId }: followUnfollowUser): Promise<void> => {
+const followUnfollowUser = async (token: string, { userId, isFollowed }: followUnfollowUser): Promise<void> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
@@ -540,8 +500,15 @@ const unfollowUser = async (token: string, { userId }: followUnfollowUser): Prom
             })
         }
 
-        if (await getUserAndFollower(userId, sub)) {
-            await unfollowUserById(userId, sub)
+        if (isFollowed) {
+            if (!await getUserAndFollower(userId, sub)) {
+                await followUserById(userId, sub)
+            }
+        }
+        else {
+            if (await getUserAndFollower(userId, sub)) {
+                await unfollowUserById(userId, sub)
+            }
         }
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
@@ -554,6 +521,7 @@ const unfollowUser = async (token: string, { userId }: followUnfollowUser): Prom
 
 interface followUnfollowUser {
     userId: string
+    isFollowed: boolean
 }
 
 const deleteAllFollowersAndFollowings = async (_id: string): Promise<void> => {
@@ -1320,8 +1288,7 @@ export default {
     getSessionById,
     updateSessionById,
     deleteSessionById,
-    followUser,
-    unfollowUser,
+    followUnfollowUser,
     deleteUser,
     getUsers,
     getSingleUser,

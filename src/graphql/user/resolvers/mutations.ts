@@ -98,33 +98,15 @@ export default {
         }
     },
 
-    followUser: async (_: any, { input }: followUnfollowUser, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+    followUnfollowUser: async (_: any, { input }: followUnfollowUser, { token }: any, info: GraphQLResolveInfo): Promise<{ isFollowed: boolean }> => {
         try {
             validateSchema(input, userValidation.followUnfollowUser)
 
-            validateSelection(info.fieldNodes[0].selectionSet, fields.followUser)
+            validateSelection(info.fieldNodes[0].selectionSet, fields.followUnfollowUser)
 
-            await userService.followUser(token, input)
+            await userService.followUnfollowUser(token, input)
 
-            return { success: true }
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
-        }
-    },
-
-    unfollowUser: async (_: any, { input }: followUnfollowUser, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
-        try {
-            validateSchema(input, userValidation.followUnfollowUser)
-
-            validateSelection(info.fieldNodes[0].selectionSet, fields.unfollowUser)
-
-            await userService.unfollowUser(token, input)
-
-            return { success: true }
+            return { isFollowed: input.isFollowed }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -369,6 +351,7 @@ interface resetPasswordInput {
 interface followUnfollowUser {
     input: {
         userId: string
+        isFollowed: boolean
     }
 }
 

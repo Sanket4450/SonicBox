@@ -3,8 +3,7 @@ const loginUser: string[] = ['accessToken', 'refreshToken']
 const resetForgotPassword: string[] = ['success']
 const resetPassword: string[] = ['success']
 const logoutUser: string[] = ['success']
-const followUser: string[] = ['success']
-const unfollowUser: string[] = ['success']
+const followUnfollowUser: string[] = ['isFollowed']
 const updateUser: string[] = ['userId']
 const addLibraryPlaylist: string[] = ['success']
 const removeLibraryPlaylist: string[] = ['success']
@@ -21,8 +20,7 @@ export default {
     resetForgotPassword,
     resetPassword,
     logoutUser,
-    followUser,
-    unfollowUser,
+    followUnfollowUser,
     updateUser,
     addLibraryPlaylist,
     removeLibraryPlaylist,

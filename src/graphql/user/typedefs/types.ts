@@ -73,12 +73,13 @@ export default `#graphql
         newPassword: String!
     }
 
-    input followUserInput {
-        userId: ID!
+    input followUnfollowUserInput {
+        userId: String!
+        isFollowed: Boolean!
     }
 
-    input unfollowUserInput {
-        userId: ID!
+    type followUnfollowUserData {
+        isFollowed: Boolean!
     }
 
     input updateUserInput {

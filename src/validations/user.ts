@@ -8,7 +8,8 @@ import {
 } from './common'
 
 const followUnfollowUser = Joi.object({
-    userId: idReqValidation
+    userId: idReqValidation,
+    isFollowed: booleanValidation.required()
 })
 
 const updateUser = Joi.object({
