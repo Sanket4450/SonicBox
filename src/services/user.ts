@@ -9,7 +9,7 @@ import libraryService from './library'
 
 const getUserById = async (_id: string): Promise<{ _id: string } | null> => {
     const query = {
-        _id
+        _id: new mongoose.Types.ObjectId(_id)
     }
 
     const data = {
@@ -49,7 +49,7 @@ const getUserByEmail = async (email: string): Promise<Pick<getUserData, '_id' | 
 
 const getArtistById = async (_id: string): Promise<{ _id: string } | null> => {
     const query = {
-        _id,
+        _id: new mongoose.Types.ObjectId(_id),
         role: 'artist'
     }
 
@@ -98,7 +98,7 @@ interface selectUserData {
 const createLibrary = async (userId: string): Promise<void> => {
     try {
         const data = {
-            userId
+            userId: new mongoose.Types.ObjectId(userId)
         }
 
         return DbRepo.create(constants.COLLECTIONS.LIBRARY, { data })
@@ -196,7 +196,7 @@ interface sessionData {
 const getSessionByuserIdAndDevice = async (userId: string, device: string): Promise<{ _id: string }> => {
     try {
         const query = {
-            userId,
+            userId: new mongoose.Types.ObjectId(userId),
             device
         }
 
@@ -217,7 +217,7 @@ const getSessionByuserIdAndDevice = async (userId: string, device: string): Prom
 const updateUserById = async (_id: string, userData: Partial<userData>): Promise<void> => {
     try {
         const query = {
-            _id
+            _id: new mongoose.Types.ObjectId(_id)
         }
 
         if (userData.username || userData.email) {
@@ -321,7 +321,7 @@ const deleteAllSessions = async (userId: string): Promise<void> => {
 const validateSession = async ({ userId, device, token }: sessionData): Promise<{ sessionId: string }> => {
     try {
         const query = {
-            userId,
+            userId: new mongoose.Types.ObjectId(userId),
             token
         }
 
@@ -362,7 +362,7 @@ const validateSession = async ({ userId, device, token }: sessionData): Promise<
 const getSessionById = async (_id: string): Promise<{ _id: string }> => {
     try {
         const query = {
-            _id
+            _id: new mongoose.Types.ObjectId(_id)
         }
 
         const data = {
@@ -382,7 +382,7 @@ const getSessionById = async (_id: string): Promise<{ _id: string }> => {
 const updateSessionById = async (_id: string, token: string): Promise<void> => {
     try {
         const query = {
-            _id
+            _id: new mongoose.Types.ObjectId(_id)
         }
 
         const data = {
@@ -404,7 +404,7 @@ const updateSessionById = async (_id: string, token: string): Promise<void> => {
 const deleteSessionById = async (_id: string): Promise<void> => {
     try {
         const query = {
-            _id
+            _id: new mongoose.Types.ObjectId(_id)
         }
 
         await DbRepo.deleteOne(constants.COLLECTIONS.SESSION, { query })

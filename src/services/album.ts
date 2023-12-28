@@ -9,7 +9,7 @@ import libraryService from './library'
 
 const getAlbumById = async (_id: string): Promise<{ _id: string } | null> => {
     const query = {
-        _id
+        _id: new mongoose.Types.ObjectId(_id)
     }
 
     const data = {
@@ -21,8 +21,8 @@ const getAlbumById = async (_id: string): Promise<{ _id: string } | null> => {
 
 const getAlbumByIdAndArtist = async (albumId: string, artistId: string): Promise<{ _id: string } | null> => {
     const query = {
-        _id: albumId,
-        artistId
+        _id: new mongoose.Types.ObjectId(albumId),
+        artistId: new mongoose.Types.ObjectId(artistId)
     }
 
     const data = {
@@ -35,7 +35,7 @@ const getAlbumByIdAndArtist = async (albumId: string, artistId: string): Promise
 const getAlbumByNameAndArtist = async (name: string, artistId: string): Promise<{ _id: string } | null> => {
     const query = {
         name: { $regex: name, $options: 'i' },
-        artistId
+        artistId: new mongoose.Types.ObjectId(artistId)
     }
 
     const data = {
@@ -47,7 +47,7 @@ const getAlbumByNameAndArtist = async (name: string, artistId: string): Promise<
 
 const getFullAlbumById = async (_id: string): Promise<updateAlbumData> => {
     const query = {
-        _id
+        _id: new mongoose.Types.ObjectId(_id)
     }
 
     const data = {}
@@ -139,7 +139,7 @@ const updateAlbum = async (token: string, { albumId, input }: updateAlbumParams)
         }
 
         const query = {
-            _id: albumId
+            _id: new mongoose.Types.ObjectId(albumId)
         }
 
         const data = {
@@ -212,7 +212,7 @@ const deleteAlbum = async (token: string, albumId: string): Promise<void> => {
         }
 
         const query = {
-            _id: albumId
+            _id: new mongoose.Types.ObjectId(albumId)
         }
 
         await DbRepo.deleteOne(constants.COLLECTIONS.ALBUM, { query })

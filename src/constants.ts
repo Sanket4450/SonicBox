@@ -26,6 +26,7 @@ export default {
         ARTIST_MUST_INCLUDED: 'This artist must be included in artists list',
         ONE_ARTIST_NOT_EXIST: 'One of the artists does not exist',
         ARTIST_NOT_EXIST: 'Artist does not exist with this artistId',
+        DEFAULT_ARTIST: 'Default artist cannot be removed',
         ALBUM_NOT_FOUND: 'Album not found for this albumId',
         ALBUM_NOT_EXIST: 'Album does not exist with this artistId',
         SONG_ALREADY_EXISTS: 'Song already exists in this album',

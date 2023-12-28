@@ -9,7 +9,7 @@ import playlistService from './playlist'
 
 const getSongById = async (_id: string): Promise<{ _id: string } | null> => {
     const query = {
-        _id
+        _id: new mongoose.Types.ObjectId(_id)
     }
 
     const data = {
@@ -21,8 +21,8 @@ const getSongById = async (_id: string): Promise<{ _id: string } | null> => {
 
 const getSongByIdAndArtist = async (_id: string, artistId: string): Promise<{ _id: string } | null> => {
     const query = {
-        _id,
-        artists: artistId
+        _id: new mongoose.Types.ObjectId(_id),
+        artists: new mongoose.Types.ObjectId(artistId)
     }
 
     const data = {
@@ -34,7 +34,7 @@ const getSongByIdAndArtist = async (_id: string, artistId: string): Promise<{ _i
 
 const getSongByAlbumAndURL = async (albumId: string, fileURL: string): Promise<{ _id: string } | null> => {
     const query = {
-        albumId,
+        albumId: new mongoose.Types.ObjectId(albumId),
         fileURL
     }
 
@@ -47,7 +47,7 @@ const getSongByAlbumAndURL = async (albumId: string, fileURL: string): Promise<{
 
 const getFullSongById = async (_id: string): Promise<updateSongData> => {
     const query = {
-        _id
+        _id: new mongoose.Types.ObjectId(_id)
     }
 
     const data = {}
@@ -57,7 +57,7 @@ const getFullSongById = async (_id: string): Promise<updateSongData> => {
 
 const getSongByAlbum = async (albumId: string): Promise<{ _id: 1 } | null > => {
     const query = {
-        albumId
+        albumId: new mongoose.Types.ObjectId(albumId)
     }
 
     const data = {
@@ -147,7 +147,7 @@ const addArtist = async (songId: string, artistId: string): Promise<void> => {
     try {
         const query = {
             $and: [
-                { _id: songId },
+                { _id: new mongoose.Types.ObjectId(songId) },
                 { artists: { $ne: new mongoose.Types.ObjectId(artistId) } }
             ]
         }
@@ -168,13 +168,12 @@ const addArtist = async (songId: string, artistId: string): Promise<void> => {
     }
 }
 
-const removeArtist = async (songId: string, artistId: string, defaultArtist: string): Promise<void> => {
+const removeArtist = async (songId: string, artistId: string): Promise<void> => {
     try {
         const query = {
             $and: [
-                { _id: songId },
-                { artists: new mongoose.Types.ObjectId(artistId) },
-                { artists: { $ne: new mongoose.Types.ObjectId(defaultArtist) } }
+                { _id: new mongoose.Types.ObjectId(songId) },
+                { artists: new mongoose.Types.ObjectId(artistId) }
             ]
         }
 
@@ -230,9 +229,8 @@ const updateSong = async (token: string, { songId, input }: updateSongParams): P
                     }
                 })
             }
-            else {
-                await addArtist(songId, input.addArtist)
-            }
+
+            await addArtist(songId, input.addArtist)
         }
 
         if (input.removeArtist) {
@@ -243,16 +241,23 @@ const updateSong = async (token: string, { songId, input }: updateSongParams): P
                     }
                 })
             }
-            else {
-                await removeArtist(songId, input.removeArtist, sub)
+
+            if (sub === input.removeArtist) {
+                throw new GraphQLError(constants.MESSAGES.DEFAULT_ARTIST, {
+                    extensions: {
+                        code: 'CONFLICT'
+                    }
+                })
             }
+
+            await removeArtist(songId, input.removeArtist)
         }
 
         delete input.addArtist
         delete input.removeArtist
 
         const query = {
-            _id: songId
+            _id: new mongoose.Types.ObjectId(songId)
         }
 
         const data = {
@@ -321,7 +326,7 @@ const deleteSong = async (token: string, songId: string): Promise<void> => {
         }
 
         const query = {
-            _id: songId
+            _id: new mongoose.Types.ObjectId(songId)
         }
 
         await DbRepo.deleteOne(constants.COLLECTIONS.SONG, { query })

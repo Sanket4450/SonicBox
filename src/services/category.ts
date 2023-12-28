@@ -8,7 +8,7 @@ import playlistService from './playlist'
 
 const getCategoryById = async (_id: string): Promise<{ _id: string } | null> => {
     const query = {
-        _id
+        _id: new mongoose.Types.ObjectId(_id)
     }
 
     const data = {
@@ -20,10 +20,12 @@ const getCategoryById = async (_id: string): Promise<{ _id: string } | null> => 
 
 const getFullCategory = async (_id: string): Promise<updateCategoryData> => {
     const query = {
-        _id
+        _id: new mongoose.Types.ObjectId(_id)
     }
 
-    const data = {}
+    const data = {
+        playlists: 0
+    }
 
     return DbRepo.findOne(constants.COLLECTIONS.CATEGORY, { query, data })
 }
@@ -80,13 +82,7 @@ const createCategory = async (token: string, input: categoryInput): Promise<cate
 
         if (input.playlists?.length) {
             for (let playlistId of input.playlists) {
-                if (!await playlistService.getPlaylistByIdAndUser(playlistId, sub)) {
-                    throw new GraphQLError(constants.MESSAGES.ONLY_ADMIN_PLAYLISTS_ALLOWED, {
-                        extensions: {
-                            code: 'CONFLICT'
-                        }
-                    })
-                }
+                await playlistService.validatePlaylistUser(playlistId)
             }
         }
 
@@ -150,7 +146,7 @@ const updateCategory = async (token: string, { categoryId, input }: updateCatego
         }
 
         const query = {
-            _id: categoryId
+            _id: new mongoose.Types.ObjectId(categoryId)
         }
 
         const data = {
@@ -216,22 +212,16 @@ const addRemovePlaylist = async (token: string, { categoryId, playlistId, isAdde
             })
         }
 
-        if (!await playlistService.getPlaylistById(playlistId)) {
-            throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
+        await playlistService.validatePlaylistUser(playlistId)
 
         const query = isAdded ? {
             $and: [
-                { _id: categoryId },
+                { _id: new mongoose.Types.ObjectId(categoryId) },
                 { playlists: { $ne: new mongoose.Types.ObjectId(playlistId) } }
             ]
         } : {
             $and: [
-                { _id: categoryId },
+                { _id: new mongoose.Types.ObjectId(categoryId) },
                 { playlists: new mongoose.Types.ObjectId(playlistId) }
             ]
         }
@@ -291,7 +281,7 @@ const deleteCategory = async (token: string, categoryId: string): Promise<void> 
         }
 
         const query = {
-            _id: categoryId
+            _id: new mongoose.Types.ObjectId(categoryId)
         }
 
         await DbRepo.deleteOne(constants.COLLECTIONS.CATEGORY, { query })

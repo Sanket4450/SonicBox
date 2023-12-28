@@ -10,7 +10,7 @@ import libraryService from './library'
 
 const getPlaylistById = async (_id: string): Promise<{ _id: string } | null> => {
     const query = {
-        _id
+        _id: new mongoose.Types.ObjectId(_id)
     }
 
     const data = {
@@ -22,8 +22,8 @@ const getPlaylistById = async (_id: string): Promise<{ _id: string } | null> => 
 
 const getPlaylistByIdAndUser = async (_id: string, userId: string): Promise<{ _id: string } | null> => {
     const query = {
-        _id,
-        userId
+        _id: new mongoose.Types.ObjectId(_id),
+        userId: new mongoose.Types.ObjectId(userId)
     }
 
     const data = {
@@ -36,7 +36,7 @@ const getPlaylistByIdAndUser = async (_id: string, userId: string): Promise<{ _i
 const getPlaylistByNameAndUser = async (name: string, userId: string): Promise<{ _id: string } | null> => {
     const query = {
         name: { $regex: name, $options: 'i' },
-        userId
+        userId: new mongoose.Types.ObjectId(userId)
     }
 
     const data = {
@@ -46,19 +46,30 @@ const getPlaylistByNameAndUser = async (name: string, userId: string): Promise<{
     return DbRepo.findOne(constants.COLLECTIONS.PLAYLIST, { query, data })
 }
 
-const getFullPlaylistById = async (_id: string): Promise<updatePlaylistData> => {
+const getFullPlaylistById = async (_id: string): Promise<fullPlaylist> => {
     const query = {
-        _id
+        _id: new mongoose.Types.ObjectId(_id)
     }
 
-    const data = {}
+    const data = {
+        songs: 0
+    }
 
     return DbRepo.findOne(constants.COLLECTIONS.PLAYLIST, { query, data })
 }
 
+interface fullPlaylist {
+    _id: string
+    userId: string
+    name: string
+    image: string
+    description: string
+    isPrivate: boolean
+}
+
 const checkPlaylistPrivate = async (_id: string): Promise<{ isPrivate: 1 }> => {
     const query = {
-        _id
+        _id: new mongoose.Types.ObjectId(_id)
     }
 
     const data = {
@@ -67,6 +78,28 @@ const checkPlaylistPrivate = async (_id: string): Promise<{ isPrivate: 1 }> => {
     }
 
     return DbRepo.findOne(constants.COLLECTIONS.PLAYLIST, { query, data })
+}
+
+const validatePlaylistUser = async (playlistId: string): Promise<void> => {
+    const playlist = await getFullPlaylistById(playlistId)
+
+    if (!playlist) {
+        throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
+            extensions: {
+                code: 'NOT_FOUND'
+            }
+        })
+    }
+
+    const { role } = await userService.getFullUser({ _id: playlist.userId }, { role: 1 })
+
+    if (role !== 'admin') {
+        throw new GraphQLError(constants.MESSAGES.ONLY_ADMIN_PLAYLISTS_ALLOWED, {
+            extensions: {
+                code: 'CONFLICT'
+            }
+        })
+    }
 }
 
 const removeAllSongs = async (songId: string): Promise<void> => {
@@ -174,7 +207,7 @@ const updatePlaylist = async (token: string, { playlistId, input }: updatePlayli
         }
 
         const query = {
-            _id: playlistId
+            _id: new mongoose.Types.ObjectId(playlistId)
         }
 
         const data = {
@@ -251,12 +284,12 @@ const addRemoveSong = async (token: string, { playlistId, songId, isAdded }: add
 
         const query = isAdded ? {
             $and: [
-                { _id: playlistId },
+                { _id: new mongoose.Types.ObjectId(playlistId) },
                 { songs: { $ne: new mongoose.Types.ObjectId(songId) } }
             ]
         } : {
             $and: [
-                { _id: playlistId },
+                { _id: new mongoose.Types.ObjectId(playlistId) },
                 { songs: new mongoose.Types.ObjectId(songId) }
             ]
         }
@@ -316,7 +349,7 @@ const deletePlaylist = async (token: string, playlistId: string): Promise<void> 
         }
 
         const query = {
-            _id: playlistId
+            _id: new mongoose.Types.ObjectId(playlistId)
         }
 
         await DbRepo.deleteOne(constants.COLLECTIONS.PLAYLIST, { query })
@@ -654,6 +687,7 @@ export default {
     getPlaylistById,
     getPlaylistByIdAndUser,
     checkPlaylistPrivate,
+    validatePlaylistUser,
     removeAllSongs,
     createPlaylist,
     updatePlaylist,
