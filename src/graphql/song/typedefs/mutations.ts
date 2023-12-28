@@ -7,11 +7,9 @@ export default `#graphql
         updateAlbum(albumId: String! input: updateAlbumInput!): updateAlbumData!
         updateSong(songId: String! input: updateSongInput!): updateSongData!
         updatePlaylist(playlistId: String! input: updatePlaylistInput!): updatePlaylistData!
-        addSong(input: addRemoveSongInput!): SuccessResponse!
-        removeSong(input: addRemoveSongInput!): SuccessResponse!
+        addRemoveSong(input: addRemoveSongInput!): addRemoveSongData!
         updateCategory(categoryId: String! input: updateCategoryInput!): updateCategoryData!
-        addPlaylist(input: addRemovePlaylistInput!): SuccessResponse!
-        removePlaylist(input: addRemovePlaylistInput!): SuccessResponse!
+        addRemovePlaylist(input: addRemovePlaylistInput!): addRemovePlaylistData!
         deleteAlbum(albumId: String!): SuccessResponse!
         deleteSong(songId: String!): SuccessResponse!
         deletePlaylist(playlistId: String!): SuccessResponse!

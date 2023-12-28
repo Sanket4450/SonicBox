@@ -213,7 +213,7 @@ interface updatePlaylistData {
     isPrivate: boolean
 }
 
-const addSong = async (token: string, { playlistId, songId }: addRemoveSong): Promise<void> => {
+const addRemoveSong = async (token: string, { playlistId, songId, isAdded }: addRemoveSong): Promise<void> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
@@ -249,73 +249,23 @@ const addSong = async (token: string, { playlistId, songId }: addRemoveSong): Pr
             })
         }
 
-        const query = {
+        const query = isAdded ? {
             $and: [
                 { _id: playlistId },
                 { songs: { $ne: new mongoose.Types.ObjectId(songId) } }
             ]
-        }
-
-        const data = {
-            $push: {
-                songs: new mongoose.Types.ObjectId(songId)
-            }
-        }
-
-        await DbRepo.updateOne(constants.COLLECTIONS.PLAYLIST, { query, data })
-    } catch (error: any) {
-        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-            extensions: {
-                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-            }
-        })
-    }
-}
-
-const removeSong = async (token: string, { playlistId, songId }: addRemoveSong): Promise<void> => {
-    try {
-        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
-
-        if (!await userService.getUserById(sub)) {
-            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
-
-        if (!await getPlaylistById(playlistId)) {
-            throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
-
-        if (!await getPlaylistByIdAndUser(playlistId, sub)) {
-            throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_EXIST, {
-                extensions: {
-                    code: 'CONFLICT'
-                }
-            })
-        }
-
-        if (!await songService.getSongById(songId)) {
-            throw new GraphQLError(constants.MESSAGES.SONG_NOT_FOUND, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
-
-        const query = {
+        } : {
             $and: [
                 { _id: playlistId },
                 { songs: new mongoose.Types.ObjectId(songId) }
             ]
         }
 
-        const data = {
+        const data = isAdded ? {
+            $push: {
+                songs: new mongoose.Types.ObjectId(songId)
+            }
+        } : {
             $pull: {
                 songs: new mongoose.Types.ObjectId(songId)
             }
@@ -334,6 +284,7 @@ const removeSong = async (token: string, { playlistId, songId }: addRemoveSong):
 interface addRemoveSong {
     playlistId: string
     songId: string
+    isAdded: boolean
 }
 
 const deletePlaylist = async (token: string, playlistId: string): Promise<void> => {
@@ -706,8 +657,7 @@ export default {
     removeAllSongs,
     createPlaylist,
     updatePlaylist,
-    addSong,
-    removeSong,
+    addRemoveSong,
     deletePlaylist,
     deleteAllPlaylistsByUserId,
     getUserPlaylists,

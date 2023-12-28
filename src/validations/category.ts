@@ -5,7 +5,8 @@ import {
     stringReqValidation,
     stringValidation,
     idReqValidation,
-    pageAndLimit
+    pageAndLimit,
+    booleanValidation
 } from './common'
 
 const createCategory = Joi.object({
@@ -27,7 +28,8 @@ const updateCategory = Joi.object({
 
 const addRemovePlaylist = Joi.object({
     categoryId: idReqValidation,
-    playlistId: idReqValidation
+    playlistId: idReqValidation,
+    isAdded: booleanValidation.required()
 })
 
 const deleteCategory = Joi.object({

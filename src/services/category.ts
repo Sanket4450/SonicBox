@@ -188,7 +188,7 @@ interface updateCategoryData {
     parent_categoryId: string
 }
 
-const addPlaylist = async (token: string, { categoryId, playlistId }: addRemovePlaylist): Promise<void> => {
+const addRemovePlaylist = async (token: string, { categoryId, playlistId, isAdded }: addRemovePlaylist): Promise<void> => {
     try {
         const { sub, role } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
@@ -224,73 +224,23 @@ const addPlaylist = async (token: string, { categoryId, playlistId }: addRemoveP
             })
         }
 
-        const query = {
+        const query = isAdded ? {
             $and: [
                 { _id: categoryId },
                 { playlists: { $ne: new mongoose.Types.ObjectId(playlistId) } }
             ]
-        }
-
-        const data = {
-            $push: {
-                playlists: new mongoose.Types.ObjectId(playlistId)
-            }
-        }
-
-        await DbRepo.updateOne(constants.COLLECTIONS.CATEGORY, { query, data })
-    } catch (error: any) {
-        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-            extensions: {
-                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-            }
-        })
-    }
-}
-
-const removePlaylist = async (token: string, { categoryId, playlistId }: addRemovePlaylist): Promise<void> => {
-    try {
-        const { sub, role } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
-
-        if (!await userService.getUserById(sub)) {
-            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
-
-        if (role !== 'admin') {
-            throw new GraphQLError(constants.MESSAGES.USER_NOT_ALLOWED, {
-                extensions: {
-                    code: 'FORBIDDEN'
-                }
-            })
-        }
-
-        if (!await getCategoryById(categoryId)) {
-            throw new GraphQLError(constants.MESSAGES.CATEGORY_NOT_EXIST, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
-
-        if (!await playlistService.getPlaylistById(playlistId)) {
-            throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
-
-        const query = {
+        } : {
             $and: [
                 { _id: categoryId },
                 { playlists: new mongoose.Types.ObjectId(playlistId) }
             ]
         }
 
-        const data = {
+        const data = isAdded ? {
+            $push: {
+                playlists: new mongoose.Types.ObjectId(playlistId)
+            }
+        } : {
             $pull: {
                 playlists: new mongoose.Types.ObjectId(playlistId)
             }
@@ -309,6 +259,7 @@ const removePlaylist = async (token: string, { categoryId, playlistId }: addRemo
 interface addRemovePlaylist {
     categoryId: string
     playlistId: string
+    isAdded: boolean
 }
 
 const deleteCategory = async (token: string, categoryId: string): Promise<void> => {
@@ -504,8 +455,7 @@ export default {
     removeAllPlaylists,
     createCategory,
     updateCategory,
-    addPlaylist,
-    removePlaylist,
+    addRemovePlaylist,
     deleteCategory,
     getCategories,
     getSingleCategory

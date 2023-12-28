@@ -26,7 +26,8 @@ const updatePlaylist = Joi.object({
 
 const addRemoveSong = Joi.object({
     playlistId: idReqValidation,
-    songId: idReqValidation
+    songId: idReqValidation,
+    isAdded: booleanValidation.required()
 })
 
 const deletePlaylist = Joi.object({

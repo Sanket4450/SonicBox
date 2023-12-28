@@ -5,11 +5,9 @@ const createCategory: string[] = ['categoryId']
 const updateAlbum: string[] = ['albumId']
 const updateSong: string[] = ['songId']
 const updatePlaylist: string[] = ['playlistId']
-const addSong: string[] = ['success']
-const removeSong: string[] = ['success']
+const addRemoveSong: string[] = ['isAdded']
 const updateCategory: string[] = ['categoryId']
-const addPlaylist: string[] = ['success']
-const removePlaylist: string[] = ['success']
+const addRemovePlaylist: string[] = ['isAdded']
 const deleteAlbum: string[] = ['success']
 const deleteSong: string[] = ['success']
 const deletePlaylist: string[] = ['success']
@@ -23,11 +21,9 @@ export default {
     updateAlbum,
     updateSong,
     updatePlaylist,
-    addSong,
-    removeSong,
+    addRemoveSong,
     updateCategory,
-    addPlaylist,
-    removePlaylist,
+    addRemovePlaylist,
     deleteAlbum,
     deleteSong,
     deletePlaylist,

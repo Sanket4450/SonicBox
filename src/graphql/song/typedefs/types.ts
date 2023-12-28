@@ -109,6 +109,11 @@ export default `#graphql
     input addRemoveSongInput {
         playlistId: String!
         songId: String!
+        isAdded: Boolean!
+    }
+
+    type addRemoveSongData {
+        isAdded: Boolean!
     }
 
     input updateCategoryInput {
@@ -128,6 +133,11 @@ export default `#graphql
     input addRemovePlaylistInput {
         categoryId: String!
         playlistId: String!
+        isAdded: Boolean!
+    }
+
+    type addRemovePlaylistData {
+        isAdded: Boolean!
     }
 
     input CategoriesInput {

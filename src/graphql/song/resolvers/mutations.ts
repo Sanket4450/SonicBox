@@ -141,33 +141,15 @@ export default {
         }
     },
 
-    addSong: async (_: any, { input }: addRemoveSongInput, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+    addRemoveSong: async (_: any, { input }: addRemoveSongInput, { token }: any, info: GraphQLResolveInfo): Promise<{ isAdded: boolean }> => {
         try {
             validateSchema(input, playlistValidation.addRemoveSong)
 
-            validateSelection(info.fieldNodes[0].selectionSet, fields.addSong)
+            validateSelection(info.fieldNodes[0].selectionSet, fields.addRemoveSong)
 
-            await playlistService.addSong(token, input)
+            await playlistService.addRemoveSong(token, input)
 
-            return { success: true }
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
-        }
-    },
-
-    removeSong: async (_: any, { input }: addRemoveSongInput, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
-        try {
-            validateSchema(input, playlistValidation.addRemoveSong)
-
-            validateSelection(info.fieldNodes[0].selectionSet, fields.removeSong)
-
-            await playlistService.removeSong(token, input)
-
-            return { success: true }
+            return { isAdded: input.isAdded }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -195,33 +177,15 @@ export default {
         }
     },
 
-    addPlaylist: async (_: any, { input }: addRemovePlaylistInput, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
+    addRemovePlaylist: async (_: any, { input }: addRemovePlaylistInput, { token }: any, info: GraphQLResolveInfo): Promise<{ isAdded: boolean }> => {
         try {
             validateSchema(input, categoryValidation.addRemovePlaylist)
 
-            validateSelection(info.fieldNodes[0].selectionSet, fields.addPlaylist)
+            validateSelection(info.fieldNodes[0].selectionSet, fields.addRemovePlaylist)
 
-            await categoryService.addPlaylist(token, input)
+            await categoryService.addRemovePlaylist(token, input)
 
-            return { success: true }
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
-        }
-    },
-
-    removePlaylist: async (_: any, { input }: addRemovePlaylistInput, { token }: any, info: GraphQLResolveInfo): Promise<{ success: true }> => {
-        try {
-            validateSchema(input, categoryValidation.addRemovePlaylist)
-
-            validateSelection(info.fieldNodes[0].selectionSet, fields.removePlaylist)
-
-            await categoryService.removePlaylist(token, input)
-
-            return { success: true }
+            return { isAdded: input.isAdded }
         } catch (error: any) {
             throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
                 extensions: {
@@ -428,6 +392,7 @@ interface addRemoveSongInput {
     input: {
         playlistId: string
         songId: string
+        isAdded: boolean
     }
 }
 
@@ -452,6 +417,7 @@ interface addRemovePlaylistInput {
     input: {
         categoryId: string
         playlistId: string
+        isAdded: boolean
     }
 }
 
