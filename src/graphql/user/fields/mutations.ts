@@ -5,12 +5,9 @@ const resetPassword: string[] = ['success']
 const logoutUser: string[] = ['success']
 const followUnfollowUser: string[] = ['isFollowed']
 const updateUser: string[] = ['userId']
-const addLibraryPlaylist: string[] = ['success']
-const removeLibraryPlaylist: string[] = ['success']
-const addLibraryArtist: string[] = ['success']
-const removeLibraryArtist: string[] = ['success']
-const addLibraryAlbum: string[] = ['success']
-const removeLibraryAlbum: string[] = ['success']
+const addRemoveLibraryPlaylist: string[] = ['isAdded']
+const addRemoveLibraryArtist: string[] = ['isAdded']
+const addRemoveLibraryAlbum: string[] = ['isAdded']
 const deleteUser: string[] = ['success']
 const verifyUser: string[] = ['isVerified']
 
@@ -22,12 +19,9 @@ export default {
     logoutUser,
     followUnfollowUser,
     updateUser,
-    addLibraryPlaylist,
-    removeLibraryPlaylist,
-    addLibraryArtist,
-    removeLibraryArtist,
-    addLibraryAlbum,
-    removeLibraryAlbum,
+    addRemoveLibraryPlaylist,
+    addRemoveLibraryArtist,
+    addRemoveLibraryAlbum,
     deleteUser,
     verifyUser
 }

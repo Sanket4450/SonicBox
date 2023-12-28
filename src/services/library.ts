@@ -32,6 +32,31 @@ const addPlaylist = async (userId: string, playlistId: string): Promise<void> =>
     }
 }
 
+const removePlaylist = async (userId: string, playlistId: string): Promise<void> => {
+    try {
+        const query = {
+            $and: [
+                { userId: new mongoose.Types.ObjectId(userId) },
+                { playlists: new mongoose.Types.ObjectId(playlistId) }
+            ]
+        }
+
+        const data = {
+            $pull: {
+                playlists: new mongoose.Types.ObjectId(playlistId)
+            }
+        }
+
+        await DbRepo.updateOne(constants.COLLECTIONS.LIBRARY, { query, data })
+    } catch (error: any) {
+        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
+            extensions: {
+                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+            }
+        })
+    }
+}
+
 const removeAllPlaylists = async (playlistId: string): Promise<void> => {
     try {
         const query = {
@@ -76,7 +101,7 @@ const removeAllAlbums = async (albumId: string): Promise<void> => {
     }
 }
 
-const addLibraryPlaylist = async (token: string, playlistId: string): Promise<void> => {
+const addRemoveLibraryPlaylist = async (token: string, { playlistId, isAdded }: addRemoveLibraryPlaylist): Promise<void> => {
     try {
         const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
 
@@ -96,17 +121,19 @@ const addLibraryPlaylist = async (token: string, playlistId: string): Promise<vo
             })
         }
 
-        const { isPrivate } = await playlistService.checkPlaylistPrivate(playlistId)
+        if (isAdded) {
+            const { isPrivate } = await playlistService.checkPlaylistPrivate(playlistId)
 
-        if (isPrivate) {
-            throw new GraphQLError(constants.MESSAGES.PRIVATE_PLAYLIST, {
-                extensions: {
-                    code: 'FORBIDDEN'
-                }
-            })
+            if (isPrivate) {
+                throw new GraphQLError(constants.MESSAGES.PRIVATE_PLAYLIST, {
+                    extensions: {
+                        code: 'FORBIDDEN'
+                    }
+                })
+            }
         }
 
-        await addPlaylist(sub, playlistId)
+        isAdded ? await addPlaylist(sub, playlistId) : await removePlaylist(sub, playlistId)
     } catch (error: any) {
         throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
             extensions: {
@@ -116,47 +143,9 @@ const addLibraryPlaylist = async (token: string, playlistId: string): Promise<vo
     }
 }
 
-const removeLibraryPlaylist = async (token: string, playlistId: string): Promise<void> => {
-    try {
-        const { sub } = await tokenService.verifyToken(token, process.env.ACCESS_TOKEN_SECRET as string)
-
-        if (!await userService.getUserById(sub)) {
-            throw new GraphQLError(constants.MESSAGES.USER_NOT_FOUND, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
-
-        if (!await playlistService.getPlaylistById(playlistId)) {
-            throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
-                extensions: {
-                    code: 'NOT_FOUND'
-                }
-            })
-        }
-
-        const query = {
-            $and: [
-                { userId: new mongoose.Types.ObjectId(sub) },
-                { playlists: new mongoose.Types.ObjectId(playlistId) }
-            ]
-        }
-
-        const data = {
-            $pull: {
-                playlists: new mongoose.Types.ObjectId(playlistId)
-            }
-        }
-
-        await DbRepo.updateOne(constants.COLLECTIONS.LIBRARY, { query, data })
-    } catch (error: any) {
-        throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-            extensions: {
-                code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-            }
-        })
-    }
+interface addRemoveLibraryPlaylist {
+    playlistId: string
+    isAdded: boolean
 }
 
 const addLibraryArtist = async (token: string, artistId: string): Promise<void> => {
@@ -575,8 +564,7 @@ export default {
     addPlaylist,
     removeAllPlaylists,
     removeAllAlbums,
-    addLibraryPlaylist,
-    removeLibraryPlaylist,
+    addRemoveLibraryPlaylist,
     addLibraryArtist,
     removeLibraryArtist,
     addLibraryAlbum,

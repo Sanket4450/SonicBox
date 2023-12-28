@@ -110,6 +110,33 @@ export default `#graphql
         isVerified: Boolean
     }
 
+    input addRemoveLibraryPlaylistInput {
+        playlistId: String!
+        isAdded: Boolean!
+    }
+
+    type addRemoveLibraryPlaylistData {
+        isAdded: Boolean!
+    }
+
+    input addRemoveLibraryArtistInput {
+        artistId: String!
+        isAdded: Boolean!
+    }
+
+    type addRemoveLibraryArtistData {
+        isAdded: Boolean!
+    }
+
+    input addRemoveLibraryAlbumInput {
+        albumId: String!
+        isAdded: Boolean!
+    }
+
+    type addRemoveLibraryAlbumData {
+        isAdded: Boolean!
+    }
+
     input usersInput {
         keyword: String
         page: Int = 1
