@@ -1,28 +1,36 @@
 import { Schema, InferSchemaType, model } from 'mongoose'
 
-const librarySchema = new Schema({
+const librarySchema = new Schema(
+  {
     userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    playlists: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Playlist',
+      },
+    ],
+    artists: [
+      {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: true
-    },
-    playlists: [{
+      },
+    ],
+    albums: [
+      {
         type: Schema.Types.ObjectId,
-        ref: 'Playlist'
-    }],
-    artists: [{
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-    }],
-    albums: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Album'
-    }]
-},
-    {
-        timestamps: true,
-        autoIndex: false
-    })
+        ref: 'Album',
+      },
+    ],
+  },
+  {
+    timestamps: true,
+    autoIndex: false,
+  }
+)
 
 type Library = InferSchemaType<typeof librarySchema>
 

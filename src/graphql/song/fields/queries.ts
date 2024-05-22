@@ -8,12 +8,12 @@ const categories: string[] = ['categoryId']
 const category: string[] = ['categoryId']
 
 export default {
-    albums,
-    album,
-    songs,
-    song,
-    playlists,
-    playlist,
-    categories,
-    category
+  albums,
+  album,
+  songs,
+  song,
+  playlists,
+  playlist,
+  categories,
+  category,
 }

@@ -12,16 +12,16 @@ const deleteUser: string[] = ['success']
 const verifyUser: string[] = ['isVerified']
 
 export default {
-    createUser,
-    loginUser,
-    resetForgotPassword,
-    resetPassword,
-    logoutUser,
-    followUnfollowUser,
-    updateUser,
-    addRemoveLibraryPlaylist,
-    addRemoveLibraryArtist,
-    addRemoveLibraryAlbum,
-    deleteUser,
-    verifyUser
+  createUser,
+  loginUser,
+  resetForgotPassword,
+  resetPassword,
+  logoutUser,
+  followUnfollowUser,
+  updateUser,
+  addRemoveLibraryPlaylist,
+  addRemoveLibraryArtist,
+  addRemoveLibraryAlbum,
+  deleteUser,
+  verifyUser,
 }

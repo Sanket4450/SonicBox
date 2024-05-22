@@ -14,18 +14,18 @@ const deletePlaylist: string[] = ['success']
 const deleteCategory: string[] = ['success']
 
 export default {
-    createAlbum,
-    createSong,
-    createPlaylist,
-    createCategory,
-    updateAlbum,
-    updateSong,
-    updatePlaylist,
-    addRemoveSong,
-    updateCategory,
-    addRemovePlaylist,
-    deleteAlbum,
-    deleteSong,
-    deletePlaylist,
-    deleteCategory
+  createAlbum,
+  createSong,
+  createPlaylist,
+  createCategory,
+  updateAlbum,
+  updateSong,
+  updatePlaylist,
+  addRemoveSong,
+  updateCategory,
+  addRemovePlaylist,
+  deleteAlbum,
+  deleteSong,
+  deletePlaylist,
+  deleteCategory,
 }

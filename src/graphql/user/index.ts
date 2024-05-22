@@ -6,8 +6,8 @@ import mutationResolvers from './resolvers/mutations'
 import parentResolvers from './resolvers/parents'
 
 export default {
-    typeDefs: `${types} ${queries} ${mutations}`,
-    queryResolvers,
-    mutationResolvers,
-    parentResolvers
+  typeDefs: `${types} ${queries} ${mutations}`,
+  queryResolvers,
+  mutationResolvers,
+  parentResolvers,
 }

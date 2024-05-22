@@ -4,8 +4,8 @@ const artists: string[] = ['artistId']
 const albums: string[] = ['albumId']
 
 export default {
-    users,
-    playlists,
-    artists,
-    albums
+  users,
+  playlists,
+  artists,
+  albums,
 }

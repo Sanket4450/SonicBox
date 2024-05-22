@@ -7,11 +7,11 @@ const artists: string[] = ['artistId']
 const artist: string[] = ['artistId']
 
 export default {
-    requestReset,
-    verifyResetOtp,
-    refreshAuthTokens,
-    users,
-    user,
-    artists,
-    artist
+  requestReset,
+  verifyResetOtp,
+  refreshAuthTokens,
+  users,
+  user,
+  artists,
+  artist,
 }

@@ -5,7 +5,7 @@ import queryResolvers from './resolvers/queries'
 import mutationResolvers from './resolvers/mutations'
 
 export default {
-    typeDefs: `${types} ${queries} ${mutations}`,
-    queryResolvers,
-    mutationResolvers
+  typeDefs: `${types} ${queries} ${mutations}`,
+  queryResolvers,
+  mutationResolvers,
 }

@@ -14,24 +14,30 @@ export const arrayValidation = Joi.array()
 export const arrayReqValidation = arrayValidation.required()
 
 export const pageAndLimit = {
-    page: integerNumberValidation.min(1),
-    limit: integerNumberValidation.min(1)
+  page: integerNumberValidation.min(1),
+  limit: integerNumberValidation.min(1),
 }
 
 export const pageAndLimitSchema = Joi.object({
-    ...pageAndLimit
+  ...pageAndLimit,
 })
 
 export const secretValidation = stringValidation
-    .pattern(new RegExp('^[A-Za-z0-9_@/?%]*$'))
-    .messages({ 'string.pattern.base': 'Invalid secret. Secret does not match with the pattern' })
+  .pattern(new RegExp('^[A-Za-z0-9_@/?%]*$'))
+  .messages({
+    'string.pattern.base':
+      'Invalid secret. Secret does not match with the pattern',
+  })
 
 export const idValidation = stringValidation
-    .pattern(new RegExp('^[0-9a-fA-F]{24}$'))
-    .messages({ 'string.pattern.base': 'Invalid ID. Please provide a valid ObjectId' })
+  .pattern(new RegExp('^[0-9a-fA-F]{24}$'))
+  .messages({
+    'string.pattern.base': 'Invalid ID. Please provide a valid ObjectId',
+  })
 
 export const idReqValidation = idValidation.required()
 
 export const toggleValidation = [
-    stringValidation.lowercase().valid('true', 'false'), numberValidation.valid(1, 0)
+  stringValidation.lowercase().valid('true', 'false'),
+  numberValidation.valid(1, 0),
 ]

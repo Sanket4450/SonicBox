@@ -1,37 +1,41 @@
 import { Schema, InferSchemaType, model } from 'mongoose'
 
-const playlistSchema = new Schema({
+const playlistSchema = new Schema(
+  {
     userId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
     name: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     image: {
-        type: String,
-        trim: true,
-        default: null
+      type: String,
+      trim: true,
+      default: null,
     },
     description: {
-        type: String,
-        default: null
+      type: String,
+      default: null,
     },
     isPrivate: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
-    songs: [{
+    songs: [
+      {
         type: Schema.Types.ObjectId,
-        ref: 'Song'
-    }]
-},
-    {
-        timestamps: true,
-        autoIndex: false
-    })
+        ref: 'Song',
+      },
+    ],
+  },
+  {
+    timestamps: true,
+    autoIndex: false,
+  }
+)
 
 type Playlist = InferSchemaType<typeof playlistSchema>
 

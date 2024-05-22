@@ -12,318 +12,382 @@ import playlistService from '../../../services/playlist'
 import categoryService from '../../../services/category'
 
 export default {
-    albums: async (_: any, { input }: albumsInput, __: any, info: GraphQLResolveInfo): Promise<albumWithArtist[]> => {
-        try {
-            validateSchema(input, albumValidation.albums)
+  albums: async (
+    _: any,
+    { input }: albumsInput,
+    __: any,
+    info: GraphQLResolveInfo
+  ): Promise<albumWithArtist[]> => {
+    try {
+      validateSchema(input, albumValidation.albums)
 
-            validateSelection(info.fieldNodes[0].selectionSet, fields.albums)
+      validateSelection(info.fieldNodes[0].selectionSet, fields.albums)
 
-            const albums = await albumService.getAlbums(input)
+      const albums = await albumService.getAlbums(input)
 
-            return albums
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
+      return albums
+    } catch (error: any) {
+      throw new GraphQLError(
+        error.message || constants.MESSAGES.SOMETHING_WENT_WRONG,
+        {
+          extensions: {
+            code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
+          },
         }
-    },
-
-    album: async (_: any, { id }: id, __: any, info: GraphQLResolveInfo): Promise<singleAlbum> => {
-        try {
-            validateSchema({ id }, albumValidation.album)
-
-            validateSelection(info.fieldNodes[0].selectionSet, fields.album)
-
-            const [album] = await albumService.getSingleAlbum(id)
-
-            if (!album) {
-                throw new GraphQLError(constants.MESSAGES.ALBUM_NOT_FOUND, {
-                    extensions: {
-                        code: 'NOT_FOUND'
-                    }
-                })
-            }
-            return album
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
-        }
-    },
-
-    songs: async (_: any, { input }: songsInput, __: any, info: GraphQLResolveInfo): Promise<songWithArtists[]> => {
-        try {
-            validateSchema(input, songValidation.songs)
-
-            validateSelection(info.fieldNodes[0].selectionSet, fields.songs)
-
-            const songs = await songService.getSongs(input)
-
-            return songs
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
-        }
-    },
-
-    song: async (_: any, { id }: id, __: any, info: GraphQLResolveInfo): Promise<singleSong> => {
-        try {
-            validateSchema({ id }, songValidation.song)
-
-            validateSelection(info.fieldNodes[0].selectionSet, fields.song)
-
-            const [song] = await songService.getSingleSong(id)
-
-            if (!song) {
-                throw new GraphQLError(constants.MESSAGES.SONG_NOT_FOUND, {
-                    extensions: {
-                        code: 'NOT_FOUND'
-                    }
-                })
-            }
-            return song
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
-        }
-    },
-
-    playlists: async (_: any, { input }: playlistsInput, __: any, info: GraphQLResolveInfo): Promise<playlist[]> => {
-        try {
-            validateSchema(input, playlistValidation.playlists)
-
-            validateSelection(info.fieldNodes[0].selectionSet, fields.playlists)
-
-            const playlists = await playlistService.getPlaylists(input)
-
-            return playlists
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
-        }
-    },
-
-    playlist: async (_: any, { id }: id, __: any, info: GraphQLResolveInfo): Promise<singlePlaylist> => {
-        try {
-            validateSchema({ id }, playlistValidation.playlist)
-
-            validateSelection(info.fieldNodes[0].selectionSet, fields.playlist)
-
-            const [playlist] = await playlistService.getSinglePlaylist(id)
-
-            if (!playlist) {
-                throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
-                    extensions: {
-                        code: 'NOT_FOUND'
-                    }
-                })
-            }
-            return playlist
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
-        }
-    },
-
-    categories: async (_: any, { input }: categoriesInput, __: any, info: GraphQLResolveInfo): Promise<category[]> => {
-        try {
-            validateSchema(input, categoryValidation.categories)
-
-            validateSelection(info.fieldNodes[0].selectionSet, fields.categories)
-
-            const categories = await categoryService.getCategories(input)
-
-            return categories
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
-        }
-    },
-
-    category: async (_: any, { id }: id, __: any, info: GraphQLResolveInfo): Promise<singleCategory> => {
-        try {
-            validateSchema({ id }, categoryValidation.category)
-
-            validateSelection(info.fieldNodes[0].selectionSet, fields.category)
-
-            const [category] = await categoryService.getSingleCategory(id)
-
-            if (!category) {
-                throw new GraphQLError(constants.MESSAGES.CATEGORY_NOT_EXIST, {
-                    extensions: {
-                        code: 'NOT_FOUND'
-                    }
-                })
-            }
-            return category
-        } catch (error: any) {
-            throw new GraphQLError(error.message || constants.MESSAGES.SOMETHING_WENT_WRONG, {
-                extensions: {
-                    code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
-                }
-            })
-        }
+      )
     }
+  },
+
+  album: async (
+    _: any,
+    { id }: id,
+    __: any,
+    info: GraphQLResolveInfo
+  ): Promise<singleAlbum> => {
+    try {
+      validateSchema({ id }, albumValidation.album)
+
+      validateSelection(info.fieldNodes[0].selectionSet, fields.album)
+
+      const [album] = await albumService.getSingleAlbum(id)
+
+      if (!album) {
+        throw new GraphQLError(constants.MESSAGES.ALBUM_NOT_FOUND, {
+          extensions: {
+            code: 'NOT_FOUND',
+          },
+        })
+      }
+      return album
+    } catch (error: any) {
+      throw new GraphQLError(
+        error.message || constants.MESSAGES.SOMETHING_WENT_WRONG,
+        {
+          extensions: {
+            code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
+          },
+        }
+      )
+    }
+  },
+
+  songs: async (
+    _: any,
+    { input }: songsInput,
+    __: any,
+    info: GraphQLResolveInfo
+  ): Promise<songWithArtists[]> => {
+    try {
+      validateSchema(input, songValidation.songs)
+
+      validateSelection(info.fieldNodes[0].selectionSet, fields.songs)
+
+      const songs = await songService.getSongs(input)
+
+      return songs
+    } catch (error: any) {
+      throw new GraphQLError(
+        error.message || constants.MESSAGES.SOMETHING_WENT_WRONG,
+        {
+          extensions: {
+            code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
+          },
+        }
+      )
+    }
+  },
+
+  song: async (
+    _: any,
+    { id }: id,
+    __: any,
+    info: GraphQLResolveInfo
+  ): Promise<singleSong> => {
+    try {
+      validateSchema({ id }, songValidation.song)
+
+      validateSelection(info.fieldNodes[0].selectionSet, fields.song)
+
+      const [song] = await songService.getSingleSong(id)
+
+      if (!song) {
+        throw new GraphQLError(constants.MESSAGES.SONG_NOT_FOUND, {
+          extensions: {
+            code: 'NOT_FOUND',
+          },
+        })
+      }
+      return song
+    } catch (error: any) {
+      throw new GraphQLError(
+        error.message || constants.MESSAGES.SOMETHING_WENT_WRONG,
+        {
+          extensions: {
+            code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
+          },
+        }
+      )
+    }
+  },
+
+  playlists: async (
+    _: any,
+    { input }: playlistsInput,
+    __: any,
+    info: GraphQLResolveInfo
+  ): Promise<playlist[]> => {
+    try {
+      validateSchema(input, playlistValidation.playlists)
+
+      validateSelection(info.fieldNodes[0].selectionSet, fields.playlists)
+
+      const playlists = await playlistService.getPlaylists(input)
+
+      return playlists
+    } catch (error: any) {
+      throw new GraphQLError(
+        error.message || constants.MESSAGES.SOMETHING_WENT_WRONG,
+        {
+          extensions: {
+            code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
+          },
+        }
+      )
+    }
+  },
+
+  playlist: async (
+    _: any,
+    { id }: id,
+    __: any,
+    info: GraphQLResolveInfo
+  ): Promise<singlePlaylist> => {
+    try {
+      validateSchema({ id }, playlistValidation.playlist)
+
+      validateSelection(info.fieldNodes[0].selectionSet, fields.playlist)
+
+      const [playlist] = await playlistService.getSinglePlaylist(id)
+
+      if (!playlist) {
+        throw new GraphQLError(constants.MESSAGES.PLAYLIST_NOT_FOUND, {
+          extensions: {
+            code: 'NOT_FOUND',
+          },
+        })
+      }
+      return playlist
+    } catch (error: any) {
+      throw new GraphQLError(
+        error.message || constants.MESSAGES.SOMETHING_WENT_WRONG,
+        {
+          extensions: {
+            code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
+          },
+        }
+      )
+    }
+  },
+
+  categories: async (
+    _: any,
+    { input }: categoriesInput,
+    __: any,
+    info: GraphQLResolveInfo
+  ): Promise<category[]> => {
+    try {
+      validateSchema(input, categoryValidation.categories)
+
+      validateSelection(info.fieldNodes[0].selectionSet, fields.categories)
+
+      const categories = await categoryService.getCategories(input)
+
+      return categories
+    } catch (error: any) {
+      throw new GraphQLError(
+        error.message || constants.MESSAGES.SOMETHING_WENT_WRONG,
+        {
+          extensions: {
+            code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
+          },
+        }
+      )
+    }
+  },
+
+  category: async (
+    _: any,
+    { id }: id,
+    __: any,
+    info: GraphQLResolveInfo
+  ): Promise<singleCategory> => {
+    try {
+      validateSchema({ id }, categoryValidation.category)
+
+      validateSelection(info.fieldNodes[0].selectionSet, fields.category)
+
+      const [category] = await categoryService.getSingleCategory(id)
+
+      if (!category) {
+        throw new GraphQLError(constants.MESSAGES.CATEGORY_NOT_EXIST, {
+          extensions: {
+            code: 'NOT_FOUND',
+          },
+        })
+      }
+      return category
+    } catch (error: any) {
+      throw new GraphQLError(
+        error.message || constants.MESSAGES.SOMETHING_WENT_WRONG,
+        {
+          extensions: {
+            code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
+          },
+        }
+      )
+    }
+  },
 }
 
 interface albumsInput {
-    input: {
-        keyword?: string
-        page?: number
-        limit?: number
-    }
+  input: {
+    keyword?: string
+    page?: number
+    limit?: number
+  }
 }
 
 interface album {
-    albumId: string
-    name: string
-    image: string
+  albumId: string
+  name: string
+  image: string
 }
 
 interface albumWithArtist {
-    albumId: string
-    name: string
-    image: string
-    artist: artist
+  albumId: string
+  name: string
+  image: string
+  artist: artist
 }
 
 interface artist {
-    artistId: string
-    username: string
-    name: string
-    gender: string
-    dateOfBirth: string
-    state: string
-    country: string
-    profile_picture: string
-    description: string
-    isVerified: boolean
+  artistId: string
+  username: string
+  name: string
+  gender: string
+  dateOfBirth: string
+  state: string
+  country: string
+  profile_picture: string
+  description: string
+  isVerified: boolean
 }
 
 interface id {
-    id: string
+  id: string
 }
 
 interface singleAlbum {
-    albumId: string
-    name: string
-    image: string
-    artist: artist
-    songs: song[]
+  albumId: string
+  name: string
+  image: string
+  artist: artist
+  songs: song[]
 }
 
 interface song {
-    songId: string
-    name: string
-    fileURL: string
+  songId: string
+  name: string
+  fileURL: string
 }
 
 interface songWithAlbum {
-    songId: string
-    name: string
-    fileURL: string
-    album: album
+  songId: string
+  name: string
+  fileURL: string
+  album: album
 }
 
 interface songsInput {
-    input: {
-        keyword?: string
-        page?: number
-        limit?: number
-    }
+  input: {
+    keyword?: string
+    page?: number
+    limit?: number
+  }
 }
 
 interface songWithArtists {
-    songId: string
-    name: string
-    fileURL: string
-    artists: artist[]
+  songId: string
+  name: string
+  fileURL: string
+  artists: artist[]
 }
 
 interface singleSong {
-    songId: string
-    name: string
-    fileURL: string
-    album: albumWithArtist
-    artists: artist[]
+  songId: string
+  name: string
+  fileURL: string
+  album: albumWithArtist
+  artists: artist[]
 }
 
 interface playlistsInput {
-    input: {
-        keyword?: string
-        page?: number
-        limit?: number
-    }
+  input: {
+    keyword?: string
+    page?: number
+    limit?: number
+  }
 }
 
 interface playlist {
-    playlistId: string
-    name: string
-    image: string
-    description: string
+  playlistId: string
+  name: string
+  image: string
+  description: string
 }
 
 interface singlePlaylist {
-    playlistId: string
-    name: string
-    image: string
-    description: string
-    user: user
-    songs: songWithAlbum[]
+  playlistId: string
+  name: string
+  image: string
+  description: string
+  user: user
+  songs: songWithAlbum[]
 }
 
 interface user {
-    username: string
-    name: string
-    email: string
-    password: string
-    gender: string
-    dateOfBirth: string
-    state: string
-    country: string
-    profile_picture: string
-    description: string
-    isVerified: boolean
+  username: string
+  name: string
+  email: string
+  password: string
+  gender: string
+  dateOfBirth: string
+  state: string
+  country: string
+  profile_picture: string
+  description: string
+  isVerified: boolean
 }
 
 interface categoriesInput {
-    input: {
-        page?: number
-        limit?: number
-    }
+  input: {
+    page?: number
+    limit?: number
+  }
 }
 
 interface category {
-    categoryId: string
-    name: string
-    image: string
-    description: string
+  categoryId: string
+  name: string
+  image: string
+  description: string
 }
 
 interface singleCategory {
-    categoryId: string
-    name: string
-    image: string
-    description: string
-    childCategories: category[]
-    playlists: playlist[]
+  categoryId: string
+  name: string
+  image: string
+  description: string
+  childCategories: category[]
+  playlists: playlist[]
 }

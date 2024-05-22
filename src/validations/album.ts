@@ -1,42 +1,42 @@
 import Joi from 'joi'
 import {
-    idReqValidation,
-    stringReqValidation,
-    stringValidation,
-    pageAndLimit
+  idReqValidation,
+  stringReqValidation,
+  stringValidation,
+  pageAndLimit,
 } from './common'
 
 const createAlbum = Joi.object({
-    name: stringReqValidation,
-    image: stringReqValidation
+  name: stringReqValidation,
+  image: stringReqValidation,
 })
 
 const updateAlbum = Joi.object({
-    albumId: idReqValidation,
-    input: {
-        artistId: stringValidation,
-        name: stringValidation,
-        image: stringValidation
-    }
+  albumId: idReqValidation,
+  input: {
+    artistId: stringValidation,
+    name: stringValidation,
+    image: stringValidation,
+  },
 })
 
 const deleteAlbum = Joi.object({
-    albumId: idReqValidation
+  albumId: idReqValidation,
 })
 
 const albums = Joi.object({
-    keyword: stringValidation,
-    ...pageAndLimit
+  keyword: stringValidation,
+  ...pageAndLimit,
 })
 
 const album = Joi.object({
-    id: idReqValidation
+  id: idReqValidation,
 })
 
 export default {
-    createAlbum,
-    updateAlbum,
-    deleteAlbum,
-    albums,
-    album
+  createAlbum,
+  updateAlbum,
+  deleteAlbum,
+  albums,
+  album,
 }

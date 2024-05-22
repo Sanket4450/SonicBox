@@ -1,54 +1,54 @@
 import Joi from 'joi'
 import {
-    arrayValidation,
-    idValidation,
-    stringReqValidation,
-    stringValidation,
-    idReqValidation,
-    pageAndLimit,
-    booleanValidation
+  arrayValidation,
+  idValidation,
+  stringReqValidation,
+  stringValidation,
+  idReqValidation,
+  pageAndLimit,
+  booleanValidation,
 } from './common'
 
 const createCategory = Joi.object({
-    name: stringReqValidation,
-    image: stringValidation,
-    description: stringValidation,
-    parent_categoryId: idValidation,
-    playlists: arrayValidation.items(idValidation)
+  name: stringReqValidation,
+  image: stringValidation,
+  description: stringValidation,
+  parent_categoryId: idValidation,
+  playlists: arrayValidation.items(idValidation),
 })
 
 const updateCategory = Joi.object({
-    categoryId: idReqValidation,
-    input: {
-        name: stringValidation,
-        image: stringValidation,
-        description: stringValidation
-    }
+  categoryId: idReqValidation,
+  input: {
+    name: stringValidation,
+    image: stringValidation,
+    description: stringValidation,
+  },
 })
 
 const addRemovePlaylist = Joi.object({
-    categoryId: idReqValidation,
-    playlistId: idReqValidation,
-    isAdded: booleanValidation.required()
+  categoryId: idReqValidation,
+  playlistId: idReqValidation,
+  isAdded: booleanValidation.required(),
 })
 
 const deleteCategory = Joi.object({
-    categoryId: idReqValidation
+  categoryId: idReqValidation,
 })
 
 const categories = Joi.object({
-    ...pageAndLimit
+  ...pageAndLimit,
 })
 
 const category = Joi.object({
-    id: idReqValidation
+  id: idReqValidation,
 })
 
 export default {
-    createCategory,
-    updateCategory,
-    addRemovePlaylist,
-    deleteCategory,
-    categories,
-    category
+  createCategory,
+  updateCategory,
+  addRemovePlaylist,
+  deleteCategory,
+  categories,
+  category,
 }

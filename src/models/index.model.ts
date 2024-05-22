@@ -8,12 +8,12 @@ import Album from './album'
 import Category from './category'
 
 export default {
-    User,
-    Session,
-    Follower,
-    Library,
-    Song,
-    Playlist,
-    Album,
-    Category
+  User,
+  Session,
+  Follower,
+  Library,
+  Song,
+  Playlist,
+  Album,
+  Category,
 }
