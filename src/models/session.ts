@@ -7,17 +7,15 @@ const sessionSchema = new Schema(
       ref: 'User',
       required: true,
     },
-    device: {
-      type: String,
-      trim: true,
-      unique: true,
-      required: true,
-    },
     token: {
       type: String,
       trim: true,
       unique: true,
       required: true,
+    },
+    lastActive: {
+      type: Date,
+      default: Date.now(),
     },
   },
   {

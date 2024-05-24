@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import constants from '../constants'
 import userService from './user'
 import tokenService from './token'
+import { roleType, genderType } from '../types'
 
 const checkUserAlreadyExist = async (
   username: string,
@@ -55,7 +56,6 @@ const registerUser = async (userData: userData): Promise<userIdAndTokens> => {
   const payload = {
     sub: user._id,
     role: userData.role,
-    device: userData.deviceToken,
   }
 
   const { accessToken, refreshToken } = await tokenService.generateAuthTokens(
@@ -64,7 +64,6 @@ const registerUser = async (userData: userData): Promise<userIdAndTokens> => {
 
   await userService.createSession({
     userId: user._id,
-    device: userData.deviceToken,
     token: refreshToken,
   })
 
@@ -84,19 +83,6 @@ interface userData {
   country?: string
   profile_picture?: string
   description?: string
-  deviceToken: string
-}
-
-enum genderType {
-  MALE = 'male',
-  FEMALE = 'female',
-  OTHER = 'other',
-}
-
-enum roleType {
-  USER = 'user',
-  ARTIST = 'artist',
-  ADMIN = 'admin',
 }
 
 interface userIdAndTokens {
@@ -139,19 +125,6 @@ const loginUser = async (loginData: loginData): Promise<userIdAndTokens> => {
     ? await userService.getUserByUsername(loginData.username as string)
     : await userService.getUserByEmail(loginData.email as string)
 
-  if (
-    await userService.getSessionByuserIdAndDevice(
-      user._id,
-      loginData.deviceToken
-    )
-  ) {
-    throw new GraphQLError(constants.MESSAGES.ALREADY_LOGGED_IN, {
-      extensions: {
-        code: 'FORBIDDEN',
-      },
-    })
-  }
-
   if (!(await bcrypt.compare(loginData.password, user.password))) {
     throw new GraphQLError(constants.MESSAGES.INCORRECT_PASSWORD, {
       extensions: {
@@ -170,7 +143,6 @@ const loginUser = async (loginData: loginData): Promise<userIdAndTokens> => {
   const payload = {
     sub: user._id,
     role,
-    device: loginData.deviceToken,
   }
 
   const { accessToken, refreshToken } = await tokenService.generateAuthTokens(
@@ -179,7 +151,6 @@ const loginUser = async (loginData: loginData): Promise<userIdAndTokens> => {
 
   await userService.createSession({
     userId: user._id,
-    device: loginData.deviceToken,
     token: refreshToken,
   })
 
@@ -190,13 +161,9 @@ interface loginData {
   username?: string
   email?: string
   password: string
-  deviceToken: string
 }
 
-const requestReset = async ({
-  email,
-  deviceToken,
-}: requestResetData): Promise<string> => {
+const requestReset = async ({ email }: requestResetData): Promise<string> => {
   const user = await userService.getUserByEmail(email)
 
   if (!user) {
@@ -218,7 +185,6 @@ const requestReset = async ({
     payload: {
       sub: user._id,
       role,
-      device: deviceToken,
     },
     secret: process.env.RESET_TOKEN_SECRET as string,
     options: { expiresIn: process.env.RESET_TOKEN_EXPIRY as string },
@@ -227,7 +193,6 @@ const requestReset = async ({
 
 interface requestResetData {
   email: string
-  deviceToken: string
 }
 
 const verifyResetOtp = async ({
@@ -330,7 +295,7 @@ interface oldNewPassword {
 }
 
 const refreshAuthTokens = async (token: string): Promise<authTokens> => {
-  const { sub, role, device } = await tokenService.verifyToken(
+  const { sub, role } = await tokenService.verifyToken(
     token,
     process.env.REFRESH_TOKEN_SECRET as string
   )
@@ -345,14 +310,12 @@ const refreshAuthTokens = async (token: string): Promise<authTokens> => {
 
   const { sessionId } = await userService.validateSession({
     userId: sub,
-    device,
     token,
   })
 
   const { accessToken, refreshToken } = await tokenService.generateAuthTokens({
     sub,
     role,
-    device,
   })
 
   await userService.updateSessionById(sessionId, refreshToken)
@@ -365,24 +328,6 @@ interface authTokens {
   refreshToken: string
 }
 
-const logoutUser = async (token: string): Promise<void> => {
-  const { sub, device } = await tokenService.verifyToken(
-    token,
-    process.env.ACCESS_TOKEN_SECRET as string
-  )
-  const session = await userService.getSessionByuserIdAndDevice(sub, device)
-
-  if (!session) {
-    throw new GraphQLError(constants.MESSAGES.NO_SESSION, {
-      extensions: {
-        code: 'CONFLICT',
-      },
-    })
-  }
-
-  await userService.deleteSessionById(session._id)
-}
-
 export default {
   registerUser,
   checkUserAlreadyExist,
@@ -393,5 +338,4 @@ export default {
   resetForgotPassword,
   resetPassword,
   refreshAuthTokens,
-  logoutUser,
 }

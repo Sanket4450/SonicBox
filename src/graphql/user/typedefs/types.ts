@@ -16,7 +16,6 @@ export default `#graphql
         country: String
         profile_picture: String
         description: String
-        deviceToken: String!
     }
 
     enum GenderType {
@@ -41,12 +40,10 @@ export default `#graphql
         username: String
         email: String
         password: String!
-        deviceToken: String!
     }
 
     input requestResetInput {
         email: String!
-        deviceToken: String!
     }
 
     type ResetToken {

@@ -3,9 +3,7 @@ import { validateSchema, validateSelection } from '../../../utils/validate'
 import { pageAndLimitSchema } from '../../../validations/common'
 import fields from '../fields/parents'
 import constants from '../../../constants'
-import userService from '../../../services/user'
-import playlistService from '../../../services/playlist'
-import libraryService from '../../../services/library'
+import { userService, playlistService, libraryService } from '../../../services'
 
 export default {
   SingleUser: {

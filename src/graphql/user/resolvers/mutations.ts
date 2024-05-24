@@ -1,13 +1,14 @@
 import { GraphQLResolveInfo, GraphQLError } from 'graphql'
 import { validateSchema, validateSelection } from '../../../utils/validate'
-import authValidation from '../../../validations/auth'
-import userValidation from '../../../validations/user'
-import libraryValidation from '../../../validations/library'
+import {
+  authValidation,
+  userValidation,
+  libraryValidation,
+} from '../../../validations'
 import fields from '../fields/mutations'
 import constants from '../../../constants'
-import authService from '../../../services/auth'
-import userService from '../../../services/user'
-import libraryService from '../../../services/library'
+import { roleType, genderType } from '../../../types'
+import { authService, userService, libraryService } from '../../../services'
 
 export default {
   createUser: async (
@@ -106,30 +107,6 @@ export default {
       validateSelection(info.fieldNodes[0].selectionSet, fields.resetPassword)
 
       await authService.resetPassword(token, input)
-
-      return { success: true }
-    } catch (error: any) {
-      throw new GraphQLError(
-        error.message || constants.MESSAGES.SOMETHING_WENT_WRONG,
-        {
-          extensions: {
-            code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
-          },
-        }
-      )
-    }
-  },
-
-  logoutUser: async (
-    _: any,
-    __: any,
-    { token }: any,
-    info: GraphQLResolveInfo
-  ): Promise<{ success: true }> => {
-    try {
-      validateSelection(info.fieldNodes[0].selectionSet, fields.logoutUser)
-
-      await authService.logoutUser(token)
 
       return { success: true }
     } catch (error: any) {
@@ -363,7 +340,6 @@ interface userData {
     country?: string
     profile_picture?: string
     description?: string
-    deviceToken: string
   }
 }
 
@@ -372,20 +348,7 @@ interface loginData {
     username?: string
     email?: string
     password: string
-    deviceToken: string
   }
-}
-
-enum genderType {
-  MALE = 'male',
-  FEMALE = 'female',
-  OTHER = 'other',
-}
-
-enum roleType {
-  USER = 'user',
-  ARTIST = 'artist',
-  ADMIN = 'admin',
 }
 
 interface userIdAndTokens {

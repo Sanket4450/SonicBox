@@ -1,4 +1,4 @@
-import domain from './models/index.model'
+import domain from './models'
 
 interface QueryObject {
   query: object

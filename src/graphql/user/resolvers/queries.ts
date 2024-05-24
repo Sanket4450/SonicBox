@@ -1,16 +1,14 @@
 import { GraphQLResolveInfo, GraphQLError } from 'graphql'
 import { validateSchema, validateSelection } from '../../../utils/validate'
-import authValidation from '../../../validations/auth'
-import userValidation from '../../../validations/user'
+import { authValidation, userValidation } from '../../../validations'
 import fields from '../fields/queries'
 import constants from '../../../constants'
-import authService from '../../../services/auth'
-import userService from '../../../services/user'
+import { authService, userService } from '../../../services'
 
 export default {
   requestReset: async (
     _: any,
-    { input }: emailAndDevice,
+    { input }: onlyEmail,
     __: any,
     info: GraphQLResolveInfo
   ): Promise<resetToken> => {
@@ -234,10 +232,9 @@ export default {
   },
 }
 
-interface emailAndDevice {
+interface onlyEmail {
   input: {
     email: string
-    deviceToken: string
   }
 }
 

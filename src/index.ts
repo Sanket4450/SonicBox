@@ -18,7 +18,7 @@ const init = async () => {
   app.use(cors<cors.CorsRequest>())
   app.use(express.json())
 
-  app.get('/', (req, res) => {
+  app.get('/', (_, res) => {
     res.send('App is running...')
   })
 
@@ -29,7 +29,7 @@ const init = async () => {
     })
   )
 
-  app.use((req, res) => {
+  app.use((_, res) => {
     res.json({ success: 'false', message: 'Route not found' })
   })
 

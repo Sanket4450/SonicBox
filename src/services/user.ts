@@ -6,6 +6,7 @@ import authService from './auth'
 import tokenService from './token'
 import playlistService from './playlist'
 import libraryService from './library'
+import { roleType, genderType } from '../types'
 
 const getUserById = async (_id: string): Promise<{ _id: string } | null> => {
   const query = {
@@ -172,18 +173,6 @@ interface getUserData {
   isVerified?: boolean
 }
 
-enum genderType {
-  MALE = 'male',
-  FEMALE = 'female',
-  OTHER = 'other',
-}
-
-enum roleType {
-  USER = 'user',
-  ARTIST = 'artist',
-  ADMIN = 'admin',
-}
-
 const createSession = async (sessionData: sessionData): Promise<any> => {
   try {
     const data = {
@@ -205,35 +194,7 @@ const createSession = async (sessionData: sessionData): Promise<any> => {
 
 interface sessionData {
   userId: string
-  device: string
   token: string
-}
-
-const getSessionByuserIdAndDevice = async (
-  userId: string,
-  device: string
-): Promise<{ _id: string }> => {
-  try {
-    const query = {
-      userId: new mongoose.Types.ObjectId(userId),
-      device,
-    }
-
-    const data = {
-      _id: 1,
-    }
-
-    return DbRepo.findOne(constants.COLLECTIONS.SESSION, { query, data })
-  } catch (error: any) {
-    throw new GraphQLError(
-      error.message || constants.MESSAGES.SOMETHING_WENT_WRONG,
-      {
-        extensions: {
-          code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
-        },
-      }
-    )
-  }
 }
 
 const updateUserById = async (
@@ -377,7 +338,6 @@ const deleteAllSessions = async (userId: string): Promise<void> => {
 
 const validateSession = async ({
   userId,
-  device,
   token,
 }: sessionData): Promise<{ sessionId: string }> => {
   try {
@@ -399,8 +359,6 @@ const validateSession = async ({
         },
       })
     }
-
-    Object.assign(query, { device })
 
     const session = await DbRepo.findOne(constants.COLLECTIONS.SESSION, {
       query,
@@ -1437,7 +1395,6 @@ export default {
   createLibrary,
   createUser,
   createSession,
-  getSessionByuserIdAndDevice,
   updateUserById,
   updateUser,
   deleteAllSessions,

@@ -2,7 +2,6 @@ const createUser: string[] = ['accessToken', 'refreshToken']
 const loginUser: string[] = ['accessToken', 'refreshToken']
 const resetForgotPassword: string[] = ['success']
 const resetPassword: string[] = ['success']
-const logoutUser: string[] = ['success']
 const followUnfollowUser: string[] = ['isFollowed']
 const updateUser: string[] = ['userId']
 const addRemoveLibraryPlaylist: string[] = ['isAdded']
@@ -16,7 +15,6 @@ export default {
   loginUser,
   resetForgotPassword,
   resetPassword,
-  logoutUser,
   followUnfollowUser,
   updateUser,
   addRemoveLibraryPlaylist,

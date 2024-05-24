@@ -1,12 +1,12 @@
 import jwt from 'jsonwebtoken'
 import { GraphQLError } from 'graphql'
 import constants from '../constants'
+import { roleType } from '../types'
 
 interface tokenType {
   payload: {
     sub: string
     role: roleType
-    device: string
   }
   secret: string
   options: {
@@ -17,13 +17,6 @@ interface tokenType {
 interface payload {
   sub: string
   role: roleType
-  device: string
-}
-
-enum roleType {
-  USER = 'user',
-  ARTIST = 'artist',
-  ADMIN = 'admin',
 }
 
 const generateToken = ({ payload, secret, options }: tokenType): string => {
@@ -65,14 +58,7 @@ interface authTokens {
 }
 
 const verifyToken = (token: string, secret: string): any => {
-  if (!token) {
-    throw new GraphQLError(constants.MESSAGES.TOKEN_IS_REQUIRED, {
-      extensions: {
-        code: 'FORBIDDEN',
-      },
-    })
-  }
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _) => {
     jwt.verify(token, secret, (error: any, decoded: any) => {
       if (error) {
         if (error instanceof jwt.JsonWebTokenError) {

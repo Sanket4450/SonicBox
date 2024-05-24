@@ -1,15 +1,19 @@
 import { GraphQLResolveInfo, GraphQLError } from 'graphql'
 import { validateSchema, validateSelection } from '../../../utils/validate'
-import albumValidation from '../../../validations/album'
-import songValidation from '../../../validations/song'
-import playlistValidation from '../../../validations/playlist'
-import categoryValidation from '../../../validations/category'
 import fields from '../fields/queries'
 import constants from '../../../constants'
-import albumService from '../../../services/album'
-import songService from '../../../services/song'
-import playlistService from '../../../services/playlist'
-import categoryService from '../../../services/category'
+import {
+  albumValidation,
+  songValidation,
+  playlistValidation,
+  categoryValidation,
+} from '../../../validations'
+import {
+  albumService,
+  songService,
+  playlistService,
+  categoryService,
+} from '../../../services'
 
 export default {
   albums: async (
