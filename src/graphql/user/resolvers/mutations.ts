@@ -172,7 +172,7 @@ export default {
         dateOfBirth: user.dateOfBirth,
         state: user.state,
         country: user.country,
-        profile_picture: user.profile_picture,
+        profileImage: user.profileImage,
         description: user.description,
         isVerified: user.isVerified,
       }
@@ -338,7 +338,7 @@ interface userData {
     secret?: string
     state?: string
     country?: string
-    profile_picture?: string
+    profileImage?: string
     description?: string
   }
 }
@@ -389,7 +389,7 @@ interface updateUserInput {
     secret?: string
     state?: string
     country?: string
-    profile_picture?: string
+    profileImage?: string
     description?: string
   }
 }
@@ -403,7 +403,7 @@ interface updateUserData {
   dateOfBirth: string
   state: string
   country: string
-  profile_picture: string
+  profileImage: string
   description: string
   isVerified: boolean
 }

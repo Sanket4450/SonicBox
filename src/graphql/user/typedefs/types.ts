@@ -14,7 +14,7 @@ export default `#graphql
         secret: String
         state: String
         country: String
-        profile_picture: String
+        profileImage: String
         description: String
     }
 
@@ -89,7 +89,7 @@ export default `#graphql
         secret: String
         state: String
         country: String
-        profile_picture: String
+        profileImage: String
         description: String
     }
 
@@ -102,7 +102,7 @@ export default `#graphql
         dateOfBirth: String
         state: String
         country: String
-        profile_picture: String
+        profileImage: String
         description: String
         isVerified: Boolean
     }
@@ -149,7 +149,7 @@ export default `#graphql
         dateOfBirth: String
         state: String
         country: String
-        profile_picture: String
+        profileImage: String
         description: String
         isVerified: Boolean
         followersCount: Int
@@ -165,7 +165,7 @@ export default `#graphql
         dateOfBirth: String
         state: String
         country: String
-        profile_picture: String
+        profileImage: String
         description: String
         isVerified: Boolean
     }
@@ -179,7 +179,7 @@ export default `#graphql
         dateOfBirth: String
         state: String
         country: String
-        profile_picture: String
+        profileImage: String
         description: String
         isVerified: Boolean
         followers(page: Int = 1, limit: Int = 10): [UserData]!
@@ -198,7 +198,7 @@ export default `#graphql
         dateOfBirth: String
         state: String
         country: String
-        profile_picture: String
+        profileImage: String
         description: String
         isVerified: Boolean
         followers(page: Int = 1, limit: Int = 10): [UserData]!
@@ -225,7 +225,7 @@ export default `#graphql
         dateOfBirth: String
         state: String
         country: String
-        profile_picture: String
+        profileImage: String
         description: String
         isVerified: Boolean
         followersCount: Int
@@ -240,7 +240,7 @@ export default `#graphql
         dateOfBirth: String
         state: String
         country: String
-        profile_picture: String
+        profileImage: String
         description: String
         isVerified: Boolean
     }
@@ -253,7 +253,7 @@ export default `#graphql
         dateOfBirth: String
         state: String
         country: String
-        profile_picture: String
+        profileImage: String
         description: String
         isVerified: Boolean
         followers(page: Int = 1, limit: Int = 10): [UserData]!

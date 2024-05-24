@@ -515,7 +515,7 @@ const getUserLibraryArtists = async ({
           dateOfBirth: { $first: '$artists.dateOfBirth' },
           state: { $first: '$artists.state' },
           country: { $first: '$artists.country' },
-          profile_picture: { $first: '$artists.profile_picture' },
+          profileImage: { $first: '$artists.profileImage' },
           description: { $first: '$artists.description' },
           isVerified: { $first: '$artists.isVerified' },
         },
@@ -529,7 +529,7 @@ const getUserLibraryArtists = async ({
           dateOfBirth: 1,
           state: 1,
           country: 1,
-          profile_picture: 1,
+          profileImage: 1,
           description: 1,
           isVerified: 1,
           _id: 0,
@@ -560,7 +560,7 @@ interface artist {
   dateOfBirth: string
   state: string
   country: string
-  profile_picture: string
+  profileImage: string
   description: string
   isVerified: boolean
 }

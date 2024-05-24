@@ -22,7 +22,7 @@ const updateUser = Joi.object({
   secret: stringValidation,
   state: stringValidation,
   country: stringValidation,
-  profile_picture: stringValidation,
+  profileImage: stringValidation,
   description: stringValidation,
 })
 

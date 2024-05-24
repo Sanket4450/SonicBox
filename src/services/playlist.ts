@@ -664,7 +664,7 @@ const getSinglePlaylist = async (
               dateOfBirth: { $first: '$user.dateOfBirth' },
               state: { $first: '$user.state' },
               country: { $first: '$user.country' },
-              profile_picture: { $first: '$user.profile_picture' },
+              profileImage: { $first: '$user.profileImage' },
               description: { $first: '$user.description' },
               isVerified: { $first: '$user.isVerified' },
             },
@@ -746,7 +746,7 @@ interface user {
   dateOfBirth: string
   state: string
   country: string
-  profile_picture: string
+  profileImage: string
   description: string
   isVerified: boolean
 }

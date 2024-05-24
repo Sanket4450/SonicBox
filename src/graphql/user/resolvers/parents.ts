@@ -387,7 +387,7 @@ interface user {
   dateOfBirth: string
   state: string
   country: string
-  profile_picture: string
+  profileImage: string
   description: string
   isVerified: boolean
 }
@@ -416,7 +416,7 @@ interface artist {
   dateOfBirth: string
   state: string
   country: string
-  profile_picture: string
+  profileImage: string
   description: string
   isVerified: boolean
 }

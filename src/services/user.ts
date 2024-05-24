@@ -98,7 +98,7 @@ interface selectUserData {
   secret: number
   state: number
   country: number
-  profile_picture: number
+  profileImage: number
   description: number
   isVerified: number
 }
@@ -152,7 +152,7 @@ interface userData {
   secret?: string
   state?: string
   country?: string
-  profile_picture?: string
+  profileImage?: string
   description?: string
 }
 
@@ -168,7 +168,7 @@ interface getUserData {
   secret?: string
   state?: string
   country?: string
-  profile_picture?: string
+  profileImage?: string
   description?: string
   isVerified?: boolean
 }
@@ -282,7 +282,7 @@ const updateUser = async (
       dateOfBirth: 1,
       state: 1,
       country: 1,
-      profile_picture: 1,
+      profileImage: 1,
       description: 1,
       isVerified: 1,
     }
@@ -312,7 +312,7 @@ interface updateUserData {
   dateOfBirth: string
   state: string
   country: string
-  profile_picture: string
+  profileImage: string
   description: string
   isVerified: boolean
 }
@@ -730,7 +730,7 @@ const getUsers = async (input: usersInput = {}): Promise<user[]> => {
           dateOfBirth: { $first: '$dateOfBirth' },
           state: { $first: '$state' },
           country: { $first: '$country' },
-          profile_picture: { $first: '$profile_picture' },
+          profileImage: { $first: '$profileImage' },
           description: { $first: '$description' },
           isVerified: { $first: '$isVerified' },
           followersCount: { $sum: { $size: '$followers' } },
@@ -746,7 +746,7 @@ const getUsers = async (input: usersInput = {}): Promise<user[]> => {
           dateOfBirth: 1,
           state: 1,
           country: 1,
-          profile_picture: 1,
+          profileImage: 1,
           description: 1,
           isVerified: 1,
           followersCount: 1,
@@ -785,7 +785,7 @@ interface user {
   dateOfBirth: string
   state: string
   country: string
-  profile_picture: string
+  profileImage: string
   description: string
   isVerified: boolean
   followingsCount: number
@@ -826,7 +826,7 @@ const getSingleUser = async (userId: string): Promise<user[]> => {
           dateOfBirth: { $first: '$dateOfBirth' },
           state: { $first: '$state' },
           country: { $first: '$country' },
-          profile_picture: { $first: '$profile_picture' },
+          profileImage: { $first: '$profileImage' },
           description: { $first: '$description' },
           isVerified: { $first: '$isVerified' },
           followersCount: { $sum: { $size: '$followers' } },
@@ -842,7 +842,7 @@ const getSingleUser = async (userId: string): Promise<user[]> => {
           dateOfBirth: 1,
           state: 1,
           country: 1,
-          profile_picture: 1,
+          profileImage: 1,
           description: 1,
           isVerified: 1,
           followersCount: 1,
@@ -923,7 +923,7 @@ const getUserFollowers = async ({
           dateOfBirth: { $first: '$followers.dateOfBirth' },
           state: { $first: '$followers.state' },
           country: { $first: '$followers.country' },
-          profile_picture: { $first: '$followers.profile_picture' },
+          profileImage: { $first: '$followers.profileImage' },
           description: { $first: '$followers.description' },
           isVerified: { $first: '$followers.isVerified' },
         },
@@ -937,7 +937,7 @@ const getUserFollowers = async ({
           dateOfBirth: 1,
           state: 1,
           country: 1,
-          profile_picture: 1,
+          profileImage: 1,
           description: 1,
           isVerified: 1,
           _id: 0,
@@ -1022,7 +1022,7 @@ const getUserFollowings = async ({
           dateOfBirth: { $first: '$followings.dateOfBirth' },
           state: { $first: '$followings.state' },
           country: { $first: '$followings.country' },
-          profile_picture: { $first: '$followings.profile_picture' },
+          profileImage: { $first: '$followings.profileImage' },
           description: { $first: '$followings.description' },
           isVerified: { $first: '$followings.isVerified' },
         },
@@ -1036,7 +1036,7 @@ const getUserFollowings = async ({
           dateOfBirth: 1,
           state: 1,
           country: 1,
-          profile_picture: 1,
+          profileImage: 1,
           description: 1,
           isVerified: 1,
           _id: 0,
@@ -1105,7 +1105,7 @@ const getProfile = async (token: string): Promise<user[]> => {
           dateOfBirth: { $first: '$dateOfBirth' },
           state: { $first: '$state' },
           country: { $first: '$country' },
-          profile_picture: { $first: '$profile_picture' },
+          profileImage: { $first: '$profileImage' },
           description: { $first: '$description' },
           isVerified: { $first: '$isVerified' },
           followersCount: { $sum: { $size: '$followers' } },
@@ -1121,7 +1121,7 @@ const getProfile = async (token: string): Promise<user[]> => {
           dateOfBirth: 1,
           state: 1,
           country: 1,
-          profile_picture: 1,
+          profileImage: 1,
           description: 1,
           isVerified: 1,
           followersCount: 1,
@@ -1197,7 +1197,7 @@ const getArtists = async (input: artistsInput = {}): Promise<artist[]> => {
           dateOfBirth: { $first: '$dateOfBirth' },
           state: { $first: '$state' },
           country: { $first: '$country' },
-          profile_picture: { $first: '$profile_picture' },
+          profileImage: { $first: '$profileImage' },
           description: { $first: '$description' },
           isVerified: { $first: '$isVerified' },
           followersCount: { $sum: { $size: '$followers' } },
@@ -1213,7 +1213,7 @@ const getArtists = async (input: artistsInput = {}): Promise<artist[]> => {
           dateOfBirth: 1,
           state: 1,
           country: 1,
-          profile_picture: 1,
+          profileImage: 1,
           description: 1,
           isVerified: 1,
           followersCount: 1,
@@ -1251,7 +1251,7 @@ interface artist {
   dateOfBirth: string
   state: string
   country: string
-  profile_picture: string
+  profileImage: string
   description: string
   isVerified: boolean
   followingsCount: number
@@ -1292,7 +1292,7 @@ const getSingleArtist = async (artistId: string): Promise<artist[]> => {
           dateOfBirth: { $first: '$dateOfBirth' },
           state: { $first: '$state' },
           country: { $first: '$country' },
-          profile_picture: { $first: '$profile_picture' },
+          profileImage: { $first: '$profileImage' },
           description: { $first: '$description' },
           isVerified: { $first: '$isVerified' },
           followersCount: { $sum: { $size: '$followers' } },
@@ -1307,7 +1307,7 @@ const getSingleArtist = async (artistId: string): Promise<artist[]> => {
           dateOfBirth: 1,
           state: 1,
           country: 1,
-          profile_picture: 1,
+          profileImage: 1,
           description: 1,
           isVerified: 1,
           followersCount: 1,

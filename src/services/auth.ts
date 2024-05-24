@@ -81,7 +81,7 @@ interface userData {
   secret?: string
   state?: string
   country?: string
-  profile_picture?: string
+  profileImage?: string
   description?: string
 }
 

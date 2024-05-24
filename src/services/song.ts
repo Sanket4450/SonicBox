@@ -432,7 +432,7 @@ const getSongs = async (input: songsInput = {}): Promise<song[]> => {
                 dateOfBirth: '$$artist.dateOfBirth',
                 state: '$$artist.state',
                 country: '$$artist.country',
-                profile_picture: '$$artist.profile_picture',
+                profileImage: '$$artist.profileImage',
                 description: '$$artist.description',
                 isVerified: '$$artist.isVerified',
               },
@@ -476,7 +476,7 @@ interface artist {
   dateOfBirth: string
   state: string
   country: string
-  profile_picture: string
+  profileImage: string
   description: string
   isVerified: boolean
 }
@@ -531,7 +531,7 @@ const getSingleSong = async (songId: string): Promise<singleSong[]> => {
                 dateOfBirth: { $first: '$albumArtist.dateOfBirth' },
                 state: { $first: '$albumArtist.state' },
                 country: { $first: '$albumArtist.country' },
-                profile_picture: { $first: '$albumArtist.profile_picture' },
+                profileImage: { $first: '$albumArtist.profileImage' },
                 description: { $first: '$albumArtist.description' },
                 isVerified: { $first: '$albumArtist.isVerified' },
               },
@@ -564,7 +564,7 @@ const getSingleSong = async (songId: string): Promise<singleSong[]> => {
                 dateOfBirth: '$$artist.dateOfBirth',
                 state: '$$artist.state',
                 country: '$$artist.country',
-                profile_picture: '$$artist.profile_picture',
+                profileImage: '$$artist.profileImage',
                 description: '$$artist.description',
                 isVerified: '$$artist.isVerified',
               },
